@@ -24,6 +24,7 @@ import AllCourses from "./pages/courses/AllCourses";
 import CourseDetails from "./pages/courses/CourseDetails";
 import Homepage from "./pages/homepage/Homepage";
 import SpecialHallTicket from "./pages/SpecialHallticket";
+import { Analytics } from "@vercel/analytics/react";
 
 export default function App() {
   ReactGA.initialize("G-CELLQQWRXC");
@@ -40,14 +41,18 @@ export default function App() {
 
   return (
     <>
+      <Analytics />
       <div className="flex">
         <div className="w-full">
           <ToastContainer />
           <Routes>
             <Route path="*" element={<Auth.NotFound />} />
-            <Route path="/login"  element={<Auth.Login />} />
+            <Route path="/login" element={<Auth.Login />} />
             <Route path="/about-us" element={<About />} />
-            <Route path="/hallticket/download" element={<SpecialHallTicket />} />
+            <Route
+              path="/hallticket/download"
+              element={<SpecialHallTicket />}
+            />
             <Route path="/admission-started" element={<AdmissionStarted />} />
             <Route path="/result" element={<StudentResult />} />
             <Route path="/notifications" element={<Notifications />} />
