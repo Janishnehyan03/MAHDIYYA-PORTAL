@@ -16,7 +16,7 @@ function MahdiyyaStudents() {
 
   const getStudyCentres = async () => {
     try {
-      let { data } = await Axios.get("/study-centre");
+      let { data } = await Axios.get("/study-centre?sort=studyCentreName");
       setStudyCentres(data.docs);
     } catch (error) {
       console.log(error.response);

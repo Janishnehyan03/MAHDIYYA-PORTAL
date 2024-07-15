@@ -7,14 +7,14 @@ import { UserAuthContext } from "../../context/userContext";
 function MyMessages() {
   const [messages, setMessages] = useState([]);
   const { authData } = useContext(UserAuthContext);
-  const getMessages = async () => {
-    Axios.post("/messages/recipient/" + authData._id)
-      .then((res) => {
-        setMessages(res.data);
-      })
-      .catch((err) => console.log(err.response));
-  };
   useEffect(() => {
+    const getMessages = async () => {
+      Axios.post("/messages/recipient/" + authData._id)
+        .then((res) => {
+          setMessages(res.data);
+        })
+        .catch((err) => console.log(err.response));
+    };
     getMessages();
   }, []);
   return (

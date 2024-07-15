@@ -23,11 +23,7 @@ function EditStudyCentre() {
   const navigate = useNavigate();
   const { id } = useParams();
 
-  const getBranch = async () => {
-    let { data } = await Axios.get("/study-centre/" + id);
-    console.log(data);
-    setInputData(data);
-  };
+
 
   const onChange = (e) => {
     const { name, value } = e.target;
@@ -59,8 +55,12 @@ function EditStudyCentre() {
     }
   };
   useEffect(() => {
+    const getBranch = async () => {
+      let { data } = await Axios.get("/study-centre/" + id);
+      setInputData(data);
+    };
     getBranch();
-  }, []);
+  }, [id]);
   return (
     <div className="w-3/4 ml-6">
       <section className="bg-white p-6">

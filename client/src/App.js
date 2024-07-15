@@ -1,11 +1,10 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect } from "react";
 import ReactGA from "react-ga";
+import "react-quill/dist/quill.bubble.css";
 import { Route, Routes } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import "react-quill/dist/quill.bubble.css";
 import { AdminRoutes, SuperAdminRoutes } from "./Routes";
-import StickyNavbar from "./components/Navbar";
 import AdmissionCreated from "./components/New Admission/AdmissionCreated";
 import { UserAuthContext } from "./context/userContext";
 import { Auth, Student } from "./pages";
@@ -19,18 +18,14 @@ import EmailSent from "./pages/EmailSent";
 import HallTicket from "./pages/HallTicket";
 import NotificationView from "./pages/NotificationView";
 import Notifications from "./pages/Notifications";
+import SpecialHallTicket from "./pages/SpecialHallticket";
 import StudentResult from "./pages/StudentResult";
 import AllCourses from "./pages/courses/AllCourses";
 import CourseDetails from "./pages/courses/CourseDetails";
-import Homepage from "./pages/homepage/Homepage";
-import SpecialHallTicket from "./pages/SpecialHallticket";
-import { Analytics } from "@vercel/analytics/react";
 
 export default function App() {
-  ReactGA.initialize("G-CELLQQWRXC");
 
   const { checkUserLogin } = useContext(UserAuthContext);
-  const [navOpened, setNavOpened] = useState(false);
 
   useEffect(() => {
     checkUserLogin();
@@ -41,18 +36,14 @@ export default function App() {
 
   return (
     <>
-      <Analytics />
       <div className="flex">
         <div className="w-full">
           <ToastContainer />
           <Routes>
             <Route path="*" element={<Auth.NotFound />} />
-            <Route path="/login" element={<Auth.Login />} />
+            <Route path="/login"  element={<Auth.Login />} />
             <Route path="/about-us" element={<About />} />
-            <Route
-              path="/hallticket/download"
-              element={<SpecialHallTicket />}
-            />
+            <Route path="/hallticket/download" element={<SpecialHallTicket />} />
             <Route path="/admission-started" element={<AdmissionStarted />} />
             <Route path="/result" element={<StudentResult />} />
             <Route path="/notifications" element={<Notifications />} />

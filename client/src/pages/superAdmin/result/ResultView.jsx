@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useState, useEffect, useCallback, useContext } from 'react';
 import Axios from "../../../Axios";
 import { UserAuthContext } from "../../../context/userContext";
 
@@ -9,7 +9,7 @@ function ResultView() {
 
   const [classId, setClassId] = useState(null);
   const [examId, setExamId] = useState(null);
-  const [studyCentreId, setstudyCentreId] = useState(null);
+  const [studyCentreId, setStudyCentreId] = useState(null);
 
   const [results, setResults] = useState([]);
 
@@ -17,12 +17,13 @@ function ResultView() {
 
   const getBranches = async () => {
     try {
-      let { data } = await Axios.get(`/study-centre`);
+      let { data } = await Axios.get(`/study-centre?sort=studyCentreName`);
       setBranches(data.docs);
     } catch (error) {
       console.log(error.response);
     }
   };
+
   const getClasses = async () => {
     try {
       let { data } = await Axios.get(`/class`);
@@ -31,6 +32,7 @@ function ResultView() {
       console.log(error.response);
     }
   };
+
   const getExams = async () => {
     try {
       let { data } = await Axios.get(`/exam`);
@@ -40,7 +42,7 @@ function ResultView() {
     }
   };
 
-  const getResults = async () => {
+  const getResults = useCallback(async () => {
     try {
       let { data } = await Axios.get(
         `/result?examId=${examId}&classId=${classId}&studyCentreId=${
@@ -51,19 +53,20 @@ function ResultView() {
     } catch (error) {
       console.log(error.response);
     }
-  };
+  }, [examId, classId, studyCentreId, authData?.branch?._id, authData.role]);
+
   useEffect(() => {
     getClasses();
     getBranches();
     getExams();
   }, []);
+
   useEffect(() => {
-    if (examId && classId && studyCentreId) {
-      getResults();
-    } else if (examId && classId && authData.branch._id) {
+    if (examId && classId && (studyCentreId || authData.branch._id)) {
       getResults();
     }
-  }, [examId, classId, studyCentreId]);
+  }, [examId, classId, studyCentreId, authData?.branch?._id, getResults]);
+
 
   const subjectNames = new Set();
   results.forEach((result) => {
@@ -90,7 +93,7 @@ function ResultView() {
         {authData.role === "superAdmin" && (
           <select
             className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block  lg:w-1/2 w-full mx-auto my-2 p-2.5"
-            onChange={(e) => setstudyCentreId(e.target.value)}
+            onChange={(e) => setStudyCentreId(e.target.value)}
           >
             <option hidden>select study centre </option>
             {branches.map((item, key) => (
@@ -133,13 +136,13 @@ function ResultView() {
               ? results
                   .filter((result) => result.student.branch === studyCentreId)
                   .map((result, index) => {
-                    return(
+                    return (
                       <ResultTableRow
                         result={result}
                         index={index}
                         subjectNames={subjectNames}
                       />
-                    )
+                    );
                   })
               : results
                   .filter(

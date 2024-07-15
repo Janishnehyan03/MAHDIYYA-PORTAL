@@ -8,18 +8,19 @@ function StudyCentreView() {
   const { centreId } = useParams();
   const [studyCentre, setStudyCentre] = useState(null);
 
-  const getStudyCentre = async () => {
-    try {
-      let { data } = await Axios.get(`/study-centre/${centreId}`);
-      setStudyCentre(data);
-    } catch (error) {
-      console.log(error.response);
-    }
-  };
-
+  
   useEffect(() => {
+    const getStudyCentre = async () => {
+      try {
+        let { data } = await Axios.get(`/study-centre/${centreId}`);
+        setStudyCentre(data);
+      } catch (error) {
+        console.log(error.response);
+      }
+    };
     getStudyCentre();
-  }, []);
+  }, [centreId]);
+
   return (
     <div>
       <h1 className="text-center font-bold text-3xl mb-3 p-8 text-white bg-gray-900">

@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from "react";
-import Axios from "../../../Axios";
+import React, { useCallback, useEffect, useState } from "react";
 import { toast } from "react-toastify";
+import Axios from "../../../Axios";
 
 function EditResult() {
   const [classes, setClasses] = useState([]);
@@ -22,15 +22,16 @@ function EditResult() {
       console.error(error);
     }
   };
+
   const getAllBranches = async () => {
     try {
       const response = await Axios.get("/study-centre?sort=branchName");
-     
       setBranches(response.data.docs);
     } catch (error) {
       console.error(error);
     }
   };
+
   const getAllExams = async () => {
     try {
       const response = await Axios.get("/exam");
@@ -39,19 +40,19 @@ function EditResult() {
       console.error(error);
     }
   };
+
   const getAllSubjects = async () => {
     try {
       const response = await Axios.get("/subject");
-      console.log('====================================');
-      console.log(response.data);
-      console.log('====================================');
       setSubjects(response.data);
     } catch (error) {
       console.error(error);
     }
   };
 
-  const fetchResults = async () => {
+  const fetchResults = useCallback(async () => {
+    if (!subject || !selectedClass || !exam) return;
+
     try {
       const response = await Axios.get(
         `/result/fetch?examId=${exam}&subjectId=${subject}&classId=${selectedClass}`
@@ -62,7 +63,7 @@ function EditResult() {
     } catch (error) {
       console.error(error);
     }
-  };
+  }, [exam, subject, selectedClass]);
 
   const handleMarkChange = (index, newMarks) => {
     setUpdatedData((prevData) => {
@@ -91,6 +92,7 @@ function EditResult() {
       console.error("Error updating marks:", error);
     }
   };
+
   useEffect(() => {
     getAllClasses();
     getAllExams();
@@ -99,10 +101,9 @@ function EditResult() {
   }, []);
 
   useEffect(() => {
-    if (subject && selectedClass && exam) {
-      fetchResults();
-    }
-  }, [subject, selectedClass, exam]);
+    fetchResults();
+  }, [fetchResults]);
+
   return (
     <div>
       <h1 className="text-center font-bold uppercase text-3xl my-4">

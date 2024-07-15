@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
 import Axios from "../../../Axios";
@@ -95,7 +95,7 @@ const AddResult = () => {
       console.error(error);
     }
   };
-  const getStudents = async () => {
+  const getStudents = useCallback(async () => {
     try {
       const response = await Axios.get(
         `/student/data/${selectedBranch}/${selectedClass}`
@@ -104,12 +104,13 @@ const AddResult = () => {
     } catch (error) {
       console.error(error);
     }
-  };
-  
+  }, [selectedBranch, selectedClass]);
 
   useEffect(() => {
-    getStudents();
-  }, [selectedClass, selectedBranch]);
+    if (selectedBranch && selectedClass) {
+      getStudents();
+    }
+  }, [selectedClass, selectedBranch, getStudents]);
 
   useEffect(() => {
     getAllClasses();
@@ -179,8 +180,6 @@ const AddResult = () => {
           </select>
         </div>
 
-        
-
         <div className="mb-4">
           <label className="block text-gray-700 font-bold mb-2" htmlFor="class">
             Exam{" "}
@@ -244,8 +243,6 @@ const AddResult = () => {
           )}
         </div>
       </div>
-
-     
     </div>
   );
 };

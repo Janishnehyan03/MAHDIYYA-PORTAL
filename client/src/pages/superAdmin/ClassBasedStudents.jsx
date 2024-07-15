@@ -9,6 +9,7 @@ function AllStudents() {
   const location = useLocation();
   const [students, setStudents] = useState([]);
   const [cols, setCols] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [rows, setRows] = useState([]);
 
   const [showModal, setShowModal] = useState(false);
@@ -37,13 +38,16 @@ function AllStudents() {
     formData.append("file", file);
     formData.append("class", classId);
     try {
+      setLoading(true);
       let res = await Axios.post("/student/excel", formData);
       if (res.status === 200) {
         alert("File uploaded successfully");
+        setLoading(false);
         window.location.reload();
       }
     } catch (error) {
       console.log(error.response);
+      setLoading(false);
       alert(error.response.data.message);
     }
   };
@@ -139,19 +143,20 @@ function AllStudents() {
                             </table>
                           </div>
                         )}
-                        <button
-                          onClick={(e) => handleExcelUpload(e)}
-                          className="bg-green-400 mr-2 text-white  font-bold px-3 py-2 mt-3"
-                        >
-                          Upload{" "}
-                        </button>
-
-                        <button
-                          onClick={(e) => setShowModal(!showModal)}
-                          className="bg-red-600 mr-3 text-white  font-bold px-3 py-2 mt-3"
-                        >
-                          close
-                        </button>
+                        {loading ? (
+                          <button
+                            className="bg-green-400 mr-2 text-white  font-bold px-3 py-2 mt-3"
+                          >
+                            Uploading....
+                          </button>
+                        ) : (
+                          <button
+                            onClick={(e) => handleExcelUpload(e)}
+                            className="bg-green-400 mr-2 text-white  font-bold px-3 py-2 mt-3"
+                          >
+                            Upload{" "}
+                          </button>
+                        )}
                       </div>
                     </div>
                   }

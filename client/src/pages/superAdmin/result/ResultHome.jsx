@@ -1,6 +1,6 @@
 import { faAdd, faCheck, faEdit } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import Axios from "../../../Axios";
 import { BarChart } from "@mui/x-charts/BarChart";
@@ -10,7 +10,7 @@ function ResultHome() {
   const [exams, setExams] = useState([]);
   const [selectedExam, setSelectedExam] = useState(null);
 
-  const getStatistics = async () => {
+  const getStatistics = useCallback(async () => {
     try {
       let { data } = await Axios.get(
         `/result/statistics?examId=${selectedExam}`
@@ -19,7 +19,7 @@ function ResultHome() {
     } catch (error) {
       console.log(error);
     }
-  };
+  }, [selectedExam]);
 
   useEffect(() => {
     const getExams = async () => {
@@ -33,8 +33,11 @@ function ResultHome() {
     getExams();
   }, []);
   useEffect(() => {
-    selectedExam && getStatistics();
-  }, [selectedExam]);
+    if (selectedExam) {
+      getStatistics();
+    }
+  }, [selectedExam, getStatistics]);
+
   const transformedData = statistics.map((item) => ({
     label: item.subjectName,
     passed: item.passed,

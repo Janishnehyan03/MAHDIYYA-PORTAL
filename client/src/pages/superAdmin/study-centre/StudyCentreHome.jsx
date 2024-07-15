@@ -1,12 +1,10 @@
-import React from "react";
-import { Link } from "react-router-dom";
 import {
   faAdd,
-  faBuildingCircleArrowRight,
-  faCheck,
-  faEdit,
+  faBuildingCircleArrowRight
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import React from "react";
+import { Link } from "react-router-dom";
 
 function StudyCentreHome() {
   return (

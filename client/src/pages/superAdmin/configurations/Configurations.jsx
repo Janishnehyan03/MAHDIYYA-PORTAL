@@ -63,7 +63,7 @@ const AdminConfigPage = () => {
   const handleInputBlur = async (yearId, year) => {
     try {
       setMessage("updating");
-      let { data } = await Axios.patch(`/academic-year/${yearId}`, { year });
+       await Axios.patch(`/academic-year/${yearId}`, { year });
       getAcademicYears();
       setMessage("updated");
     } catch (err) {

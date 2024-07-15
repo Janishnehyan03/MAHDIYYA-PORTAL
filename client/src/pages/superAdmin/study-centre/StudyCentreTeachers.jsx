@@ -6,18 +6,18 @@ function StudyCentreTeachers() {
   const { id } = useParams();
   const [teachers, setTeachers] = useState([]);
 
-  const getBranchTeaches = async () => {
-    try {
-      let { data } = await Axios.get("/teacher?branch=" + id);
-      setTeachers(data);
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
+  
   useEffect(() => {
+    const getBranchTeaches = async () => {
+      try {
+        let { data } = await Axios.get("/teacher?branch=" + id);
+        setTeachers(data);
+      } catch (error) {
+        console.log(error);
+      }
+    };
     getBranchTeaches();
-  }, []);
+  }, [id]);
 
   return (
     <>
