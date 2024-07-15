@@ -16,6 +16,7 @@ function EditStudyCentre() {
     username: "",
     password: "",
   };
+  const [errors, setErrors] = useState({});
 
   const [inputData, setInputData] = useState(initialState);
   const [loading, setLoading] = useState(false);
@@ -37,7 +38,7 @@ function EditStudyCentre() {
     e.preventDefault();
     setLoading(true);
     try {
-      let res = await Axios.post("/study-centre/" + id, inputData);
+      let res = await Axios.patch("/study-centre/" + id, inputData);
       if (res.status === 200) {
         setLoading(false);
         setInputData(initialState);
@@ -45,7 +46,7 @@ function EditStudyCentre() {
           autoClose: 2000,
           position: toast.POSITION.TOP_CENTER,
         });
-        navigate("/all-branches");
+        navigate("/study-centres");
       }
     } catch (error) {
       setLoading(false);
@@ -53,6 +54,7 @@ function EditStudyCentre() {
         autoClose: 2000,
         position: toast.POSITION.TOP_CENTER,
       });
+      setErrors(error.response.data);
       console.log(error.response);
     }
   };
@@ -70,40 +72,133 @@ function EditStudyCentre() {
           <form className="lg:grid lg:grid-cols-2 lg:gap-8">
             <div className="lg:col-span-1">
               <div className="px-4 sm:px-0">
-                <label
-                  className="block  text-sm font-bold mb-2"
-                  htmlFor="username"
-                >
-                  Centre Name
+                <label className="block   font-bold mb-2" htmlFor="username">
+                  Study Center Name
+                  {errors.studyCentreName && (
+                    <h1 className="text-red-500 font-sm text-center">
+                      {errors.studyCentreName}
+                    </h1>
+                  )}
                 </label>
+
                 <input
-                  className="focus:ring-indigo-500 focus:border-indigo-500 shadow appearance-none border rounded w-full py-4 px-3  leading-tight focus:outline-none focus:shadow-outline uppercase"
+                  className="block p-4 pl-10 w-full  text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-gray-500 focus:border-gray-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-500 dark:focus:border-gray-500"
                   type="text"
                   onChange={(e) => onChange(e)}
                   required
-                  placeholder="Branch Name"
+                  placeholder="Study Center Name"
                   name="studyCentreName"
                   value={inputData.studyCentreName}
+                />
+              </div>
+            </div>
+            <div className="lg:col-span-1">
+              <div className="px-4 sm:px-0">
+                <label className="block   font-bold mb-2" htmlFor="username">
+                  Study Center Code
+                  {errors.studyCentreCode && (
+                    <h1 className="text-red-500 font-sm text-center">
+                      {errors.studyCentreCode}
+                    </h1>
+                  )}
+                </label>
+
+                <input
+                  className="block p-4 pl-10 w-full  text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-gray-500 focus:border-gray-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-500 dark:focus:border-gray-500"
+                  type="text"
+                  onChange={(e) => onChange(e)}
+                  required
+                  placeholder="Study Center Code"
+                  name="studyCentreCode"
+                  value={inputData.studyCentreCode}
                 />
               </div>
             </div>
 
             <div className="lg:col-span-1">
               <div className="px-4 sm:px-0">
-                <label
-                  className="block  text-sm font-bold mb-2"
-                  htmlFor="username"
-                >
-                  Phone Number
+                <label className="block   font-bold mb-2" htmlFor="username">
+                  Panchayath
+                  {errors.panchayath && (
+                    <h1 className="text-red-500 font-sm text-center">
+                      {errors.panchayath}
+                    </h1>
+                  )}
                 </label>
                 <input
-                  className="focus:ring-indigo-500 focus:border-indigo-500 shadow appearance-none border rounded w-full py-4 px-3  leading-tight focus:outline-none focus:shadow-outline uppercase"
+                  className="block p-4 pl-10 w-full  text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-gray-500 focus:border-gray-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-500 dark:focus:border-gray-500"
+                  id="username"
+                  type="text"
+                  required
+                  value={inputData.panchayath}
+                  onChange={(e) => onChange(e)}
+                  placeholder="Panchayath"
+                  name="panchayath"
+                />
+              </div>
+            </div>
+            <div className="lg:col-span-1">
+              <div className="px-4 sm:px-0">
+                <label className="block   font-bold mb-2" htmlFor="username">
+                  Affiliated Year
+                  {errors.affiliatedYear && (
+                    <h1 className="text-red-500 font-sm text-center">
+                      {errors.affiliatedYear}
+                    </h1>
+                  )}
+                </label>
+                <input
+                  className="block p-4 pl-10 w-full  text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-gray-500 focus:border-gray-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-500 dark:focus:border-gray-500"
+                  id="username"
+                  type="text"
+                  required
+                  value={inputData.affiliatedYear}
+                  onChange={(e) => onChange(e)}
+                  placeholder="Affiliated Year"
+                  name="affiliatedYear"
+                />
+              </div>
+            </div>
+            <div className="lg:col-span-1">
+              <div className="px-4 sm:px-0">
+                <label className="block   font-bold mb-2" htmlFor="username">
+                  Email
+                  {errors.email && (
+                    <h1 className="text-red-500 font-sm text-center">
+                      {errors.email}
+                    </h1>
+                  )}
+                </label>
+                <input
+                  className="block p-4 pl-10 w-full  text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-gray-500 focus:border-gray-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-500 dark:focus:border-gray-500"
+                  id="username"
+                  type="text"
+                  required
+                  value={inputData.email}
+                  onChange={(e) => onChange(e)}
+                  placeholder="Email"
+                  name="email"
+                />
+              </div>
+            </div>
+            <div className="lg:col-span-1">
+              <div className="px-4 sm:px-0">
+                <label className="block   font-bold mb-2" htmlFor="username">
+                  Phone Number
+                  {errors.phone && (
+                    <h1 className="text-red-500 font-sm text-center">
+                      {errors.phone}
+                    </h1>
+                  )}
+                </label>
+                <input
+                  className="block p-4 pl-10 w-full  text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-gray-500 focus:border-gray-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-500 dark:focus:border-gray-500"
                   id="username"
                   type="text"
                   required
                   value={inputData.phone}
                   onChange={(e) => onChange(e)}
-                  placeholder="Phone No:"
+                  placeholder="Phone No :"
                   name="phone"
                 />
               </div>
@@ -111,14 +206,16 @@ function EditStudyCentre() {
 
             <div className="lg:col-span-1">
               <div className="px-4 sm:px-0">
-                <label
-                  className="block  text-sm font-bold mb-2"
-                  htmlFor="username"
-                >
+                <label className="block   font-bold mb-2" htmlFor="username">
                   Place
+                  {errors.place && (
+                    <h1 className="text-red-500 font-sm text-center">
+                      {errors.place}
+                    </h1>
+                  )}
                 </label>
                 <input
-                  className="focus:ring-indigo-500 focus:border-indigo-500 shadow appearance-none border rounded w-full py-4 px-3  leading-tight focus:outline-none focus:shadow-outline uppercase"
+                  className="block p-4 pl-10 w-full  text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-gray-500 focus:border-gray-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-500 dark:focus:border-gray-500"
                   type="text"
                   required
                   value={inputData.place}
@@ -129,11 +226,13 @@ function EditStudyCentre() {
               </div>
             </div>
             <div className="lg:col-span-1">
-              <label
-                className="block  text-sm font-bold mb-2"
-                htmlFor="username"
-              >
+              <label className="block   font-bold mb-2" htmlFor="username">
                 District
+                {errors.district && (
+                  <h1 className="text-red-500 font-sm text-center">
+                    {errors.district}
+                  </h1>
+                )}
               </label>
 
               <select
@@ -141,7 +240,7 @@ function EditStudyCentre() {
                 onChange={(e) => onChange(e)}
                 id=""
                 value={inputData.district}
-                className="bg-gray-50 border border-gray-300 text-blue-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
+                className="bg-gray-50 border border-gray-300 text-gray-900  rounded-lg focus:ring-gray-500 focus:border-gray-500 block w-full p-2.5 "
               >
                 <option hidden>Select YOUR DISTRICT </option>
                 {DISTRICT.map((district, index) => (
@@ -155,14 +254,16 @@ function EditStudyCentre() {
             </div>
             <div className="lg:col-span-1">
               <div className="px-4 sm:px-0">
-                <label
-                  className="block  text-sm font-bold mb-2"
-                  htmlFor="username"
-                >
+                <label className="block   font-bold mb-2" htmlFor="username">
                   Post Office
+                  {errors.postOffice && (
+                    <h1 className="text-red-500 font-sm text-center">
+                      {errors.postOffice}
+                    </h1>
+                  )}
                 </label>
                 <input
-                  className="focus:ring-indigo-500 focus:border-indigo-500 shadow appearance-none border rounded w-full py-4 px-3  leading-tight focus:outline-none focus:shadow-outline uppercase"
+                  className="block p-4 pl-10 w-full  text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-gray-500 focus:border-gray-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-500 dark:focus:border-gray-500"
                   type="text"
                   required
                   value={inputData.postOffice}
@@ -174,14 +275,16 @@ function EditStudyCentre() {
             </div>
             <div className="lg:col-span-1">
               <div className="px-4 sm:px-0">
-                <label
-                  className="block  text-sm font-bold mb-2"
-                  htmlFor="username"
-                >
+                <label className="block   font-bold mb-2" htmlFor="username">
                   Pin Code
+                  {errors.pinCode && (
+                    <h1 className="text-red-500 font-sm text-center">
+                      {errors.pinCode}
+                    </h1>
+                  )}
                 </label>
                 <input
-                  className="focus:ring-indigo-500 focus:border-indigo-500 shadow appearance-none border rounded w-full py-4 px-3  leading-tight focus:outline-none focus:shadow-outline uppercase"
+                  className="block p-4 pl-10 w-full  text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-gray-500 focus:border-gray-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-500 dark:focus:border-gray-500"
                   type="text"
                   value={inputData.pinCode}
                   required
@@ -193,20 +296,88 @@ function EditStudyCentre() {
             </div>
             <div className="lg:col-span-1">
               <div className="px-4 sm:px-0">
-                <label
-                  className="block  text-sm font-bold mb-2"
-                  htmlFor="username"
-                >
+                <label className="block   font-bold mb-2" htmlFor="username">
                   State
+                  {errors.state && (
+                    <h1 className="text-red-500 font-sm text-center">
+                      {errors.state}
+                    </h1>
+                  )}
                 </label>
                 <input
-                  className="focus:ring-indigo-500 focus:border-indigo-500 shadow appearance-none border rounded w-full py-4 px-3  leading-tight focus:outline-none focus:shadow-outline uppercase"
+                  className="block p-4 pl-10 w-full  text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-gray-500 focus:border-gray-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-500 dark:focus:border-gray-500"
                   type="text"
                   value={inputData.state}
                   required
                   onChange={(e) => onChange(e)}
                   placeholder="State"
                   name="state"
+                />
+              </div>
+            </div>
+
+            <div className="lg:col-span-1">
+              <div className="px-4 sm:px-0">
+                <label className="block   font-bold mb-2" htmlFor="username">
+                  Principal's Name
+                </label>
+                <input
+                  className="block p-4 pl-10 w-full  text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-gray-500 focus:border-gray-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-500 dark:focus:border-gray-500"
+                  type="text"
+                  value={inputData.currentPrincipal}
+                  required
+                  onChange={(e) => onChange(e)}
+                  placeholder="Principal's Name "
+                  name="currentPrincipal"
+                />
+              </div>
+            </div>
+            <div className="lg:col-span-1">
+              <div className="px-4 sm:px-0">
+                <label className="block   font-bold mb-2" htmlFor="username">
+                  Principal Contact Number
+                </label>
+                <input
+                  className="block p-4 pl-10 w-full  text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-gray-500 focus:border-gray-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-500 dark:focus:border-gray-500"
+                  type="tel"
+                  value={inputData.principalContactNumber}
+                  required
+                  onChange={(e) => onChange(e)}
+                  placeholder="Principal Contact Number "
+                  name="principalContactNumber"
+                />
+              </div>
+            </div>
+            <div className="lg:col-span-1">
+              <div className="px-4 sm:px-0">
+                <label className="block   font-bold mb-2" htmlFor="username">
+                  Admin Username
+                </label>
+                <input
+                  className="block p-4 pl-10 w-full  text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-gray-500 focus:border-gray-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-500 dark:focus:border-gray-500"
+                  type="text"
+                  value={inputData.username}
+                  required
+                  onChange={(e) => onChange(e)}
+                  placeholder="Admin Username"
+                  name="username"
+                />
+              </div>
+            </div>
+
+            <div className="lg:col-span-1">
+              <div className="px-4 sm:px-0">
+                <label className="block   font-bold mb-2" htmlFor="username">
+                  Admin Password
+                </label>
+                <input
+                  className="block p-4 pl-10 w-full  text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-gray-500 focus:border-gray-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-500 dark:focus:border-gray-500"
+                  type="text"
+                  value={inputData.password}
+                  required
+                  onChange={(e) => onChange(e)}
+                  placeholder="Admin Password"
+                  name="password"
                 />
               </div>
             </div>
