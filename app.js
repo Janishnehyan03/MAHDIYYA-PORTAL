@@ -74,6 +74,7 @@ app.use("/api/trash", trashRoute);
 app.use("/api/configurations", configurationRoute);
 app.use("/api/academic-year", academicYearRoute);
 
+
 process.env.PWD = process.cwd();
 app.use(express.static(path.join(process.env.PWD, "public")));
 if (process.env.NODE_ENV === "production") {
