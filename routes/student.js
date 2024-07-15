@@ -31,7 +31,6 @@ router.get(
 router.get(
   "/",
   protect,
-  restrictTo("superAdmin"),
   studentController.getAllStudents
 );
 
