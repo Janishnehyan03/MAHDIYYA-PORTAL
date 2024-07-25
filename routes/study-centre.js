@@ -1,7 +1,14 @@
 const { protect, restrictTo } = require("../controllers/authController");
 const branchController = require("../controllers/studyCentreController");
 const router = require("express").Router();
+const multer = require("multer");
 
+const storage = multer.diskStorage({
+  filename: (req, file, cb) => {
+    cb(null, file.originalname);
+  },
+});
+const upload = multer({ storage });
 router.post(
   "/",
   protect,
@@ -11,7 +18,11 @@ router.post(
 router.get("/", branchController.getAllBranches);
 router.get("/:id", protect, branchController.getBranch);
 router.patch("/:id", protect, branchController.editBranch);
-router.get("/details/:studyCentreId", protect, branchController.getStudyCentreDetails);
+router.get(
+  "/details/:studyCentreId",
+  protect,
+  branchController.getStudyCentreDetails
+);
 router.delete(
   "/:id",
   protect,
@@ -20,8 +31,9 @@ router.delete(
 );
 
 router.post(
-  "/study-centre/upload-cover/",
+  "/:id/upload-cover/",
   protect,
+  upload.single("image"),
   branchController.updateCoverImage
 );
 module.exports = router;

@@ -51,8 +51,12 @@ function EditTeacher() {
   };
 
   const onChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prevState) => ({ ...prevState, [name]: value }));
+    const { name, value, type, checked } = e.target;
+
+    setFormData((prevState) => ({
+      ...prevState,
+      [name]: type === "checkbox" ? checked : value,
+    }));
   };
 
   const handleSubmit = async (e) => {
@@ -157,47 +161,66 @@ function EditTeacher() {
                 />
               </div>
             </div>
+            <div className="px-4 sm:px-0 mt-4">
+              <label
+                className="block text-sm font-bold mb-2"
+                htmlFor="mahdiyyaTeacher"
+              >
+                Mahdiyya Teacher
+              </label>
+              <input
+                type="checkbox"
+                id="mahdiyyaTeacher"
+                name="mahdiyyaTeacher"
+                onChange={(e) => onChange(e)}
+                className="bg-gray-50 border border-gray-300 text-sky-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5"
+              />
+            </div>
 
-            <div className="lg:col-span-1">
-              <div className="px-4 sm:px-0">
-                <label className="block  text-sm font-bold mb-2">
-                  Subjects
-                </label>{" "}
-                <select
-                  className="bg-gray-50 border border-gray-300 text-blue-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
-                  onChange={(e) => handleSubjects(e.target.value)}
-                >
-                  <option hidden>select subjects </option>
-                  {subjects.map((subject, index) => (
-                    <option key={index} value={subject._id}>
-                      {subject.subjectName}
-                      {subject.subjectCode}
-                    </option>
+            {formData?.mahdiyyaTeacher && (
+              <div className="lg:col-span-1">
+                <div className="px-4 sm:px-0">
+                  <label className="block  text-sm font-bold mb-2">
+                    Subjects
+                  </label>{" "}
+                  <select
+                    className="bg-gray-50 border border-gray-300 text-blue-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
+                    onChange={(e) => handleSubjects(e.target.value)}
+                  >
+                    <option hidden>select subjects </option>
+                    {subjects.map((subject, index) => (
+                      <option key={index} value={subject._id}>
+                        {subject.subjectName}
+                        {subject.subjectCode}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            )}
+
+            {formData?.mahdiyyaTeacher && (
+              <div className="lg:col-span-1 mt-4">
+                <div className="px-4 sm:px-0">
+                  <label className="block  text-sm font-bold mb-2">
+                    Selected Subjects
+                  </label>
+                  {SelectedSubjects.map((item, key) => (
+                    <div className="flex justify-between mx-2 text-center cursor-pointer bg-sky-900 px-2 my-2  text-white py-1">
+                      <h1 key={key}>
+                        {item.subjectName} {item.subjectCode}
+                      </h1>
+                      <FontAwesomeIcon
+                        onClick={() => removeSubject(item._id)}
+                        icon={faTrash}
+                        color="white"
+                      />
+                    </div>
                   ))}
-                </select>
+                  <br />
+                </div>
               </div>
-            </div>
-
-            <div className="lg:col-span-1 mt-4">
-              <div className="px-4 sm:px-0">
-                <label className="block  text-sm font-bold mb-2">
-                  Selected Subjects
-                </label>
-                {SelectedSubjects.map((item, key) => (
-                  <div className="flex justify-between mx-2 text-center cursor-pointer bg-sky-900 px-2 my-2  text-white py-1">
-                    <h1 key={key}>
-                      {item.subjectName} {item.subjectCode}
-                    </h1>
-                    <FontAwesomeIcon
-                      onClick={() => removeSubject(item._id)}
-                      icon={faTrash}
-                      color="white"
-                    />
-                  </div>
-                ))}
-                <br />
-              </div>
-            </div>
+            )}
           </form>
           <div className="lg:col-span-1 mt-4">
             <div className="px-4 sm:px-0  grid lg:grid-cols-2 gap-2">

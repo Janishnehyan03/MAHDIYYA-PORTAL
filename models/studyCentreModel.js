@@ -73,6 +73,9 @@ const studyCentreSchema = new mongoose.Schema({
   deleted: { type: Boolean, default: false },
   currentPrincipal: { type: String },
   principalContactNumber: { type: String },
+  googleMapUrl: {
+    type: String,
+  },
 });
 
 studyCentreSchema.pre(/^find/, function (next) {

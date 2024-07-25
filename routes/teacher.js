@@ -3,8 +3,6 @@ const {
   getAllTeachers,
   updateTeacher,
   getOneTeacher,
-  deleteTeacher,
-  getMyTeachers,
 } = require("../controllers/teacherController");
 const { protect, restrictTo } = require("../controllers/authController");
 

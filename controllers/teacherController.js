@@ -11,6 +11,7 @@ exports.getAllTeachers = async (req, res) => {
       branch: req.user.branch,
     }).populate("branch");
 
+
     res.status(200).json(data);
   } catch (error) {
     res.status(200).json(error);

@@ -10,7 +10,6 @@ function AllTeachers() {
   const getTeachers = async () => {
     try {
       let { data } = await Axios.get("/teacher");
-      console.log(data);
       setTeachers(data);
     } catch (error) {
       console.log(error);
@@ -58,6 +57,12 @@ function AllTeachers() {
               scope="col"
               className="text-sm font-medium text-blue-900 px-6 py-4 text-left"
             >
+              Mahdiyya Teacher
+            </th>
+            <th
+              scope="col"
+              className="text-sm font-medium text-blue-900 px-6 py-4 text-left"
+            >
               Edit
             </th>
           </tr>
@@ -82,6 +87,9 @@ function AllTeachers() {
                 </td>
                 <td className="text-sm text-blue-900 font-light px-6 py-4 whitespace-nowrap">
                   {teacher.phone}
+                </td>
+                <td className="text-sm text-blue-900 font-light px-6 py-4 whitespace-nowrap">
+                  {teacher?.mahdiyyaTeacher && "YES"}
                 </td>
 
                 <td className="text-sm text-blue-900 font-light px-6 py-4 whitespace-nowrap">

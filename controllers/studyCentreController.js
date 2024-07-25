@@ -5,6 +5,13 @@ const catchAsync = require("../utils/catchAsync");
 const Student = require("../models/studentModel");
 const Teacher = require("../models/teacherModel");
 const StudyCentre = require("../models/studyCentreModel");
+const cloudinary = require("cloudinary").v2;
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUDNAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 exports.createBranch = async (req, res, next) => {
   try {
@@ -47,25 +54,17 @@ exports.getBranch = globalFuctions.getOne(StudyCentre);
 exports.getAllBranches = globalFuctions.getAll(StudyCentre);
 exports.deleteBranch = globalFuctions.deleteOne(StudyCentre);
 
-exports.updateCoverImage = catchAsync(async (req, res, next) => {
-  uploadSingle(req, res, async (err) => {
-    if (err) {
-      return res.status(400).json({ success: false, message: err.message });
-    } else {
-      let data = await StudyCentre.findByIdAndUpdate(
-        req.user.StudyCentre._id,
-        {
-          imageCover: req.file.location,
-        },
-        {
-          runValidators: true,
-          new: true,
-        }
-      );
-      res.status(200).json({
-        message: "image uploaded successfully",
-        data,
-      });
-    }
-  });
-});
+exports.updateCoverImage = async (req, res, next) => {
+  try {
+    const cldRes = await cloudinary.uploader.upload(req.file.path);
+    await StudyCentre.findByIdAndUpdate(
+      req.params.id,
+      { imageCover: cldRes.secure_url },
+      { new: true }
+    );
+    res.status(200).json({ message: "Cover updated" });
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({ error });
+  }
+};

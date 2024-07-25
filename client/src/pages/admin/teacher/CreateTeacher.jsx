@@ -23,6 +23,7 @@ function CreateTeacher() {
     branch: "",
     subjects: [],
     gender: "",
+    mahdiyyaTeacher: false,
   };
   const [formData, setFormData] = useState(initialState);
   const [loading, setLoading] = useState(false);
@@ -55,8 +56,12 @@ function CreateTeacher() {
   }
 
   const onChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prevState) => ({ ...prevState, [name]: value }));
+    const { name, value, type, checked } = e.target;
+
+    setFormData((prevState) => ({
+      ...prevState,
+      [name]: type === "checkbox" ? checked : value,
+    }));
   };
 
   const getSubjects = async () => {
@@ -193,46 +198,68 @@ function CreateTeacher() {
                 </select>
               </div>
             </div>
-            <div className="lg:col-span-1">
-              <div className="px-4 sm:px-0">
-                <label className="block  text-sm font-bold mb-2">
-                  Subjects
-                </label>{" "}
-                <select
-                  className="bg-gray-50 border text-bold border-gray-300 text-sky-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
-                  onChange={(e) => handleSubjects(e.target.value)}
-                >
-                  <option hidden>Select subjects </option>
-                  {subjects.map((subject, index) => (
-                    <option key={index} value={subject._id}>
-                      {subject.subjectName}
-                      {subject.subjectCode}
-                    </option>
-                  ))}
-                </select>
-              </div>
+            <div className="px-4 sm:px-0 mt-4">
+              <label
+                className="block text-sm font-bold mb-2"
+                htmlFor="mahdiyyaTeacher"
+              >
+                Mahdiyya Teacher
+              </label>
+              <input
+                type="checkbox"
+                id="mahdiyyaTeacher"
+                name="mahdiyyaTeacher"
+                onChange={(e) => onChange(e)}
+                className="bg-gray-50 border border-gray-300 text-sky-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5"
+              />
             </div>
+            {formData.mahdiyyaTeacher && (
+              <div className="lg:col-span-1">
+                <div className="px-4 sm:px-0">
+                  <label className="block  text-sm font-bold mb-2">
+                    Subjects
+                  </label>{" "}
+                  <select
+                    className="bg-gray-50 border text-bold border-gray-300 text-sky-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
+                    onChange={(e) => handleSubjects(e.target.value)}
+                  >
+                    <option hidden>Select subjects </option>
+                    {subjects.map((subject, index) => (
+                      <option key={index} value={subject._id}>
+                        {subject.subjectName}
+                        {subject.subjectCode}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            )}
 
-            <div className="lg:col-span-1 mt-4">
-              <div className="px-4 sm:px-0">
-                <label className="block  text-sm font-bold mb-2">
-                  Selected Subjects
-                </label>
-                {selectedSubjects.map((item, key) => (
-                  <div className="flex justify-between mx-2 text-center font-bold cursor-pointer  items-center bg-[#296d8a] px-2 my-2  text-white py-3">
-                    <h6 key={key} className="text-white font-bold text-center">
-                      {item.subjectName} {item.subjectCode}
-                    </h6>
-                    <FontAwesomeIcon
-                      onClick={() => removeSubject(item._id)}
-                      icon={faTrash}
-                      color="white"
-                      className="hover:text-red-400"
-                    />
-                  </div>
-                ))}
+            {formData.mahdiyyaTeacher && (
+              <div className="lg:col-span-1 mt-4">
+                <div className="px-4 sm:px-0">
+                  <label className="block  text-sm font-bold mb-2">
+                    Selected Subjects
+                  </label>
+                  {selectedSubjects.map((item, key) => (
+                    <div className="flex justify-between mx-2 text-center font-bold cursor-pointer  items-center bg-[#296d8a] px-2 my-2  text-white py-3">
+                      <h6
+                        key={key}
+                        className="text-white font-bold text-center"
+                      >
+                        {item.subjectName} {item.subjectCode}
+                      </h6>
+                      <FontAwesomeIcon
+                        onClick={() => removeSubject(item._id)}
+                        icon={faTrash}
+                        color="white"
+                        className="hover:text-red-400"
+                      />
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
           </form>
           <div className="lg:col-span-1 mt-4">
             <div className="px-4 sm:px-0">
