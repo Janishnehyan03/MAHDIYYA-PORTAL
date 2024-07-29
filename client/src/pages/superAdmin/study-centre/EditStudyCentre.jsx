@@ -15,6 +15,7 @@ function EditStudyCentre() {
     phone: "",
     username: "",
     password: "",
+    googleMapUrl: "",
   };
   const [errors, setErrors] = useState({});
 
@@ -22,8 +23,6 @@ function EditStudyCentre() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { id } = useParams();
-
-
 
   const onChange = (e) => {
     const { name, value } = e.target;
@@ -203,6 +202,30 @@ function EditStudyCentre() {
                 />
               </div>
             </div>
+
+            <div className="lg:col-span-1">
+              <div className="px-4 sm:px-0">
+                <label className="block   font-bold mb-2" htmlFor="username">
+                  Place
+                  {errors.place && (
+                    <h1 className="text-red-500 font-sm text-center">
+                      {errors.place}
+                    </h1>
+                  )}
+                </label>
+                <input
+                  className="block p-4 pl-10 w-full  text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-gray-500 focus:border-gray-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-500 dark:focus:border-gray-500"
+                  type="text"
+                  required
+                  value={inputData.place}
+                  onChange={(e) => onChange(e)}
+                  placeholder="Place"
+                  name="place"
+                />
+              </div>
+            </div>
+
+           
 
             <div className="lg:col-span-1">
               <div className="px-4 sm:px-0">

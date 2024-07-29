@@ -23,6 +23,7 @@ function StudyCentreProfile() {
     currentPrincipal: "",
     imageCover: "",
     principalContactNumber: "",
+    googleMapUrl: "",
   };
   const [inputData, setInputData] = useState(initialState);
   const [loading, setLoading] = useState(false);
@@ -330,6 +331,22 @@ function StudyCentreProfile() {
                   onChange={(e) => onChange(e)}
                   placeholder="Place"
                   name="place"
+                />
+              </div>
+            </div>
+            <div className="lg:col-span-1">
+              <div className="px-4 sm:px-0">
+                <label className="block   font-bold mb-2" htmlFor="username">
+                  Google Map URL
+                </label>
+                <input
+                  className="block p-4 pl-10 w-full  text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-gray-500 focus:border-gray-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-500 dark:focus:border-gray-500"
+                  type="text"
+                  required
+                  value={inputData.googleMapUrl}
+                  onChange={(e) => onChange(e)}
+                  placeholder="Google Map URL"
+                  name="googleMapUrl"
                 />
               </div>
             </div>
