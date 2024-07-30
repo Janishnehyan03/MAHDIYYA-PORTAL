@@ -64,6 +64,14 @@ function CreateTeacher() {
     }));
   };
 
+  const onChangeTeacherType = (type) => {
+    setFormData((prevState) => ({
+      ...prevState,
+      mahdiyyaTeacher: type,
+    }));
+  };
+
+  
   const getSubjects = async () => {
     try {
       let { data } = await Axios.get("/subject");
@@ -206,10 +214,25 @@ function CreateTeacher() {
                 Mahdiyya Teacher
               </label>
               <input
-                type="checkbox"
-                id="mahdiyyaTeacher"
-                name="mahdiyyaTeacher"
-                onChange={(e) => onChange(e)}
+                type="radio"
+                id="teacher"
+                name="teacher"
+                onChange={() => onChangeTeacherType(true)}
+                className="bg-gray-50 border border-gray-300 text-sky-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5"
+              />
+            </div>
+            <div className="px-4 sm:px-0 mt-4">
+              <label
+                className="block text-sm font-bold mb-2"
+                htmlFor="mahdiyyaTeacher"
+              >
+                Non Mahdiyya Teacher
+              </label>
+              <input
+                type="radio"
+                id="teacher"
+                name="teacher"
+                onChange={() => onChangeTeacherType(false)}
                 className="bg-gray-50 border border-gray-300 text-sky-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5"
               />
             </div>
