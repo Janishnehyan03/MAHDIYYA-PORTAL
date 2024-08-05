@@ -49,7 +49,6 @@ function EditTeacher() {
       console.log(error);
     }
   };
-
   const onChange = (e) => {
     const { name, value, type, checked } = e.target;
 
@@ -86,6 +85,13 @@ function EditTeacher() {
       return itemA._id === itemB;
     });
   });
+
+  const onChangeTeacherType = (type) => {
+    setFormData((prevState) => ({
+      ...prevState,
+      mahdiyyaTeacher: type,
+    }));
+  };
 
   useEffect(() => {
     getSubjects();
@@ -161,6 +167,27 @@ function EditTeacher() {
                 />
               </div>
             </div>
+            <div className="lg:col-span-1">
+              <div className="px-4 sm:px-0">
+                <label
+                  className="block  text-sm font-bold mb-2"
+                  htmlFor="username"
+                >
+                  Gender
+                </label>
+
+                <select
+                  className="bg-gray-50 border border-gray-300 text-sky-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
+                  name="gender"
+                  onChange={(e) => onChange(e)}
+                  id=""
+                >
+                  <option hidden>Select Gender </option>
+                  <option value={"male"}>Male </option>
+                  <option value={"female"}>Female </option>
+                </select>
+              </div>
+            </div>
             <div className="px-4 sm:px-0 mt-4">
               <label
                 className="block text-sm font-bold mb-2"
@@ -169,10 +196,25 @@ function EditTeacher() {
                 Mahdiyya Teacher
               </label>
               <input
-                type="checkbox"
-                id="mahdiyyaTeacher"
-                name="mahdiyyaTeacher"
-                onChange={(e) => onChange(e)}
+                type="radio"
+                id="teacher"
+                name="teacher"
+                onChange={() => onChangeTeacherType(true)}
+                className="bg-gray-50 border border-gray-300 text-sky-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5"
+              />
+            </div>
+            <div className="px-4 sm:px-0 mt-4">
+              <label
+                className="block text-sm font-bold mb-2"
+                htmlFor="mahdiyyaTeacher"
+              >
+                Non Mahdiyya Teacher
+              </label>
+              <input
+                type="radio"
+                id="teacher"
+                name="teacher"
+                onChange={() => onChangeTeacherType(false)}
                 className="bg-gray-50 border border-gray-300 text-sky-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5"
               />
             </div>

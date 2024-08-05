@@ -89,7 +89,7 @@ function AllTeachers() {
                   {teacher.phone}
                 </td>
                 <td className="text-sm text-blue-900 font-light px-6 py-4 whitespace-nowrap">
-                  {teacher?.mahdiyyaTeacher && "YES"}
+                  {teacher?.mahdiyyaTeacher ? "YES":"NO"}
                 </td>
 
                 <td className="text-sm text-blue-900 font-light px-6 py-4 whitespace-nowrap">
