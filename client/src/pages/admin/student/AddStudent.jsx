@@ -50,7 +50,7 @@ const AddStudent = () => {
       type: "text",
       name: "registerNo",
       placeholder: "Enter Register Number",
-      required: true,
+      required: false,
       value: formData.registerNo,
     },
     {

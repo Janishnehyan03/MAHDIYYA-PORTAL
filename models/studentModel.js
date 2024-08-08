@@ -53,6 +53,7 @@ const studentSchema = new mongoose.Schema(
       type: String,
       uppercase: true,
       maxLength: [50, "50 characters are allowed"],
+      required:false
     },
 
     dateOfBirth: {
