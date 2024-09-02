@@ -17,7 +17,7 @@ import StudyCentreTeachers from "./superAdmin/study-centre/StudyCentreTeachers.j
 import ClassBasedStudents from "./superAdmin/ClassBasedStudents.jsx";
 import CreateStudyCentre from "./superAdmin/study-centre/CreateStudyCentre.jsx";
 import EditStudyCentre from "./superAdmin/study-centre/EditStudyCentre.jsx";
-import MahdiyyaStudents from "./superAdmin/MahdiyyaStudents.jsx";
+import AllStudents from "./superAdmin/AllStudents.jsx";
 import StudyCentreHome from "./superAdmin/study-centre/StudyCentreHome.jsx";
 import StudyCentreView from "./superAdmin/study-centre/StudyCentreView.jsx";
 import AddResult from "./superAdmin/result/AddResult";
@@ -55,7 +55,7 @@ export const StudyCentre = {
   AllStudyCentres,
   EditStudyCentre,
   CreateStudyCentre,
-  MahdiyyaStudents,
+  AllStudents,
   StudyCentreHome,
   StudyCentreView,
 };

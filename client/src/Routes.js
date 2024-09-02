@@ -43,7 +43,7 @@ export const SuperAdminRoutes = [
 
   {
     route: "/all-centre-students",
-    component: <StudyCentre.MahdiyyaStudents />,
+    component: <StudyCentre.AllStudents />,
     role: "superAdmin",
   },
 

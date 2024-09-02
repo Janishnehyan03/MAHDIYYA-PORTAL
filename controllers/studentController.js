@@ -13,15 +13,33 @@ exports.getStudent = globalFunctions.getOne(
 
 exports.getAllStudents = async (req, res, next) => {
   try {
-    let data = await Student.find({
-      class: req.query.classId,
-      branch: req.query.studyCentre,
-    })
-      .populate("branch")
-      .populate("class");
+    let query = {}; // Initialize an empty query object
+    let data = [];
+
+    // Check query parameters and set conditions accordingly
+    if (req.query.all) {
+      // Fetch all students if 'all' is true
+      data = await Student.find().populate("branch").populate("class");
+    } else {
+      // Set query conditions based on provided parameters
+      if (req.query.studyCentre) {
+        query.branch = req.query.studyCentre; // Add branch condition if studyCentre is provided
+      }
+      if (req.query.classId) {
+        query.class = req.query.classId; // Add class condition if classId is provided
+      }
+
+      // Fetch students based on the constructed query
+      data = await Student.find(query).populate("branch").populate("class");
+    }
+
     res.status(200).json(data);
-  } catch (error) {}
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching students", error });
+  }
 };
+
+
 exports.getAdmissions = globalFunctions.getAll(Student, "branch", "class");
 exports.registerStudent = async (req, res, next) => {
   try {
@@ -153,9 +171,6 @@ exports.excelUpload = async (req, res) => {
     const workbook = xlsx.read(req.file.buffer, { type: "buffer" });
     const sheet = workbook.Sheets[workbook.SheetNames[0]];
     const jsonData = xlsx.utils.sheet_to_json(sheet);
-    console.log("====================================");
-    console.log(jsonData[2]);
-    console.log("====================================");
     if (jsonData.length === 0) {
       res.status(400).json({ message: "Please add data" });
     } else {
