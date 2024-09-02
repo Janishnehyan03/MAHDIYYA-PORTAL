@@ -46,7 +46,11 @@ export const SuperAdminRoutes = [
     component: <StudyCentre.AllStudents />,
     role: "superAdmin",
   },
-
+  {
+    route: "/all-mahdiyya-teachers",
+    component: <Teacher.AllMahdiyyaTeachers />,
+    role: "superAdmin",
+  },
   {
     route: "/all-subjects",
     component: <AllSubjects />,
@@ -172,6 +176,7 @@ export const AdminRoutes = [
     route: "/all-teachers",
     component: <Teacher.AllTeachers />,
   },
+
   {
     route: "/new-student",
     component: <Student.AddStudent />,

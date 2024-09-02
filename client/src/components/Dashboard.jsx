@@ -67,6 +67,11 @@ function Dashboard() {
       icon: faBookOpenReader,
       link: "/all-subjects",
     },
+    {
+      text: "ALL TEACHERS",
+      icon: faChalkboardTeacher,
+      link: "/all-mahdiyya-teachers",
+    },
 
     {
       text: "ADMISSION REQUESTS",

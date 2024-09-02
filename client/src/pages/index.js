@@ -9,6 +9,7 @@ import AllClasses from "./admin/class/AllClasses";
 import AddStudent from "./admin/student/AddStudent.jsx";
 import EditStudent from "./admin/student/EditStudent.jsx";
 import AllTeachers from "./admin/teacher/AllTeachers.jsx";
+import AllMahdiyyaTeachers from "./superAdmin/teacher/AllMahdiyyaTeachers.jsx";
 import CreateTeacher from "./admin/teacher/CreateTeacher.jsx";
 import EditTeacher from "./admin/teacher/EditTeacher.jsx";
 import Profile from "./student/StudentProfile.jsx";
@@ -34,6 +35,8 @@ export const Teacher = {
   AllTeachers,
   CreateTeacher,
   StudyCentreTeachers,
+  AllMahdiyyaTeachers
+
 };
 export const Auth = {
   Login,
