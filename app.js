@@ -19,6 +19,7 @@ const uploadRoute = require("./routes/uploads");
 const messageRoute = require("./routes/message");
 const hallTicketRoute = require("./routes/hallTicket");
 const resultRoute = require("./routes/result");
+const cceRoute = require("./routes/cceRoute");
 const configurationRoute = require("./routes/configurationRoute");
 const academicYearRoute = require("./routes/academicYearRoute");
 
@@ -70,6 +71,7 @@ app.use("/api/uploads", uploadRoute);
 app.use("/api/messages", messageRoute);
 app.use("/api/hall-ticket", hallTicketRoute);
 app.use("/api/result", resultRoute);
+app.use("/api/cce", cceRoute);
 app.use("/api/trash", trashRoute);
 app.use("/api/configurations", configurationRoute);
 app.use("/api/academic-year", academicYearRoute);

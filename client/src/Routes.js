@@ -1,4 +1,11 @@
-import { Course, Result, Student, StudyCentre, Teacher } from "./pages";
+import {
+  CceMark,
+  Course,
+  Result,
+  Student,
+  StudyCentre,
+  Teacher,
+} from "./pages";
 import AdminHome from "./pages/AdminHome";
 import ViewTeacher from "./pages/ViewTeacher";
 import FileUpload from "./pages/admin/FileUpload";
@@ -147,6 +154,7 @@ export const SuperAdminRoutes = [
     component: <Result.EditResult />,
     role: "superAdmin",
   },
+
   {
     route: "/study-centre/:centreId",
     component: <StudyCentre.StudyCentreView />,
@@ -222,5 +230,10 @@ export const AdminRoutes = [
   {
     route: "/study-centre-profile/",
     component: <StudyCentreProfile />,
+  },
+  {
+    route: "/add-cce-mark/",
+    component: <CceMark.AddCceMark />,
+   
   },
 ];

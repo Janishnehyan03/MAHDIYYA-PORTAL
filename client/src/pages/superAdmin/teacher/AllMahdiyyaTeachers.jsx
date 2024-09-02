@@ -1,9 +1,9 @@
-import { faDownload } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React, { useEffect, useRef, useState } from "react";
-import { DownloadTableExcel } from "react-export-table-to-excel";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faDownload } from "@fortawesome/free-solid-svg-icons";
 import Axios from "../../../Axios";
 import Loading from "../../../components/Loading";
+import ReactHTMLTableToExcel from "react-html-table-to-excel"; // Import the library
 
 function AllMahdiyyaTeachers() {
   const tableRef = useRef(null);
@@ -12,7 +12,6 @@ function AllMahdiyyaTeachers() {
   const [studyCentre, setStudyCentre] = useState("");
   const [studyCentres, setStudyCentres] = useState([]);
 
-  // Fetch study centres from the API
   const getStudyCentres = async () => {
     try {
       setLoading(true);
@@ -25,17 +24,12 @@ function AllMahdiyyaTeachers() {
     }
   };
 
-  // Fetch teachers based on selected filters
   const getTeachers = async () => {
     try {
       setLoading(true);
-      // Build query string based on provided filters
       let query = "";
       if (studyCentre) query += `studyCentre=${studyCentre}`;
-
-      // Fetch teachers from the server
       let { data } = await Axios.get(`/teacher?${query}`);
-      console.log(data);
       setTeachers(data);
     } catch (error) {
       console.log(error);
@@ -44,7 +38,6 @@ function AllMahdiyyaTeachers() {
     }
   };
 
-  // Fetch classes and study centres on component mount
   useEffect(() => {
     getStudyCentres();
   }, []);
@@ -74,7 +67,6 @@ function AllMahdiyyaTeachers() {
           className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
         >
           <option value="">Choose a study centre</option>
-
           {studyCentres.map((item) => (
             <option key={item._id} value={item._id}>
               {item.studyCentreName}
@@ -86,24 +78,28 @@ function AllMahdiyyaTeachers() {
           <p className="text-green-500">{teachers.length} teachers</p>
 
           {teachers.length > 0 && (
-            <DownloadTableExcel
+            <ReactHTMLTableToExcel
+              id="export-button"
+              className="bg-green-400 px-3 py-1 text-white font-semibold rounded-2xl"
+              table="teachers-table" // The table id must match this
               filename="teachers"
               sheet="teachers"
-              currentTableRef={tableRef.current}
+              buttonText="Download"
             >
-              <button className="bg-green-400 px-3 py-1 text-white font-semibold rounded-2xl">
-                Download <FontAwesomeIcon icon={faDownload} />
-              </button>
-            </DownloadTableExcel>
+              <FontAwesomeIcon icon={faDownload} />
+            </ReactHTMLTableToExcel>
           )}
         </div>
       </form>
 
-      {/* Table for displaying teachers */}
       {loading ? (
         <Loading />
       ) : (
-        <table ref={tableRef} className="min-w-full divide-y divide-gray-200">
+        <table
+          id="teachers-table" // Assign a unique id to your table
+          ref={tableRef}
+          className="min-w-full divide-y divide-gray-200"
+        >
           <thead className="bg-gray-50">
             <tr>
               <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -124,13 +120,11 @@ function AllMahdiyyaTeachers() {
               <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                 STUDY CENTRE
               </th>
-
               <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                 MAHDIYYA
               </th>
             </tr>
           </thead>
-
           <tbody className="bg-white divide-y divide-gray-200">
             {teachers.map((teacher, index) => (
               <tr key={teacher._id}>
@@ -152,7 +146,6 @@ function AllMahdiyyaTeachers() {
                 <td className="text-sm text-center text-gray-600 p-2">
                   {teacher.branch?.studyCentreName || "N/A"}
                 </td>
-
                 <td className="text-sm text-center text-gray-600 p-2">
                   {teacher.mahdiyyaTeacher ? "Yes" : "No"}
                 </td>

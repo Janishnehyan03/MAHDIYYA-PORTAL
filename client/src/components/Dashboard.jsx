@@ -14,6 +14,7 @@ import {
   faUser,
   faUserGraduate,
   faChalkboardTeacher,
+  faPenAlt,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React, { useContext, useEffect, useState } from "react";
@@ -129,6 +130,11 @@ function Dashboard() {
       text: "New Admissions",
       icon: faBook,
       link: "/new-admissions",
+    },
+    {
+      text: "Cce Mark Entry",
+      icon: faPenAlt,
+      link: "/add-cce-mark",
     },
     {
       text: "Exam Results",

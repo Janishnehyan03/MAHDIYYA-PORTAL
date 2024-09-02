@@ -104,9 +104,10 @@ exports.getResults = async (req, res) => {
       if (results.length === 0) {
         return res.status(404).json({ message: "No results found" });
       }
+      
       const studentResults = {};
-      results.forEach((result) => {
-        const studentId = result.student._id.toString();
+      results.forEach((result) => {        
+        const studentId = result?.student?._id.toString();
         if (!studentResults[studentId]) {
           studentResults[studentId] = {
             student: result.student,
@@ -128,7 +129,7 @@ exports.getResults = async (req, res) => {
 
       const filteredStudents = sortedStudents.filter(
         (studentResult) =>
-          studentResult.student.branch._id.toString() ===
+          studentResult?.student?.branch?._id.toString() ===
           req.query.studyCentreId
       );
 

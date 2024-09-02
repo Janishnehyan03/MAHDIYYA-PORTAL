@@ -1,7 +1,7 @@
 import { faDownload } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React, { useEffect, useRef, useState } from "react";
-import { DownloadTableExcel } from "react-export-table-to-excel";
+import ReactHTMLTableToExcel from "react-html-table-to-excel"; // Import the library
 import Axios from "../../Axios";
 import Loading from "../../components/Loading";
 
@@ -120,17 +120,17 @@ function AllStudents() {
 
         <div className="flex justify-between items-center my-4">
           <p className="text-green-500">{students.length} students</p>
-
           {students.length > 0 && (
-            <DownloadTableExcel
-              filename="Students"
-              sheet="Students"
-              currentTableRef={tableRef.current}
+            <ReactHTMLTableToExcel
+              id="export-button"
+              className="bg-green-400 px-3 py-1 text-white font-semibold rounded-2xl"
+              table="students-table" // The table id must match this
+              filename="students"
+              sheet="students"
+              buttonText="Download"
             >
-              <button className="bg-green-400 px-3 py-1 text-white font-semibold rounded-2xl">
-                Download <FontAwesomeIcon icon={faDownload} />
-              </button>
-            </DownloadTableExcel>
+              <FontAwesomeIcon icon={faDownload} />
+            </ReactHTMLTableToExcel>
           )}
         </div>
       </form>
@@ -139,7 +139,7 @@ function AllStudents() {
       {loading ? (
         <Loading />
       ) : (
-        <table ref={tableRef} className="min-w-full divide-y divide-gray-200">
+        <table id="students-table" ref={tableRef} className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
               <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">

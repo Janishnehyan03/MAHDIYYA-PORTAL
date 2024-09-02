@@ -1,11 +1,13 @@
-import React, { useState, useEffect, useCallback, useContext } from 'react';
+import React, { useState, useEffect, useCallback, useContext } from "react";
 import Axios from "../../../Axios";
 import { UserAuthContext } from "../../../context/userContext";
+import Loading from '../../../components/Loading'
 
 function ResultView() {
   const [classes, setClasses] = useState([]);
   const [exams, setExams] = useState([]);
   const [branches, setBranches] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   const [classId, setClassId] = useState(null);
   const [examId, setExamId] = useState(null);
@@ -44,13 +46,17 @@ function ResultView() {
 
   const getResults = useCallback(async () => {
     try {
+      setLoading(true);
       let { data } = await Axios.get(
         `/result?examId=${examId}&classId=${classId}&studyCentreId=${
           authData.role === "superAdmin" ? studyCentreId : authData.branch._id
         }`
       );
       setResults(data);
+      setLoading(false);
     } catch (error) {
+      setLoading(false);
+      setResults([]);
       console.log(error.response);
     }
   }, [examId, classId, studyCentreId, authData?.branch?._id, authData.role]);
@@ -66,7 +72,6 @@ function ResultView() {
       getResults();
     }
   }, [examId, classId, studyCentreId, authData?.branch?._id, getResults]);
-
 
   const subjectNames = new Set();
   results.forEach((result) => {
@@ -115,49 +120,53 @@ function ResultView() {
           ))}
         </select>
       </div>
-      <div className="overflow-x-auto m-10">
-        <table className="table-auto w-full">
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>Regiter No</th>
-              <th>Student</th>
-              {Array.from(subjectNames).map((subjectName) => (
-                <th key={subjectName}>{subjectName}</th>
-              ))}
-              <th>Total Marks</th>
-              <th>Percentage</th>
-              <th>Rank</th>
-              <th>Passed</th>
-            </tr>
-          </thead>
-          <tbody>
-            {authData.role === "superAdmin"
-              ? results
-                  .filter((result) => result.student.branch === studyCentreId)
-                  .map((result, index) => {
-                    return (
+      {loading ? (
+        <Loading />
+      ) : (
+        <div className="overflow-x-auto m-10">
+          <table className="table-auto w-full">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Regiter No</th>
+                <th>Student</th>
+                {Array.from(subjectNames).map((subjectName) => (
+                  <th key={subjectName}>{subjectName}</th>
+                ))}
+                <th>Total Marks</th>
+                <th>Percentage</th>
+                <th>Rank</th>
+                <th>Passed</th>
+              </tr>
+            </thead>
+            <tbody>
+              {authData.role === "superAdmin"
+                ? results
+                    .filter((result) => result.student.branch === studyCentreId)
+                    .map((result, index) => {
+                      return (
+                        <ResultTableRow
+                          result={result}
+                          index={index}
+                          subjectNames={subjectNames}
+                        />
+                      );
+                    })
+                : results
+                    .filter(
+                      (result) => result.student.branch === authData.branch._id
+                    )
+                    .map((result, key) => (
                       <ResultTableRow
                         result={result}
-                        index={index}
+                        key={key}
                         subjectNames={subjectNames}
                       />
-                    );
-                  })
-              : results
-                  .filter(
-                    (result) => result.student.branch === authData.branch._id
-                  )
-                  .map((result, key) => (
-                    <ResultTableRow
-                      result={result}
-                      key={key}
-                      subjectNames={subjectNames}
-                    />
-                  ))}
-          </tbody>
-        </table>
-      </div>
+                    ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 }

@@ -19,7 +19,7 @@ router.get(
 router.get(
   "/data/:studyCentreId/:classId",
   protect,
-  restrictTo("superAdmin"),
+  restrictTo("superAdmin", "admin"),
   studentController.getBranchStudents
 );
 router.get(
@@ -28,11 +28,7 @@ router.get(
   restrictTo("admin"),
   studentController.getMyAdmissions
 );
-router.get(
-  "/",
-  protect,
-  studentController.getAllStudents
-);
+router.get("/", protect, studentController.getAllStudents);
 
 router.get(
   "/admissions/data",

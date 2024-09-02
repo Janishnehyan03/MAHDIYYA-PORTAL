@@ -29,6 +29,7 @@ import ResultView from "./superAdmin/result/ResultView";
 import AllCourses from "./superAdmin/course/AllCourses.jsx";
 import CreateCourse from "./superAdmin/course/CreateCourse";
 import EditCourse from "./superAdmin/course/EditCourse";
+import AddCceMark from "./superAdmin/result/AddCceMark.jsx";
 
 export const Teacher = {
   EditTeacher,
@@ -67,6 +68,9 @@ export const Result = {
   EditResult,
   ResultHome,
   ResultView,
+};
+export const CceMark = {
+  AddCceMark
 };
 export const Course = {
   CreateCourse,
