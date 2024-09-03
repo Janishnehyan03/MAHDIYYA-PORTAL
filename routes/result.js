@@ -16,5 +16,5 @@ router.get("/data", protect, restrictTo("superAdmin"), getGlobalResults);
 router.get("/:examId/:registerNo", getMyResults);
 router.get("/fetch", fetchToUpdate);
 router.get("/statistics", getExamStatistics);
-router.patch("/", updateResult);
+router.patch("/", protect, restrictTo("superAdmin"), updateResult);
 module.exports = router;

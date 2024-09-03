@@ -1,6 +1,7 @@
 const { default: mongoose } = require("mongoose");
 const Result = require("../models/resultModel");
 const Student = require("../models/studentModel");
+const CceMark = require("../models/cceModel");
 const { deleteOne } = require("../utils/globalFuctions");
 
 exports.getMyResults = async (req, res) => {
@@ -78,7 +79,7 @@ exports.getMyResults = async (req, res) => {
 
     return res.json({
       results,
-      promoted: allSubjectsPassed ,
+      promoted: allSubjectsPassed,
       grandTotal,
       percentage: roundedPercentage,
       totalPossibleMarks,
@@ -90,10 +91,89 @@ exports.getMyResults = async (req, res) => {
     return res.status(500).json({ error: "Internal Server Error" });
   }
 };
+// exports.getResults = async (req, res) => {
+//   try {
+//     let results;
+//     if (req.query.classId && req.query.examId) {
+//       results = await Result.find({
+//         class: mongoose.Types.ObjectId(req.query.classId),
+//         exam: mongoose.Types.ObjectId(req.query.examId),
+//       })
+//         .populate("student")
+//         .populate("subject");
+
+//       if (results.length === 0) {
+//         return res.status(404).json({ message: "No results found" });
+//       }
+
+//       const studentResults = {};
+//       results.forEach((result) => {
+//         const studentId = result?.student?._id.toString();
+//         if (!studentResults[studentId]) {
+//           studentResults[studentId] = {
+//             student: result.student,
+//             totalMarks: 0,
+//             subjectResults: [],
+//           };
+//         }
+//         studentResults[studentId].totalMarks += result.marksObtained;
+//         studentResults[studentId].subjectResults.push({
+//           subject: result.subject,
+//           marksObtained: result.marksObtained,
+//         });
+//       });
+
+//       // Sort the students based on the total marks obtained
+//       const sortedStudents = Object.values(studentResults).sort(
+//         (a, b) => b.totalMarks - a.totalMarks
+//       );
+
+//       const filteredStudents = sortedStudents.filter(
+//         (studentResult) =>
+//           studentResult?.student?.branch?._id.toString() ===
+//           req.query.studyCentreId
+//       );
+
+//       const modifiedResults = filteredStudents.map((studentResult, index) => {
+//         const totalMarks = studentResult.subjectResults.reduce(
+//           (sum, subjectResult) => sum + subjectResult.subject.totalMarks,
+//           0
+//         );
+//         const marksObtained = studentResult.totalMarks;
+//         const percentage = (marksObtained / totalMarks) * 100;
+//         const passed = studentResult.subjectResults.every(
+//           (subjectResult) => subjectResult.marksObtained >= 40
+//         );
+
+//         const rank = index + 1; // Assign rank based on the sorted order
+
+//         return {
+//           student: studentResult.student,
+//           subjectResults: studentResult.subjectResults,
+//           passed,
+//           failed: !passed,
+//           percentage,
+//           rank,
+//           marksObtained,
+//           totalMarks,
+//           // Add any other required fields here
+//         };
+//       });
+//       return res.json(modifiedResults);
+//     }
+//   } catch (err) {
+//     console.error(err);
+//     return res.status(500).json({ error: "Internal Server Error" });
+//   }
+// };
+
 exports.getResults = async (req, res) => {
   try {
     let results;
+
+    // Check for required query parameters
     if (req.query.classId && req.query.examId) {
+      // Fetch exam results based on class and exam IDs
       results = await Result.find({
         class: mongoose.Types.ObjectId(req.query.classId),
         exam: mongoose.Types.ObjectId(req.query.examId),
@@ -101,48 +181,114 @@ exports.getResults = async (req, res) => {
         .populate("student")
         .populate("subject");
 
+      // Check if results are found
       if (results.length === 0) {
         return res.status(404).json({ message: "No results found" });
       }
-      
+
+      // Fetch CCE marks based on class and exam IDs
+      const cceResults = await CceMark.find({
+        class: mongoose.Types.ObjectId(req.query.classId),
+        exam: mongoose.Types.ObjectId(req.query.examId),
+      })
+        .populate("student")
+        .populate("subject");
+
+      // Merge exam and CCE results by student
       const studentResults = {};
-      results.forEach((result) => {        
+
+      // Process exam results
+      results.forEach((result) => {
         const studentId = result?.student?._id.toString();
         if (!studentResults[studentId]) {
           studentResults[studentId] = {
             student: result.student,
             totalMarks: 0,
+            examMarksObtained: 0,
+            cceMarksObtained: 0,
             subjectResults: [],
           };
         }
-        studentResults[studentId].totalMarks += result.marksObtained;
+
+        // Accumulate exam marks
+        studentResults[studentId].examMarksObtained += result.marksObtained;
         studentResults[studentId].subjectResults.push({
           subject: result.subject,
           marksObtained: result.marksObtained,
+          type: "exam", // Label to identify this as exam marks
         });
       });
 
-      // Sort the students based on the total marks obtained
+      // Process CCE marks
+      cceResults.forEach((cceResult) => {
+        const studentId = cceResult?.student?._id.toString();
+        if (!studentResults[studentId]) {
+          studentResults[studentId] = {
+            student: cceResult.student,
+            totalMarks: 0,
+            examMarksObtained: 0,
+            cceMarksObtained: 0,
+            subjectResults: [],
+          };
+        }
+
+        // Accumulate CCE marks
+        studentResults[studentId].cceMarksObtained += cceResult.cceMark;
+        studentResults[studentId].subjectResults.push({
+          subject: cceResult.subject,
+          marksObtained: cceResult.cceMark,
+          type: "cce", // Label to identify this as CCE marks
+        });
+      });
+
+      // Sort and filter students based on total marks obtained
       const sortedStudents = Object.values(studentResults).sort(
-        (a, b) => b.totalMarks - a.totalMarks
+        (a, b) =>
+          b.examMarksObtained +
+          b.cceMarksObtained -
+          (a.examMarksObtained + a.cceMarksObtained)
       );
 
+      // Filter students by study centre
       const filteredStudents = sortedStudents.filter(
         (studentResult) =>
           studentResult?.student?.branch?._id.toString() ===
           req.query.studyCentreId
       );
 
+      // Calculate and return the modified results
       const modifiedResults = filteredStudents.map((studentResult, index) => {
-        const totalMarks = studentResult.subjectResults.reduce(
-          (sum, subjectResult) => sum + subjectResult.subject.totalMarks,
-          0
-        );
-        const marksObtained = studentResult.totalMarks;
+        const totalExamMarks = studentResult.subjectResults
+          .filter((result) => result.type === "exam")
+          .reduce((sum, result) => sum + result.subject.totalMarks, 0);
+
+        const totalCCEMarks = studentResult.subjectResults
+          .filter((result) => result.type === "cce")
+          .reduce((sum, result) => sum + result.subject.totalMarks, 0);
+
+        const marksObtained =
+          studentResult.examMarksObtained + studentResult.cceMarksObtained;
+        const totalMarks = totalExamMarks + totalCCEMarks;
         const percentage = (marksObtained / totalMarks) * 100;
-        const passed = studentResult.subjectResults.every(
-          (subjectResult) => subjectResult.marksObtained >= 40
-        );
+
+        // Check each subject's passing criteria
+        const passed = studentResult.subjectResults.every((subjectResult) => {
+          if (subjectResult.type === "exam") {
+            // Check for exam marks minimum criteria
+            const cceSubject = studentResult.subjectResults.find(
+              (sr) =>
+                sr.subject._id.toString() === subjectResult.subject._id.toString() &&
+                sr.type === "cce"
+            );
+            const cceMarks = cceSubject ? cceSubject.marksObtained : 0;
+            return (
+              subjectResult.marksObtained >= 28 &&
+              cceMarks >= 1 &&
+              subjectResult.marksObtained + cceMarks >= 40
+            );
+          }
+          return true; // CCE alone doesn't determine passing
+        });
 
         const rank = index + 1; // Assign rank based on the sorted order
 
@@ -155,16 +301,23 @@ exports.getResults = async (req, res) => {
           rank,
           marksObtained,
           totalMarks,
-          // Add any other required fields here
+          examMarks: studentResult.examMarksObtained,
+          cceMarks: studentResult.cceMarksObtained,
         };
       });
+
       return res.json(modifiedResults);
+    } else {
+      return res
+        .status(400)
+        .json({ message: "Class ID and Exam ID are required" });
     }
   } catch (err) {
     console.error(err);
     return res.status(500).json({ error: "Internal Server Error" });
   }
 };
+
 
 exports.getGlobalResults = async (req, res) => {
   try {
@@ -289,23 +442,32 @@ exports.createResults = async (req, res) => {
 
 exports.updateResult = async (req, res) => {
   try {
+    // Use Promise.all to handle multiple updates concurrently
     const results = await Promise.all(
       req.body.map(async (resultData) => {
         const { _id, marksObtained } = resultData;
 
-        let updated = await Result.findByIdAndUpdate(
+        // Find by ID and update, returning the updated document
+        const updatedResult = await Result.findByIdAndUpdate(
           _id,
-          { marksObtained },
-          { new: true }
+          { marksObtained: parseInt(marksObtained) }, // Ensure marksObtained is an integer
+          { new: true } // Option to return the updated document
         );
+
+        // Return the updated result to be collected by Promise.all
+        return updatedResult;
       })
     );
+
+    // Send the updated results as the response
     res.json(results);
   } catch (err) {
+    // Log any errors that occur and send an error response
     console.log(err);
     res.status(400).json({ message: err.message });
   }
 };
+
 exports.fetchToUpdate = async (req, res) => {
   try {
     let { examId, subjectId, classId } = req.query;

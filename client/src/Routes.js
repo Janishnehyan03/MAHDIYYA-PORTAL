@@ -232,8 +232,19 @@ export const AdminRoutes = [
     component: <StudyCentreProfile />,
   },
   {
+    route: "/cce-mark/",
+    component: <CceMark.CceHome />,
+  },
+  {
+    route: "/view-cce-mark/",
+    component: <CceMark.ViewCceMarks />,
+  },
+  {
     route: "/add-cce-mark/",
     component: <CceMark.AddCceMark />,
-   
+  },
+  {
+    route: "/edit-cce-mark/",
+    component: <CceMark.EditCceMark />,
   },
 ];

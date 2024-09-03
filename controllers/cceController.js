@@ -20,9 +20,7 @@ exports.getMyResults = async (req, res) => {
       return res.status(200).json({ message: "Result Not Found" });
     }
 
-    const allSubjectsPassed = results.every(
-      (result) => result.cceMark >= 40
-    );
+    const allSubjectsPassed = results.every((result) => result.cceMark >= 40);
 
     const grandTotal = results.reduce(
       (total, result) => total + result.cceMark,
@@ -78,7 +76,7 @@ exports.getMyResults = async (req, res) => {
 
     return res.json({
       results,
-      promoted: allSubjectsPassed ,
+      promoted: allSubjectsPassed,
       grandTotal,
       percentage: roundedPercentage,
       totalPossibleMarks,
@@ -104,9 +102,9 @@ exports.getResults = async (req, res) => {
       if (results.length === 0) {
         return res.status(404).json({ message: "No results found" });
       }
-      
+
       const studentResults = {};
-      results.forEach((result) => {        
+      results.forEach((result) => {
         const studentId = result?.student?._id.toString();
         if (!studentResults[studentId]) {
           studentResults[studentId] = {
@@ -276,7 +274,7 @@ exports.createResults = async (req, res) => {
     res.status(201).json(results);
   } catch (err) {
     console.log(err);
-    
+
     if (
       err.name === "ValidationError" &&
       err.message.includes("Duplicate mark entry for the subject")
@@ -291,13 +289,14 @@ exports.createResults = async (req, res) => {
 
 exports.updateResult = async (req, res) => {
   try {
+
     const results = await Promise.all(
       req.body.map(async (resultData) => {
         const { _id, cceMark } = resultData;
 
-        let updated = await CceMark.findByIdAndUpdate(
+        await CceMark.findByIdAndUpdate(
           _id,
-          { cceMark },
+          { cceMark: parseInt(cceMark) },
           { new: true }
         );
       })

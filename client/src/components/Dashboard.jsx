@@ -95,14 +95,19 @@ function Dashboard() {
       link: "/create-exam",
     },
     {
-      text: "DOWNLOADS",
-      icon: faDownload,
-      link: "/downloads",
+      text: "CCE MARKS",
+      icon: faBookOpenReader,
+      link: "/cce-mark",
     },
     {
       text: "RESULTS",
       icon: faMarker,
       link: "/result-section",
+    },
+    {
+      text: "DOWNLOADS",
+      icon: faDownload,
+      link: "/downloads",
     },
     {
       text: "Configurations",
@@ -132,10 +137,11 @@ function Dashboard() {
       link: "/new-admissions",
     },
     {
-      text: "Cce Mark Entry",
+      text: "Cce Mark",
       icon: faPenAlt,
-      link: "/add-cce-mark",
+      link: "/cce-mark",
     },
+
     {
       text: "Exam Results",
       icon: faCheckDouble,

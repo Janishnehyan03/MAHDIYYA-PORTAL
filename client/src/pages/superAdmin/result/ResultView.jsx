@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useContext } from "react";
 import Axios from "../../../Axios";
 import { UserAuthContext } from "../../../context/userContext";
-import Loading from '../../../components/Loading'
+import Loading from "../../../components/Loading";
 
 function ResultView() {
   const [classes, setClasses] = useState([]);
@@ -52,6 +52,8 @@ function ResultView() {
           authData.role === "superAdmin" ? studyCentreId : authData.branch._id
         }`
       );
+      console.log(data);
+
       setResults(data);
       setLoading(false);
     } catch (error) {
@@ -178,18 +180,35 @@ function ResultTableRow({ result, index, subjectNames }) {
       <td className="text-sm">{result.student?.registerNo}</td>
       <td className="text-sm">{result.student?.studentName}</td>
       {Array.from(subjectNames).map((subjectName) => {
-        const subjectResult = result.subjectResults.find((sr) => {
-          // console.log(sr);
-          return sr.subject.subjectName === subjectName;
-        });
+        // Find exam and CCE results for the subject
+        const examResult = result.subjectResults.find(
+          (sr) => sr.subject.subjectName === subjectName && sr.type === "exam"
+        );
+        const cceResult = result.subjectResults.find(
+          (sr) => sr.subject.subjectName === subjectName && sr.type === "cce"
+        );
+
         return (
           <td
-            className={`whitespace-nowrap text-sm text-center px-6 py-4 ${
-              subjectResult.marksObtained >= 40 ? "bg-gray-200" : "bg-red-400"
-            }`}
+            className="whitespace-nowrap text-sm text-center px-6 py-4"
             key={subjectName}
           >
-            {subjectResult ? `${subjectResult.marksObtained} ` : "-"}
+            {examResult && (
+              <span
+                className={`inline-block px-2 py-1 ${
+                  examResult.marksObtained >= 40 ? "bg-gray-200" : "bg-red-400"
+                }`}
+              >
+                {examResult.marksObtained ? examResult.marksObtained : "N/A"}
+              </span>
+            )}
+            {cceResult && (
+              <span
+                className={`inline-block px-2 py-1 ml-1 bg-gray-600 text-white`}
+              >
+                {cceResult.marksObtained ? cceResult.marksObtained : "N/A"}
+              </span>
+            )}
           </td>
         );
       })}

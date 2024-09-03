@@ -25,7 +25,7 @@ function EditResult() {
 
   const getAllBranches = async () => {
     try {
-      const response = await Axios.get("/study-centre?sort=branchName");
+      const response = await Axios.get("/study-centre?sort=studyCentreName");
       setBranches(response.data.docs);
     } catch (error) {
       console.error(error);
@@ -79,7 +79,7 @@ function EditResult() {
         `/result?examId=${exam}&subjectId=${subject}&classId=${selectedClass}`,
         updatedData
       );
-      console.log(response.data);
+
       if (response.status === 200) {
         setResults([]);
         toast.success("Result Edited", {
@@ -205,7 +205,7 @@ function EditResult() {
                 </thead>
                 <tbody>
                   {results
-                    .filter((item) => item.student.branch === selectedBranch)
+                    .filter((item) => item?.student?.branch === selectedBranch)
                     .map((result, key) => (
                       <tr key={key}>
                         <td className="px-4 py-2">
