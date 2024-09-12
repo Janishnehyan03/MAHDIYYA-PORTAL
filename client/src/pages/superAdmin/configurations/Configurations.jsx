@@ -4,7 +4,8 @@ import Axios from "../../../Axios";
 const AdminConfigPage = () => {
   const [settings, setSettings] = useState({
     academicYear: "",
-    halfYearExamSubmissionOn: false,
+    saSubmission: false,
+    faSubmission: false,
   });
   const [message, setMessage] = useState(null);
   const [academicYears, setAcademicYears] = useState([]);
@@ -63,7 +64,7 @@ const AdminConfigPage = () => {
   const handleInputBlur = async (yearId, year) => {
     try {
       setMessage("updating");
-       await Axios.patch(`/academic-year/${yearId}`, { year });
+      await Axios.patch(`/academic-year/${yearId}`, { year });
       getAcademicYears();
       setMessage("updated");
     } catch (err) {
@@ -93,15 +94,13 @@ const AdminConfigPage = () => {
                 <div className="flex items-center">
                   <button
                     className={`${
-                      settings.halfYearExamSubmissionOn
-                        ? "bg-blue-600"
-                        : "bg-gray-200"
+                      settings.saSubmission ? "bg-blue-600" : "bg-gray-200"
                     } relative inline-flex flex-shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500`}
-                    onClick={() => handleToggle("halfYearExamSubmissionOn")}
+                    onClick={() => handleToggle("saSubmission")}
                   >
                     <span
                       className={`${
-                        settings.halfYearExamSubmissionOn
+                        settings.saSubmission
                           ? "translate-x-5"
                           : "translate-x-0"
                       } pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow transform ring-0 transition ease-in-out duration-200`}
@@ -109,7 +108,32 @@ const AdminConfigPage = () => {
                   </button>
 
                   <span className="ml-3 text-sm text-gray-500">
-                    {settings.halfYearExamSubmissionOn ? "Enabled" : "Disabled"}
+                    {settings.saSubmission ? "Enabled" : "Disabled"}
+                  </span>
+                </div>
+              </div>
+              <div className="flex flex-col space-y-2">
+                <label className="text-sm font-medium text-gray-700">
+                  FA Mark Submission
+                </label>
+                <div className="flex items-center">
+                  <button
+                    className={`${
+                      settings.faSubmission ? "bg-blue-600" : "bg-gray-200"
+                    } relative inline-flex flex-shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500`}
+                    onClick={() => handleToggle("faSubmission")}
+                  >
+                    <span
+                      className={`${
+                        settings.faSubmission
+                          ? "translate-x-5"
+                          : "translate-x-0"
+                      } pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow transform ring-0 transition ease-in-out duration-200`}
+                    />
+                  </button>
+
+                  <span className="ml-3 text-sm text-gray-500">
+                    {settings.faSubmission ? "Enabled" : "Disabled"}
                   </span>
                 </div>
               </div>
@@ -142,14 +166,12 @@ const AdminConfigPage = () => {
               </div>
               <div className="flex flex-col space-y-2">
                 <label className="text-sm font-medium text-gray-700">
-                 New Admission Requests 
+                  New Admission Requests
                 </label>
                 <div className="flex items-center">
                   <button
                     className={`${
-                      settings.newAdmission
-                        ? "bg-blue-600"
-                        : "bg-gray-200"
+                      settings.newAdmission ? "bg-blue-600" : "bg-gray-200"
                     } relative inline-flex flex-shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500`}
                     onClick={() => handleToggle("newAdmission")}
                   >

@@ -137,9 +137,9 @@ function Dashboard() {
       link: "/new-admissions",
     },
     {
-      text: "Cce Mark",
+      text: "Mark Entry",
       icon: faPenAlt,
-      link: "/cce-mark",
+      link: "/mark-entry",
     },
 
     {

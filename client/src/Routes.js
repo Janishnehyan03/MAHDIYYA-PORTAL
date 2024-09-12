@@ -232,7 +232,7 @@ export const AdminRoutes = [
     component: <StudyCentreProfile />,
   },
   {
-    route: "/cce-mark/",
+    route: "/mark-entry/",
     component: <CceMark.CceHome />,
   },
   {

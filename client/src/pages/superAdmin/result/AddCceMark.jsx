@@ -125,7 +125,7 @@ const AddCceMark = () => {
   return (
     <div className=" mt-8">
       <div className="max-w-md mx-auto ">
-        <h2 className="text-2xl font-bold mb-4 text-center">Add Result</h2>
+        <h2 className="text-2xl font-bold mb-4 text-center">Add FA Mark</h2>
         <div className="mb-4">
           <label className="block text-gray-700 font-bold mb-2" htmlFor="class">
             Study Centre

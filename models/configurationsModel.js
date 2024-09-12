@@ -5,7 +5,7 @@ const configurationSchema = new mongoose.Schema(
       type: mongoose.Types.ObjectId,
       ref: "AcademicYear",
     },
-    halfYearExamSubmissionOn: {
+    faSubmission: {
       type: Boolean,
       default: false,
     },
@@ -14,6 +14,10 @@ const configurationSchema = new mongoose.Schema(
       default: false,
     },
     newAdmission: {
+      type: Boolean,
+      default: false,
+    },
+    saSubmission: {
       type: Boolean,
       default: false,
     },

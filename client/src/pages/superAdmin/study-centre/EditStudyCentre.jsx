@@ -16,6 +16,7 @@ function EditStudyCentre() {
     username: "",
     password: "",
     googleMapUrl: "",
+    isActive: true,
   };
   const [errors, setErrors] = useState({});
 
@@ -224,8 +225,6 @@ function EditStudyCentre() {
                 />
               </div>
             </div>
-
-           
 
             <div className="lg:col-span-1">
               <div className="px-4 sm:px-0">

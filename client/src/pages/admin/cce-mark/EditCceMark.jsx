@@ -111,7 +111,7 @@ function EditCceMark() {
   return (
     <div>
       <h1 className="text-center font-bold uppercase text-3xl my-4">
-        Edit CCE Marks
+        Edit FA Marks
       </h1>
       <div className="bg-gray-50 flex-col flex items-center justify-center">
         <div className="mb-4 w-1/2">

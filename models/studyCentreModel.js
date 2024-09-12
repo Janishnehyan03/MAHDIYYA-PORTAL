@@ -69,6 +69,10 @@ const studyCentreSchema = new mongoose.Schema({
   slug: String,
   imageCover: String,
   images: [String],
+  isActive: {
+    type:Boolean,
+    default:true
+  },
   admin: { type: mongoose.Types.ObjectId },
   deleted: { type: Boolean, default: false },
   currentPrincipal: { type: String },
