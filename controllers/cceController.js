@@ -236,7 +236,8 @@ exports.getGlobalResults = async (req, res) => {
 };
 
 exports.createResults = async (req, res) => {
-  const resultsData = req.body; // Array of objects containing student results
+  // Expecting resultsData to be an array of result objects from req.body
+  const resultsData = Array.isArray(req.body) ? req.body : [req.body]; // Ensure it's an array
 
   try {
     const results = await Promise.all(
@@ -249,13 +250,14 @@ exports.createResults = async (req, res) => {
           subject,
         } = resultData;
 
+        // Find existing result by student and subject
         const existingResult = await CceMark.findOne({ student, subject });
 
         if (existingResult) {
           // Update existing result
           existingResult.cceMark = cceMark;
           await existingResult.save();
-          return existingResult;
+          return existingResult; // Return updated result
         } else {
           // Create a new result
           const newResult = new CceMark({
@@ -266,47 +268,58 @@ exports.createResults = async (req, res) => {
             subject,
           });
           await newResult.save();
-          return newResult;
+          return newResult; // Return newly created result
         }
       })
     );
 
+    // Respond with the created or updated results
     res.status(201).json(results);
   } catch (err) {
-    console.log(err);
+    console.error(err); // Changed to console.error for better error logging
 
+    // Handle validation errors specifically for duplicate marks
     if (
       err.name === "ValidationError" &&
       err.message.includes("Duplicate mark entry for the subject")
     ) {
-      return res
-        .status(400)
-        .json({ error: "Duplicate mark entry for the subject." });
+      return res.status(400).json({ error: "Duplicate mark entry for the subject." });
     }
+
+    // General error response
     res.status(400).json({ message: err.message });
   }
 };
 
+
+
 exports.updateResult = async (req, res) => {
   try {
-
     const results = await Promise.all(
       req.body.map(async (resultData) => {
         const { _id, cceMark } = resultData;
 
-        await CceMark.findByIdAndUpdate(
-          _id,
-          { cceMark: parseInt(cceMark) },
-          { new: true }
-        );
+        // Only update if _id and cceMark are provided
+        if (_id && cceMark !== undefined) {
+          return await CceMark.findByIdAndUpdate(
+            _id,
+            { cceMark: parseInt(cceMark) },
+            { new: true }
+          );
+        }
       })
     );
-    res.json(results);
+
+    // Filter out any undefined results from the update
+    const filteredResults = results.filter(Boolean);
+    res.json(filteredResults);
   } catch (err) {
     console.log(err);
     res.status(400).json({ message: err.message });
   }
 };
+
+
 exports.fetchToUpdate = async (req, res) => {
   try {
     let { examId, subjectId, classId } = req.query;

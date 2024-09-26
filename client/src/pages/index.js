@@ -15,7 +15,6 @@ import Profile from "./student/StudentProfile.jsx";
 import AllStudents from "./superAdmin/AllStudents.jsx";
 import ClassBasedStudents from "./superAdmin/ClassBasedStudents.jsx";
 import AddResult from "./superAdmin/result/AddResult";
-import EditResult from "./superAdmin/result/EditResult";
 import ResultHome from "./superAdmin/result/ResultHome";
 import ResultView from "./superAdmin/result/ResultView";
 import AllStudyCentres from "./superAdmin/study-centre/AllStudyCentres.jsx";
@@ -68,7 +67,6 @@ export const StudyCentre = {
 };
 export const Result = {
   AddResult,
-  EditResult,
   ResultHome,
   ResultView,
 };

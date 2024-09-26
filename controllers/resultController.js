@@ -391,7 +391,8 @@ exports.getGlobalResults = async (req, res) => {
 };
 
 exports.createResults = async (req, res) => {
-  const resultsData = req.body; // Array of objects containing student results
+  // Expecting resultsData to be an array of result objects from req.body
+  const resultsData = Array.isArray(req.body) ? req.body : [req.body]; // Ensure it's an array
 
   try {
     const results = await Promise.all(
@@ -399,74 +400,82 @@ exports.createResults = async (req, res) => {
         const {
           student,
           exam,
-          marksObtained,
+          marksObtained, // Changed to marksObtained
           class: studentClass,
           subject,
         } = resultData;
 
-        const existingResult = await Result.findOne({ student, subject });
+        // Find existing result by student, subject, and exam
+        const existingResult = await Result.findOne({ student, subject, exam });
 
         if (existingResult) {
-          // Update existing result
-          existingResult.marksObtained = marksObtained;
-          await existingResult.save();
-          return existingResult;
+          // Prevent duplicate entry by checking if the existing marks are already recorded
+          if (existingResult.marksObtained === marksObtained) {
+            // If the marks are the same, return the existing result without making changes
+            return existingResult; 
+          } else {
+            // Update existing result
+            existingResult.marksObtained = marksObtained; // Update field to marksObtained
+            await existingResult.save();
+            return existingResult; // Return updated result
+          }
         } else {
           // Create a new result
           const newResult = new Result({
             student,
             exam,
-            marksObtained,
+            marksObtained, // Ensure this is now marksObtained
             class: studentClass,
             subject,
           });
           await newResult.save();
-          return newResult;
+          return newResult; // Return newly created result
         }
       })
     );
 
+    // Respond with the created or updated results
     res.status(201).json(results);
   } catch (err) {
-    if (
-      err.name === "ValidationError" &&
-      err.message.includes("Duplicate mark entry for the subject")
-    ) {
-      return res
-        .status(400)
-        .json({ error: "Duplicate mark entry for the subject." });
+    console.error(err); // Improved error logging
+
+    // Handle validation errors specifically for duplicate marks if necessary
+    if (err.name === "ValidationError" && err.message.includes("Duplicate mark entry")) {
+      return res.status(400).json({ error: "Duplicate mark entry for the subject." });
     }
+
+    // General error response
     res.status(400).json({ message: err.message });
   }
 };
 
+
 exports.updateResult = async (req, res) => {
   try {
-    // Use Promise.all to handle multiple updates concurrently
     const results = await Promise.all(
       req.body.map(async (resultData) => {
         const { _id, marksObtained } = resultData;
 
-        // Find by ID and update, returning the updated document
-        const updatedResult = await Result.findByIdAndUpdate(
-          _id,
-          { marksObtained: parseInt(marksObtained) }, // Ensure marksObtained is an integer
-          { new: true } // Option to return the updated document
-        );
-
-        // Return the updated result to be collected by Promise.all
-        return updatedResult;
+        // Only update if _id and marksObtained are provided
+        if (_id && marksObtained !== undefined) {
+          return await Result.findByIdAndUpdate(
+            _id,
+            { marksObtained: parseInt(marksObtained) }, // Ensure cceMark is an integer
+            { new: true }
+          );
+        }
       })
     );
 
-    // Send the updated results as the response
-    res.json(results);
+    // Filter out any undefined results from the update
+    const filteredResults = results.filter(Boolean);
+    res.json(filteredResults);
   } catch (err) {
-    // Log any errors that occur and send an error response
-    console.log(err);
+    console.error(err); // Changed to console.error for better error logging
     res.status(400).json({ message: err.message });
   }
 };
+
 
 exports.fetchToUpdate = async (req, res) => {
   try {

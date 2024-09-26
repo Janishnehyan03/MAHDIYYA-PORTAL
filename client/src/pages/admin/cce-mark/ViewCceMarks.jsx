@@ -82,7 +82,7 @@ function ResultView() {
 
   return (
     <div>
-      <h1 className="text-3xl my-4 font-bold text-center">Exam Results </h1>
+      <h1 className="text-3xl my-4 font-bold text-center">FA Results </h1>
       <div className=" m-4">
         <select
           className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block  lg:w-1/2 w-full mx-auto my-2 p-2.5"
@@ -168,7 +168,6 @@ function ResultView() {
 }
 
 function ResultTableRow({ result, index, subjectNames }) {
-  console.log(index);
   
   return (
     <tr key={index} className="border-b text-left border-neutral-200">
@@ -183,11 +182,11 @@ function ResultTableRow({ result, index, subjectNames }) {
         return (
           <td
             className={`whitespace-nowrap text-sm text-left px-6 py-4 ${
-              subjectResult.cceMark !== 1 ? "bg-gray-200" : "bg-red-400"
+              subjectResult?.cceMark !== 1 ? "bg-gray-200" : "bg-red-400"
             }`}
             key={subjectName}
           >
-            {subjectResult ? `${subjectResult.cceMark} ` : "-"}
+            {subjectResult ? `${subjectResult?.cceMark} ` : "-"}
           </td>
         );
       })}

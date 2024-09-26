@@ -149,11 +149,6 @@ export const SuperAdminRoutes = [
     component: <Result.ResultHome />,
     role: "superAdmin",
   },
-  {
-    route: "/edit-result/",
-    component: <Result.EditResult />,
-    role: "superAdmin",
-  },
 
   {
     route: "/study-centre/:centreId",
@@ -242,9 +237,5 @@ export const AdminRoutes = [
   {
     route: "/add-cce-mark/",
     component: <CceMark.AddCceMark />,
-  },
-  {
-    route: "/edit-cce-mark/",
-    component: <CceMark.EditCceMark />,
   },
 ];

@@ -84,13 +84,13 @@ function ResultView() {
 
   return (
     <div>
-      <h1 className="text-3xl my-4 font-bold text-center">Exam Results </h1>
-      <div className=" m-4">
+      <h1 className="text-3xl my-4 font-bold text-center">SA Results</h1>
+      <div className="m-4">
         <select
-          className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block  lg:w-1/2 w-full mx-auto my-2 p-2.5"
+          className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block lg:w-1/2 w-full mx-auto my-2 p-2.5"
           onChange={(e) => setClassId(e.target.value)}
         >
-          <option hidden>select class </option>
+          <option hidden>select class</option>
           {classes.map((item, key) => (
             <option key={key} value={item._id}>
               {item.className}
@@ -99,10 +99,10 @@ function ResultView() {
         </select>
         {authData.role === "superAdmin" && (
           <select
-            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block  lg:w-1/2 w-full mx-auto my-2 p-2.5"
+            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block lg:w-1/2 w-full mx-auto my-2 p-2.5"
             onChange={(e) => setStudyCentreId(e.target.value)}
           >
-            <option hidden>select study centre </option>
+            <option hidden>select study centre</option>
             {branches.map((item, key) => (
               <option key={key} value={item._id}>
                 {item.studyCentreName}
@@ -111,10 +111,10 @@ function ResultView() {
           </select>
         )}
         <select
-          className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block  lg:w-1/2 w-full mx-auto my-2 p-2.5"
+          className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block lg:w-1/2 w-full mx-auto my-2 p-2.5"
           onChange={(e) => setExamId(e.target.value)}
         >
-          <option hidden>select exam </option>
+          <option hidden>select exam</option>
           {exams.map((item, key) => (
             <option key={key} value={item._id}>
               {item.examName}
@@ -126,42 +126,78 @@ function ResultView() {
         <Loading />
       ) : (
         <div className="overflow-x-auto m-10">
-          <table className="table-auto w-full">
+          <table className="table-auto w-full border border-collapse border-gray-300">
             <thead>
               <tr>
-                <th>#</th>
-                <th>Regiter No</th>
-                <th>Student</th>
+                <th className="border border-gray-300 p-2" rowSpan="2">
+                  #
+                </th>
+                <th className="border border-gray-300 p-2" rowSpan="2">
+                  Register No
+                </th>
+                <th className="border border-gray-300 p-2" rowSpan="2">
+                  Student
+                </th>
                 {Array.from(subjectNames).map((subjectName) => (
-                  <th key={subjectName}>{subjectName}</th>
+                  <th
+                    key={subjectName}
+                    className="border border-gray-300 text-center p-2"
+                    colSpan="3"
+                  >
+                    {subjectName}
+                  </th>
                 ))}
-                <th>Total Marks</th>
-                <th>Percentage</th>
-                <th>Rank</th>
-                <th>Passed</th>
+              </tr>
+              <tr>
+                {Array.from(subjectNames).flatMap((subjectName) => [
+                  <th
+                    key={`${subjectName}-cce`}
+                    className="border border-gray-300 text-center p-2"
+                  >
+                    <div className="flex flex-col text-xs">
+                     <p>FA</p>
+                    </div>
+                  </th>,
+                  <th
+                    key={`${subjectName}-sa`}
+                    className="border border-gray-300 text-center p-2"
+                  >
+                    <div className="flex flex-col text-xs">
+                      <p>SA </p>
+                    </div>
+                  </th>,
+                  <th
+                    key={`${subjectName}-total`}
+                    className="border border-gray-300 text-center p-2"
+                  >
+                    <div className="flex flex-col text-xs">
+                      <p>Total</p>
+                    </div>
+                  </th>,
+                ])}
               </tr>
             </thead>
             <tbody>
               {authData.role === "superAdmin"
                 ? results
                     .filter((result) => result.student.branch === studyCentreId)
-                    .map((result, index) => {
-                      return (
-                        <ResultTableRow
-                          result={result}
-                          index={index}
-                          subjectNames={subjectNames}
-                        />
-                      );
-                    })
+                    .map((result, index) => (
+                      <ResultTableRow
+                        key={result.student.registerNo}
+                        result={result}
+                        index={index}
+                        subjectNames={subjectNames}
+                      />
+                    ))
                 : results
                     .filter(
                       (result) => result.student.branch === authData.branch._id
                     )
-                    .map((result, key) => (
+                    .map((result, index) => (
                       <ResultTableRow
+                        key={result.student.registerNo}
                         result={result}
-                        key={key}
+                        index={index}
                         subjectNames={subjectNames}
                       />
                     ))}
@@ -173,14 +209,17 @@ function ResultView() {
   );
 }
 
-function ResultTableRow({ result, index, subjectNames }) {
+const ResultTableRow = ({ result, index, subjectNames }) => {
   return (
-    <tr key={index} className="border-b border-neutral-200">
-      <td className="text-sm">{index + 1}</td>
-      <td className="text-sm">{result.student?.registerNo}</td>
-      <td className="text-sm">{result.student?.studentName}</td>
+    <tr className="border-b border-neutral-200">
+      <td className="p-2 border border-gray-300">{index + 1}</td>
+      <td className="p-2 border border-gray-300">
+        {result.student?.registerNo}
+      </td>
+      <td className="p-2 border border-gray-300">
+        {result.student?.studentName}
+      </td>
       {Array.from(subjectNames).map((subjectName) => {
-        // Find exam and CCE results for the subject
         const examResult = result.subjectResults.find(
           (sr) => sr.subject.subjectName === subjectName && sr.type === "exam"
         );
@@ -188,48 +227,28 @@ function ResultTableRow({ result, index, subjectNames }) {
           (sr) => sr.subject.subjectName === subjectName && sr.type === "cce"
         );
 
+        const cceMarks = cceResult ? cceResult.marksObtained : " ";
+        const saMarks = examResult ? examResult.marksObtained : " ";
+        const totalMarks =
+          (cceMarks !== " " ? parseFloat(cceMarks) : 0) +
+          (saMarks !== " " ? parseFloat(saMarks) : 0);
+
         return (
-          <td
-            className="whitespace-nowrap text-sm text-center px-6 py-4"
-            key={subjectName}
-          >
-            {examResult && (
-              <span
-                className={`inline-block px-2 py-1 ${
-                  examResult.marksObtained >= 40 ? "bg-gray-200" : "bg-red-400"
-                }`}
-              >
-                {examResult.marksObtained ? examResult.marksObtained : "N/A"}
-              </span>
-            )}
-            {cceResult && (
-              <span
-                className={`inline-block px-2 py-1 ml-1 bg-gray-600 text-white`}
-              >
-                {cceResult.marksObtained ? cceResult.marksObtained : "N/A"}
-              </span>
-            )}
-          </td>
+          <React.Fragment key={subjectName}>
+            <td className="border border-gray-300 text-center p-2">
+              {cceMarks}
+            </td>
+            <td className="border border-gray-300 text-center p-2">
+              {saMarks}
+            </td>
+            <td className="border border-gray-300 text-center p-2">
+              {totalMarks !== 0 ? totalMarks : " "}
+            </td>
+          </React.Fragment>
         );
       })}
-      <td className="whitespace-nowrap text-sm text-center px-6 py-4">
-        {result.marksObtained}
-      </td>
-      <td className="whitespace-nowrap text-sm text-center px-6 py-4">
-        {result.percentage.toFixed(2)}%
-      </td>
-      <td className="whitespace-nowrap text-sm text-center px-6 py-4">
-        {result.rank}
-      </td>
-      <td
-        className={`whitespace-nowrap text-sm text-center px-6 py-4 ${
-          result.passed ? "bg-green-500 text-white" : "bg-red-700 text-white"
-        }`}
-      >
-        {result.passed ? "Yes" : "No"}
-      </td>
     </tr>
   );
-}
+};
 
 export default ResultView;

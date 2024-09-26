@@ -1,9 +1,9 @@
-import { faAdd, faCheck, faEdit } from "@fortawesome/free-solid-svg-icons";
+import { faAdd, faCheck } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { BarChart } from "@mui/x-charts/BarChart";
 import React, { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import Axios from "../../../Axios";
-import { BarChart } from "@mui/x-charts/BarChart";
 
 function ResultHome() {
   const [statistics, setStatistics] = useState([]);
@@ -79,18 +79,7 @@ function ResultHome() {
             </h1>
           </div>
         </Link>
-        <Link to={"/edit-result"} className="w-full p-2 cursor-pointer">
-          <div className=" py-4 overflow-hidden  cursor-pointer bg-gray-800 rounded-xl group  duration-300 shadow-2xl group">
-            <div className="flex">
-              <div className="px-4 py-4 bg-gray-300 group-hover:bg-gray-900 rounded-xl bg-opacity-30 mx-auto text-2xl">
-                <FontAwesomeIcon icon={faEdit} color="white"></FontAwesomeIcon>
-              </div>
-            </div>
-            <h1 className="text-xl text-center font-bold group-hover:text-gray-400 text-white mt-4">
-              Edit Result
-            </h1>
-          </div>
-        </Link>
+        
       </div>
       <div className="flex flex-col justify-center items-center my-5">
         <h2 className="font-bold text-3xl text-blue-600 my-4">

@@ -97,7 +97,7 @@ function Dashboard() {
     {
       text: "CCE MARKS",
       icon: faBookOpenReader,
-      link: "/cce-mark",
+      link: "/view-cce-mark",
     },
     {
       text: "RESULTS",
