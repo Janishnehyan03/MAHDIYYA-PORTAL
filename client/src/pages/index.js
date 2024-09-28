@@ -25,7 +25,6 @@ import StudyCentreTeachers from "./superAdmin/study-centre/StudyCentreTeachers.j
 import StudyCentreView from "./superAdmin/study-centre/StudyCentreView.jsx";
 import AllMahdiyyaTeachers from "./superAdmin/teacher/AllMahdiyyaTeachers.jsx";
 
-import CceHome from "./admin/cce-mark/CceHome.jsx";
 import EditCceMark from "./admin/cce-mark/EditCceMark.jsx";
 import ViewCceMarks from "./admin/cce-mark/ViewCceMarks.jsx";
 import AllCourses from "./superAdmin/course/AllCourses.jsx";
@@ -72,7 +71,6 @@ export const Result = {
 };
 export const CceMark = {
   AddCceMark,
-  CceHome,
   ViewCceMarks,
   EditCceMark
 };

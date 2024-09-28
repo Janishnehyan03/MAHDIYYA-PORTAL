@@ -1,16 +1,16 @@
 import { faTools } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import Axios from "../../Axios";
+import { ClassContext } from "../../context/classContext";
 
 function EditSubject() {
   const navigate = useNavigate();
   const { id } = useParams();
-
-  const [classes, setClasses] = useState([]);
+  const { getClasses, classes } = useContext(ClassContext);
   const [classItem, setClass] = useState(null);
 
   const [formData, setFormData] = useState({});
@@ -46,14 +46,6 @@ function EditSubject() {
   };
 
   useEffect(() => {
-    const getClasses = async () => {
-      try {
-        let { data } = await Axios.get(`/class`);
-        setClasses(data);
-      } catch (error) {
-        console.log(error.response);
-      }
-    };
     getClasses();
   }, []);
   useEffect(() => {

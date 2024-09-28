@@ -16,6 +16,28 @@ router.post("/", protect, restrictTo("superAdmin"), async (req, res) => {
     res.status(400).json(error);
   }
 });
+router.patch("/:id", protect, restrictTo("superAdmin"), async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Find the hall ticket by ID and update it
+    const updatedHallTicket = await HallTicket.findByIdAndUpdate(id, req.body, {
+      new: true,
+      runValidators: true,
+    });
+
+    if (!updatedHallTicket) {
+      return res.status(404).json({ message: "Hall ticket not found" });
+    }
+
+    res.status(200).json(updatedHallTicket);
+  } catch (error) {
+    console.error("Error updating hall ticket:", error);
+    res
+      .status(400)
+      .json({ message: "Error updating hall ticket", error: error.message });
+  }
+});
 router.get("/", async (req, res) => {
   try {
     let data = await HallTicket.find()
@@ -110,7 +132,6 @@ router.get("/special-hallticket/:registerNumber", async (req, res) => {
       method: record?.method,
       semesters: semesters,
     };
-
 
     res.status(200).json(response);
   } catch (error) {

@@ -2,10 +2,13 @@ import React, { useState, useEffect, useCallback, useContext } from "react";
 import Axios from "../../../Axios";
 import { UserAuthContext } from "../../../context/userContext";
 import Loading from "../../../components/Loading";
+import { ExamContext } from "../../../context/examContext";
+import { ClassContext } from "../../../context/classContext";
 
 function ResultView() {
-  const [classes, setClasses] = useState([]);
-  const [exams, setExams] = useState([]);
+  const { exams, getExams } = useContext(ExamContext);
+  const { classes, getClasses } = useContext(ClassContext);
+
   const [branches, setBranches] = useState([]);
   const [loading, setLoading] = useState(false);
 
@@ -21,24 +24,6 @@ function ResultView() {
     try {
       let { data } = await Axios.get(`/study-centre?sort=studyCentreName`);
       setBranches(data.docs);
-    } catch (error) {
-      console.log(error.response);
-    }
-  };
-
-  const getClasses = async () => {
-    try {
-      let { data } = await Axios.get(`/class`);
-      setClasses(data);
-    } catch (error) {
-      console.log(error.response);
-    }
-  };
-
-  const getExams = async () => {
-    try {
-      let { data } = await Axios.get(`/exam`);
-      setExams(data);
     } catch (error) {
       console.log(error.response);
     }
@@ -155,7 +140,7 @@ function ResultView() {
                     className="border border-gray-300 text-center p-2"
                   >
                     <div className="flex flex-col text-xs">
-                     <p>FA</p>
+                      <p>FA</p>
                     </div>
                   </th>,
                   <th

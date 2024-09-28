@@ -1,31 +1,52 @@
-import React from "react";
-import { useEffect } from "react";
-import { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import Axios from "../../Axios";
-import ExamTable from "../../components/ExamTable";
 
-function CreateExam() {
-  const [examName, setExamName] = useState("");
-  const [academicYear, setAcademicYear] = useState("");
+function CreateEditExam() {
+  const [examData, setExamData] = useState({
+    examName: "",
+    academicYear: "",
+    maxCceMark: "",
+    maxPaperMark: "",
+    isActive: false,
+  });
   const [exams, setExams] = useState([]);
-  const [exam, setExam] = useState("");
-  const [selectedClass, setSelectedClass] = useState("");
-  const [classes, setClasses] = useState([]);
-  const [subjects, setSubjects] = useState([]);
-  const [inputs, setInputs] = useState([
-    { subjectId: null, time: null, date: null },
-  ]);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editingId, setEditingId] = useState(null);
 
-  const handleAddRow = () => {
-    setInputs([...inputs, { subjectId: "", time: "", date: "" }]);
+  const resetForm = () => {
+    setExamData({
+      examName: "",
+      academicYear: "",
+      maxCceMark: "",
+      maxPaperMark: "",
+      isActive: false,
+    });
+    setIsEditing(false);
+    setEditingId(null);
   };
-  const handleInputChange = (index, event) => {
-    const { name, value } = event.target;
-    const newInputs = [...inputs];
-    newInputs[index][name] = value;
-    setInputs(newInputs);
+
+  const deleteItem = async (itemId) => {
+    try {
+      if (window.confirm("Do you want to delete this item?")) {
+        let res = await Axios.delete(`/exam/${itemId}`);
+        if (res.status === 200) {
+          getExams();
+          toast.success("Deleted successfully", {
+            position: toast.POSITION.TOP_CENTER,
+            autoClose: 3000,
+          });
+        }
+      }
+    } catch (error) {
+      console.log(error.response);
+      toast.error("Error Occurred", {
+        position: toast.POSITION.TOP_CENTER,
+        autoClose: 3000,
+      });
+    }
   };
+
   const getExams = async () => {
     try {
       let { data } = await Axios.get("/exam");
@@ -34,32 +55,20 @@ function CreateExam() {
       console.log(error);
     }
   };
-  const getClasses = async () => {
-    try {
-      let { data } = await Axios.get("/class");
-      setClasses(data);
-    } catch (error) {
-      console.log(error);
-    }
-  };
-  const getSubjects = async () => {
-    try {
-      let { data } = await Axios.get("/subject?class=" + selectedClass);
-      setSubjects(data);
-    } catch (error) {
-      console.log(error);
-    }
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      let res = await Axios.post("/exam", { examName, academicYear });
+      let res;
+      if (isEditing) {
+        res = await Axios.patch(`/exam/${editingId}`, examData);
+      } else {
+        res = await Axios.post("/exam", examData);
+      }
       if (res.status === 200) {
         getExams();
-        setAcademicYear("");
-        setExamName("");
-        toast.success("Exam Created Successfully", {
+        resetForm();
+        toast.success(isEditing ? "Exam Updated Successfully" : "Exam Created Successfully", {
           position: toast.POSITION.TOP_CENTER,
           autoClose: 3000,
         });
@@ -72,190 +81,179 @@ function CreateExam() {
       });
     }
   };
-  const submitHallTicket = async (e) => {
-    e.preventDefault();
-    try {
-      let res = await Axios.post("/hall-ticket", {
-        subjects: inputs,
-        exam,
-        class: selectedClass,
-      });
-      if (res.status === 200) {
-        toast.success("Hall Ticket Created Successfully", {
-          position: toast.POSITION.TOP_CENTER,
-          autoClose: 3000,
-        });
-        window.location.reload();
-      }
-    } catch (error) {
-      console.log(error.response);
-      toast.error("Something went wrong", {
-        position: toast.POSITION.TOP_CENTER,
-        autoClose: 3000,
-      });
-    }
+
+  const handleEdit = (exam) => {
+    setExamData({
+      examName: exam.examName,
+      academicYear: exam.academicYear,
+      maxCceMark: exam.maxCceMark,
+      maxPaperMark: exam.maxPaperMark,
+      isActive: exam.isActive,
+    });
+    setIsEditing(true);
+    setEditingId(exam._id);
   };
+
+  const handleInputChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setExamData(prevData => ({
+      ...prevData,
+      [name]: type === 'checkbox' ? checked : value
+    }));
+  };
+
   useEffect(() => {
     getExams();
-    getClasses();
   }, []);
-  useEffect(() => {
-    selectedClass && getSubjects();
-  }, [selectedClass]);
+
   return (
     <>
-      <ExamTable getExams={getExams} data={exams} />
-      <form className="mx-auto mt-4 w-1/2">
-        <h1 className="text-3xl font-bold">Create Exam Time Table </h1>
-        <div className="lg:col-span-1">
-          <div className="px-4 sm:px-0">
-            <label className="block  text-sm font-bold mb-2" htmlFor="username">
-              Exam
-            </label>
+      {/* Create/Edit Exam Form */}
+      <form className="mx-auto my-4 w-1/2 mt-[8rem]" onSubmit={handleSubmit}>
+        <h1 className="text-3xl font-bold">{isEditing ? "Edit Exam" : "Create Exam"}</h1>
 
-            <select
-              className="bg-gray-50 border border-gray-300 text-sky-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
-              name="gender"
-              id=""
-              onChange={(e) => setExam(e.target.value)}
-            >
-              <option hidden>Select Exam </option>
-              {exams.map((exam, key) => (
-                <option value={exam._id}>{exam.examName} </option>
-              ))}
-            </select>
-          </div>
-        </div>
-        <div className="lg:col-span-1">
-          <div className="px-4 sm:px-0">
-            <label className="block  text-sm font-bold mb-2" htmlFor="username">
-              Class
-            </label>
-
-            <select
-              className="bg-gray-50 border border-gray-300 text-sky-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
-              name="class"
-              id=""
-              onChange={(e) => setSelectedClass(e.target.value)}
-            >
-              <option hidden>Select Class </option>
-              {classes.map((classItem, key) => (
-                <option value={classItem._id}>{classItem.className} </option>
-              ))}
-            </select>
-          </div>
-        </div>
-        <div className="lg:col-span-1">
-          <div className="px-4 sm:px-0">
-            <label className="block  text-sm font-bold mb-2" htmlFor="username">
-              Subjects
-            </label>
-            {inputs.map((inputItem, key) => (
-              <div className="flex items-center">
-                <select
-                  className="bg-gray-50 border border-gray-300 text-sky-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
-                  id="username"
-                  type="text"
-                  required
-                  name="subjectId"
-                  onChange={(event) => handleInputChange(key, event)}
-                >
-                  <option hidden>Select Subjects </option>
-
-                  {subjects.map((subject, key) => (
-                    <option key={key} value={subject._id}>
-                      {subject.subjectCode} - {subject.subjectName}
-                    </option>
-                  ))}
-                </select>
-                <input
-                  className="focus:ring-indigo-500 mx-2 focus:border-indigo-500 shadow appearance-none border rounded w-full py-2 px-3  leading-tight focus:outline-none focus:shadow-outline uppercase"
-                  id="username"
-                  type="text"
-                  required
-                  placeholder="hh:mm"
-                  name="time"
-                  onChange={(event) => handleInputChange(key, event)}
-                />
-                <input
-                  className="focus:ring-indigo-500 focus:border-indigo-500 shadow appearance-none border rounded w-full py-2 px-3  leading-tight focus:outline-none focus:shadow-outline uppercase"
-                  id="username"
-                  type="text"
-                  required
-                  placeholder="DD-MM-YYYY"
-                  name="date"
-                  onChange={(event) => handleInputChange(key, event)}
-                />
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="flex justify-between items-center">
-          <button
-            onClick={(e) => handleAddRow(e)}
-            className="text-white mt-3 bg-teal-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-          >
-            add subject
-          </button>
-          <button
-            type="submit"
-            onClick={(e) => submitHallTicket(e)}
-            className="text-white mt-3 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-          >
-            Submit
-          </button>
-        </div>
-      </form>
-      <form className="mx-auto my-4 w-1/2 mt-[8rem]">
-        <h1 className="text-3xl font-bold">Create Exam </h1>
+        {/* Academic Year */}
         <div className="relative z-0 mb-6 w-full group">
           <input
             type="text"
-            name="floating_password"
-            id="floating_password"
+            name="academicYear"
             className="block py-2.5 px-0 w-full text-sm text-blue-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer"
             placeholder=" "
             required
-            onChange={(e) => setAcademicYear(e.target.value)}
-            value={academicYear}
+            onChange={handleInputChange}
+            value={examData.academicYear}
           />
-          <label
-            htmlFor="floating_password"
-            className="peer-focus:font-medium absolute text-sm  text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6"
-          >
-            Academic Year{" "}
+          <label className="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
+            Academic Year
           </label>
         </div>
+
+        {/* Exam Name */}
         <div className="relative z-0 mb-6 w-full group">
           <input
             type="text"
-            name="repeat_password"
-            id="floating_repeat_password"
+            name="examName"
             className="block py-2.5 px-0 w-full text-sm text-blue-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer"
             placeholder=" "
             required
-            onChange={(e) => setExamName(e.target.value)}
-            value={examName}
+            onChange={handleInputChange}
+            value={examData.examName}
           />
-          <label
-            htmlFor="floating_repeat_password"
-            className="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6"
-          >
+          <label className="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
             Exam Name
           </label>
         </div>
 
+        {/* Max CCE Mark */}
+        <div className="relative z-0 mb-6 w-full group">
+          <input
+            type="number"
+            name="maxCceMark"
+            className="block py-2.5 px-0 w-full text-sm text-blue-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer"
+            placeholder=" "
+            required
+            onChange={handleInputChange}
+            value={examData.maxCceMark}
+          />
+          <label className="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
+            Max CCE Mark
+          </label>
+        </div>
+
+        {/* Max Paper Mark */}
+        <div className="relative z-0 mb-6 w-full group">
+          <input
+            type="number"
+            name="maxPaperMark"
+            className="block py-2.5 px-0 w-full text-sm text-blue-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer"
+            placeholder=" "
+            required
+            onChange={handleInputChange}
+            value={examData.maxPaperMark}
+          />
+          <label className="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600 peer-focus:dark:text-blue-500 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
+            Max Paper Mark
+          </label>
+        </div>
+
+        {/* Is Active */}
+        <div className="flex items-center mb-4">
+          <input
+            type="checkbox"
+            name="isActive"
+            className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+            checked={examData.isActive}
+            onChange={handleInputChange}
+          />
+          <label className="ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">Is Active</label>
+        </div>
+
+        {/* Submit Button */}
         <button
           type="submit"
-          onClick={(e) => handleSubmit(e)}
-          className="text-white bg-teal-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+          className="text-white bg-teal-700 hover:bg-blue-800 focus:ring-4 focus:outline-none font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center mr-2"
         >
-          Submit
+          {isEditing ? "Update" : "Submit"}
         </button>
+
+        {/* Cancel Button (only show when editing) */}
+        {isEditing && (
+          <button
+            type="button"
+            onClick={resetForm}
+            className="text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:outline-none font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center"
+          >
+            Cancel
+          </button>
+        )}
       </form>
+
+      {/* Exam Time Tables */}
+      <h1 className="font-bold mt-5 text-center text-indigo-600">
+        Exam Time Tables
+      </h1>
+      <table className="w-full text-sm text-left text-gray-500">
+        <thead className="text-xs text-gray-700 bg-gray-50">
+          <tr>
+            <th className="py-3 px-6">Exam Name</th>
+            <th className="py-3 px-6">Academic Year</th>
+            <th className="py-3 px-6">Max CCE Mark</th>
+            <th className="py-3 px-6">Max Paper Mark</th>
+            <th className="py-3 px-6">Is Active</th>
+            <th className="py-3 px-6">Edit</th>
+            <th className="py-3 px-6">Delete</th>
+          </tr>
+        </thead>
+        <tbody>
+          {exams.map((item) => (
+            <tr key={item._id} className="bg-white">
+              <td className="py-4 px-6">{item?.examName}</td>
+              <td className="py-4 px-6">{item.academicYear}</td>
+              <td className="py-4 px-6">{item.maxCceMark}</td>
+              <td className="py-4 px-6">{item.maxPaperMark}</td>
+              <td className="py-4 px-6">{item.isActive ? "Yes" : "No"}</td>
+              <td className="py-4 px-6">
+                <button 
+                  onClick={() => handleEdit(item)}
+                  className="font-medium text-blue-600 hover:underline"
+                >
+                  Edit
+                </button>
+              </td>
+              <td className="py-4 px-6">
+                <button
+                  onClick={() => deleteItem(item._id)}
+                  className="font-medium text-red-600 hover:underline"
+                >
+                  Delete
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </>
   );
 }
 
-export default CreateExam;
+export default CreateEditExam;

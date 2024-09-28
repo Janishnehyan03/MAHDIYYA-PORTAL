@@ -141,13 +141,13 @@ function Downloads() {
           {
             <>
               {loading ? (
-                <button className="bg-indigo-700 w-full text-white font-bold px-4 py-2 mb-3 hover:bg-indigo-400 mt-2">
+                <button className="bg-indigo-900 w-full text-white font-bold px-4 py-2 mb-3 hover:bg-indigo-900 mt-2">
                   Uploading...
                 </button>
               ) : (
                 <button
                   onClick={fileUpload}
-                  className="bg-indigo-700 w-full text-white font-bold px-4 py-2 mb-3 hover:bg-indigo-400 mt-2"
+                  className="bg-indigo-900 w-full text-white font-bold px-4 py-2 mb-3 hover:bg-indigo-900 mt-2"
                 >
                   Upload
                 </button>
@@ -159,17 +159,19 @@ function Downloads() {
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
         {downloads.map((download, key) => (
           <div
-            className="bg-gray-900 shadow-xl rounded-lg p-6 text-gray-800 "
-            key={key}
+            className="bg-white shadow-md rounded-lg p-6 text-gray-800 transition-transform transform hover:scale-105"
+            key={download._id}
           >
-            <div className="flex  items-center justify-between">
-              <p className={`w-fit mb-3 text-sm   uppercase`}>
+            <div className="flex items-center justify-between mb-4">
+              <p
+                className={`text-sm font-semibold uppercase tracking-wide text-indigo-900`}
+              >
                 {download.type}
               </p>
               {authData?.role === "superAdmin" && (
                 <button
                   onClick={(e) => deleteFile(e, download._id)}
-                  className=" text-red-400 hover:text-red-600 hover:underline px-4 py-2 rounded-full transition duration-300 ease-in-out"
+                  className="bg-red-800 p-2 px-3 rounded-full hover:bg-red-700 text-white transition duration-300 ease-in-out"
                 >
                   <FontAwesomeIcon icon={faTrash} />
                 </button>
@@ -178,19 +180,26 @@ function Downloads() {
 
             <a
               target="_blank"
+              rel="noopener noreferrer"
               href={`${download.fileName}`}
-              className="text-lg mb-4 text-gray-300 hover:text-gray-400"
+              className="text-lg mb-4 font-bold text-gray-800 hover:text-indigo-900 transition duration-200"
             >
               {download.title}
             </a>
 
-            <a
-              target="_blank"
-              className="bg-gray-700 px-3 py-1 text-gray-300 hover:text-white hover:bg-gray-800"
-              href={`${download.fileName}`}
-            >
-              Download
-            </a>
+            <div className="flex justify-between items-center">
+              <a
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-indigo-900 px-4 py-2 text-white rounded-lg hover:bg-indigo-600 transition duration-200"
+                href={`${download.fileName}`}
+              >
+                Download
+              </a>
+              <p className="text-sm text-gray-500">
+                {/* Optional additional info */}
+              </p>
+            </div>
           </div>
         ))}
       </div>

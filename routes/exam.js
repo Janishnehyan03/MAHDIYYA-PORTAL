@@ -13,8 +13,9 @@ router.post("/", async (req, res, next) => {
 });
 
 router.get("/", async (req, res, next) => {
+  let query = req.query;
   try {
-    let data = await Exam.find();
+    let data = await Exam.find(query);
     res.status(200).json(data);
   } catch (error) {
     next(error);

@@ -26,7 +26,7 @@ const StudentResultPage = () => {
   useEffect(() => {
     const fetchExams = async () => {
       try {
-        const response = await Axios.get(`/exam`);
+        const response = await Axios.get(`/exam?isActive=true`);
         setExams(response.data);
       } catch (error) {
         console.error("Error fetching student results:", error);

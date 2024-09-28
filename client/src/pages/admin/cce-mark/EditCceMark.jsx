@@ -2,13 +2,16 @@ import React, { useCallback, useContext, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import Axios from "../../../Axios";
 import { UserAuthContext } from "../../../context/userContext";
+import { ExamContext } from "../../../context/examContext";
+import { ClassContext } from "../../../context/classContext";
 
 function EditCceMark() {
-  const [classes, setClasses] = useState([]);
+  const { exams, getExams } = useContext(ExamContext);
+  const { classes, getClasses } = useContext(ClassContext);
   const [branches, setBranches] = useState([]);
-  const [exam, setExam] = useState(null);
+
   const [subject, setSubject] = useState(null);
-  const [exams, setExams] = useState([]);
+  const [exam, setExam] = useState(null);
   const [selectedClass, setSelectedClass] = useState(null);
   const [selectedBranch, setSelectedBranch] = useState(null);
   const [results, setResults] = useState([]);
@@ -16,30 +19,12 @@ function EditCceMark() {
   const [updatedData, setUpdatedData] = useState([]);
   const { authData } = useContext(UserAuthContext);
 
-  const getAllClasses = async () => {
-    try {
-      const response = await Axios.get("/class");
-      setClasses(response.data);
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
   const getAllBranches = async () => {
     try {
       const response = await Axios.get(
         `/study-centre?sort=studyCentreName&_id=${authData.branch._id}`
       );
       setBranches(response.data.docs);
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  const getAllExams = async () => {
-    try {
-      const response = await Axios.get("/exam");
-      setExams(response.data);
     } catch (error) {
       console.error(error);
     }
@@ -98,8 +83,8 @@ function EditCceMark() {
   };
 
   useEffect(() => {
-    getAllClasses();
-    getAllExams();
+    getClasses();
+    getExams(true);
     getAllSubjects();
     getAllBranches();
   }, []);

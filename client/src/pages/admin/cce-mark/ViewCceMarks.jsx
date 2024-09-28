@@ -2,10 +2,12 @@ import React, { useState, useEffect, useCallback, useContext } from "react";
 import Axios from "../../../Axios";
 import { UserAuthContext } from "../../../context/userContext";
 import Loading from "../../../components/Loading";
+import { ExamContext } from "../../../context/examContext";
+import { ClassContext } from "../../../context/classContext";
 
 function ResultView() {
-  const [classes, setClasses] = useState([]);
-  const [exams, setExams] = useState([]);
+  const { exams, getExams } = useContext(ExamContext);
+  const { classes, getClasses } = useContext(ClassContext);
   const [branches, setBranches] = useState([]);
   const [loading, setLoading] = useState(false);
 
@@ -21,24 +23,6 @@ function ResultView() {
     try {
       let { data } = await Axios.get(`/study-centre?sort=studyCentreName`);
       setBranches(data.docs);
-    } catch (error) {
-      console.log(error.response);
-    }
-  };
-
-  const getClasses = async () => {
-    try {
-      let { data } = await Axios.get(`/class`);
-      setClasses(data);
-    } catch (error) {
-      console.log(error.response);
-    }
-  };
-
-  const getExams = async () => {
-    try {
-      let { data } = await Axios.get(`/exam`);
-      setExams(data);
     } catch (error) {
       console.log(error.response);
     }
@@ -64,7 +48,7 @@ function ResultView() {
   useEffect(() => {
     getClasses();
     getBranches();
-    getExams();
+    getExams(true);
   }, []);
 
   useEffect(() => {
@@ -168,10 +152,9 @@ function ResultView() {
 }
 
 function ResultTableRow({ result, index, subjectNames }) {
-  
   return (
     <tr key={index} className="border-b text-left border-neutral-200">
-      <td className="text-sm">{index + 1 }</td>
+      <td className="text-sm">{index + 1}</td>
       <td className="text-sm">{result.student?.registerNo || ""}</td>
       <td className="text-sm">{result.student?.studentName}</td>
       {Array.from(subjectNames).map((subjectName) => {

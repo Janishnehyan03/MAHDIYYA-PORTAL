@@ -1,20 +1,22 @@
 import {
   faBook,
+  faBookOpen,
   faBookOpenReader,
+  faChalkboardTeacher,
   faChalkboardUser,
   faCheckDouble,
   faCheckToSlot,
   faDownload,
+  faFileArchive,
   faGraduationCap,
   faMarker,
+  faPenAlt,
   faSchool,
   faToolbox,
   faTools,
   faUpload,
   faUser,
-  faUserGraduate,
-  faChalkboardTeacher,
-  faPenAlt,
+  faUserGraduate
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React, { useContext, useEffect, useState } from "react";
@@ -95,14 +97,19 @@ function Dashboard() {
       link: "/create-exam",
     },
     {
-      text: "CCE MARKS",
-      icon: faBookOpenReader,
+      text: "FA MARKS",
+      icon: faBookOpen,
       link: "/view-cce-mark",
     },
     {
       text: "RESULTS",
       icon: faMarker,
       link: "/result-section",
+    },
+    {
+      text: "TIMETABLES",
+      icon: faFileArchive,
+      link: "/timetables",
     },
     {
       text: "DOWNLOADS",

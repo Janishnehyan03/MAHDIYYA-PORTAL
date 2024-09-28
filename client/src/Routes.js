@@ -12,6 +12,7 @@ import FileUpload from "./pages/admin/FileUpload";
 import MyMessages from "./pages/admin/MyMessages";
 import MyUploads from "./pages/admin/MyUploads";
 import Admissions from "./pages/admin/admission/Admissions";
+import MarkEntry from "./pages/admin/results/MarkEntry";
 import StudyCentreProfile from "./pages/admin/study-centre/StudyCentreProfile";
 import AdmissionRequests from "./pages/superAdmin/AdmissionRequests";
 import AllSubjects from "./pages/superAdmin/AllSubjects";
@@ -20,6 +21,7 @@ import CreateExam from "./pages/superAdmin/CreateExam";
 import CreateMessage from "./pages/superAdmin/CreateMessage";
 import EditSubject from "./pages/superAdmin/EditSubject";
 import RecycleBin from "./pages/superAdmin/RecycleBin";
+import TimeTables from "./pages/superAdmin/Timetables";
 import UploadedFiles from "./pages/superAdmin/UploadedFiles";
 import Configurations from "./pages/superAdmin/configurations/Configurations";
 import CourseHome from "./pages/superAdmin/course/CourseHome";
@@ -140,11 +142,6 @@ export const SuperAdminRoutes = [
   },
 
   {
-    route: "/add-result",
-    component: <Result.AddResult />,
-    role: "superAdmin",
-  },
-  {
     route: "/result-section/",
     component: <Result.ResultHome />,
     role: "superAdmin",
@@ -158,6 +155,11 @@ export const SuperAdminRoutes = [
   {
     route: "/configurations",
     component: <Configurations />,
+    role: "superAdmin",
+  },
+  {
+    route: "/timetables",
+    component: <TimeTables />,
     role: "superAdmin",
   },
 ];
@@ -228,7 +230,7 @@ export const AdminRoutes = [
   },
   {
     route: "/mark-entry/",
-    component: <CceMark.CceHome />,
+    component: <MarkEntry />,
   },
   {
     route: "/view-cce-mark/",
@@ -238,4 +240,5 @@ export const AdminRoutes = [
     route: "/add-cce-mark/",
     component: <CceMark.AddCceMark />,
   },
+  { route: "/add-result", component: <Result.AddResult /> },
 ];

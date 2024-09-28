@@ -24,7 +24,7 @@ function ResultHome() {
   useEffect(() => {
     const getExams = async () => {
       try {
-        let { data } = await Axios.get(`/exam`);
+        let { data } = await Axios.get(`/exam?isActive=true`);
         setExams(data);
       } catch (error) {
         console.log(error.response);
@@ -75,7 +75,7 @@ function ResultHome() {
               </div>
             </div>
             <h1 className="text-xl text-center font-bold group-hover:text-gray-400 text-white mt-4">
-              Add Result
+              Add  Result
             </h1>
           </div>
         </Link>

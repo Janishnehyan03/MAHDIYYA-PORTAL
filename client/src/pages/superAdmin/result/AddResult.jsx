@@ -1,22 +1,30 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useContext, useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
 import Axios from "../../../Axios";
+import { ExamContext } from "../../../context/examContext";
+import { ClassContext } from "../../../context/classContext";
 
 const AddResult = () => {
   const { pathname } = useLocation();
+  const { exams, getExams } = useContext(ExamContext);
+  const { classes, getClasses } = useContext(ClassContext);
   const [exam, setExam] = useState(null);
   const [subject, setSubject] = useState(null);
   const [subjects, setSubjects] = useState([]);
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [classes, setClasses] = useState([]);
+
   const [branches, setBranches] = useState([]);
   const [selectedClass, setSelectedClass] = useState(null);
   const [selectedBranch, setSelectedBranch] = useState(null);
-  const [exams, setExams] = useState([]);
+
   const [studentMarks, setStudentMarks] = useState({});
   const [existingResults, setExistingResults] = useState([]); // To hold existing results
+  const selectedExam = exams.find((examObj) => {
+    return examObj._id.toString() === exam; // Compare as string
+  });
+  let maxMark = selectedExam?.maxPaperMark;
 
   const handleMarkChange = (studentId, newMarks) => {
     setStudentMarks((prevMarks) => ({
@@ -124,28 +132,10 @@ const AddResult = () => {
     }
   };
 
-  const getAllClasses = async () => {
-    try {
-      const response = await Axios.get("/class");
-      setClasses(response.data);
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
   const getAllBranches = async () => {
     try {
       const response = await Axios.get("/study-centre?sort=studyCentreName");
       setBranches(response.data.docs);
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  const getAllExams = async () => {
-    try {
-      const response = await Axios.get("/exam");
-      setExams(response.data);
     } catch (error) {
       console.error(error);
     }
@@ -179,8 +169,8 @@ const AddResult = () => {
   }, [selectedClass, selectedBranch, exam, subject, getStudents]);
 
   useEffect(() => {
-    getAllClasses();
-    getAllExams();
+    getClasses();
+    getExams(true);
     getAllSubjects();
     getAllBranches();
   }, [pathname]);
@@ -188,7 +178,7 @@ const AddResult = () => {
   return (
     <div className="mt-8">
       <div className="max-w-4xl space-x-2 mx-auto">
-        <h2 className="text-2xl font-bold mb-4 text-center">Add Result</h2>
+        <h2 className="text-2xl font-bold mb-4 text-center">Add SA Mark</h2>
 
         {/* Study Centre Selection */}
         <div className="flex">
@@ -286,6 +276,7 @@ const AddResult = () => {
 
         {/* Student Marks Table */}
         <div>
+          <p className="text-red-700 my-3">Maximum Marks {maxMark}</p>
           <table className="min-w-full border-collapse border border-gray-300">
             <thead>
               <tr>
@@ -312,6 +303,7 @@ const AddResult = () => {
                       type="number"
                       className="w-20"
                       value={studentMarks[student._id] || "0"}
+                      max={maxMark}
                       onChange={(e) =>
                         handleMarkChange(student._id, e.target.value)
                       }

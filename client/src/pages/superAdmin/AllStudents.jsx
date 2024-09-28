@@ -227,16 +227,16 @@ function AllStudents() {
                   <p className="w-40">{student.phone}</p>
                 </td>
                 <td className="text-sm text-center text-gray-600 p-2">
-                  <p className="w-40">{student.dateOfBirth}</p>
+                  <p className="w-40">{student.dobDate}-{student.dobMonth}-{student.dobYear}</p>
                 </td>
                 <td className="text-sm text-center text-gray-600 p-2">
                   <p className="w-40">{student.class.className}</p>
                 </td>
                 <td className="text-sm text-center text-gray-600 p-2">
-                  <p className="w-60">{student.branch.studyCentreName}</p>
+                  <p className="w-60">{student?.branch?.studyCentreName}</p>
                 </td>
                 <td className="text-sm text-center text-gray-600 p-2">
-                  {student.branch.studyCentreCode}
+                  {student?.branch?.studyCentreCode}
                 </td>
               </tr>
             ))}
