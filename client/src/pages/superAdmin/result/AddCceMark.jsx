@@ -44,7 +44,7 @@ const AddCceMark = () => {
         const resultsData = students.map((student) => {
           // Find the result for the current student from fetched results
           const existingResult = results.find(
-            (result) => result.student._id === student._id
+            (result) => result?.student?._id === student._id
           );
 
           // Create an entry for this student
@@ -122,7 +122,7 @@ const AddCceMark = () => {
 
         const marks = {};
         results.forEach((result) => {
-          marks[result.student._id] = result.cceMark; // Updated to access student ID correctly
+          marks[result.student?._id] = result.cceMark; // Updated to access student ID correctly
         });
 
         setStudentMarks(marks);
@@ -316,22 +316,27 @@ const AddCceMark = () => {
                   </td>
                   <td>
                     <input
-                      type="number"
+                      type="text"
                       className="w-full"
-                      value={studentMarks[student._id] || ""} // Ensure no extra spaces
+                      value={studentMarks[student._id] ?? ""} // Use ?? to handle null or undefined, but keep 0
                       onChange={(e) => {
-                        const value = parseInt(e.target.value, 10); // Parse the entered value as an integer
-                        if (value <= maxMark) {
-                          // Check if value is within the limit
-                          handleMarkChange(student._id, value); // Only update if value is valid
-                        } else {
-                          handleMarkChange(student._id, maxMark); // Optionally set to max if over limit
+                        const value =
+                          e.target.value === ""
+                            ? ""
+                            : parseFloat(e.target.value); // Handle empty string
+
+                        if (isNaN(value) || value <= maxMark) {
+                          // Ensure the value is not greater than maxMark
+                          handleMarkChange(
+                            student._id,
+                            isNaN(value) ? "" : value
+                          ); // Only update if the value is valid or within limit
                         }
                       }}
                       max={maxMark}
                     />
                   </td>
-              </tr>
+                </tr>
               ))}
             </tbody>
           </table>
