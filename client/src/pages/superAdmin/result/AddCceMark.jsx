@@ -32,8 +32,7 @@ const AddCceMark = () => {
   };
 
   const handleSubmit = async (e) => {
-    if(window.confirm("Are you sure to submit this result?")){
-
+    if (window.confirm("Are you sure to submit this result?")) {
       e.preventDefault();
       setLoading(true);
       try {
@@ -47,7 +46,7 @@ const AddCceMark = () => {
           const existingResult = results.find(
             (result) => result.student._id === student._id
           );
-  
+
           // Create an entry for this student
           return {
             student: student._id,
@@ -58,10 +57,10 @@ const AddCceMark = () => {
             _id: existingResult ? existingResult._id : null, // Use fetched result._id if it exists
           };
         });
-  
+
         // Determine whether to PATCH or POST based on results length
         const requests = results.length > 0 ? [] : []; // Initialize an empty array for requests
-  
+
         resultsData.forEach((result) => {
           if (result.cceMark !== undefined && result.cceMark !== "0") {
             if (result._id) {
@@ -85,15 +84,15 @@ const AddCceMark = () => {
             }
           }
         });
-  
+
         // Wait for all requests to complete
         const responses = await Promise.all(requests);
-  
+
         // Log responses from the server (optional)
         responses.forEach((response) => {
           console.log("Response from server:", response.data);
         });
-  
+
         // Notify user of success
         toast.success("Marks submitted successfully", {
           position: toast.POSITION.TOP_CENTER,
@@ -319,14 +318,20 @@ const AddCceMark = () => {
                     <input
                       type="number"
                       className="w-full"
-                      value={studentMarks[student._id] || "0"} // Setting initial value from fetched results
-                      onChange={(e) =>
-                        handleMarkChange(student._id, e.target.value)
-                      }
+                      value={studentMarks[student._id] || ""} // Ensure no extra spaces
+                      onChange={(e) => {
+                        const value = parseInt(e.target.value, 10); // Parse the entered value as an integer
+                        if (value <= maxMark) {
+                          // Check if value is within the limit
+                          handleMarkChange(student._id, value); // Only update if value is valid
+                        } else {
+                          handleMarkChange(student._id, maxMark); // Optionally set to max if over limit
+                        }
+                      }}
                       max={maxMark}
                     />
                   </td>
-                </tr>
+              </tr>
               ))}
             </tbody>
           </table>

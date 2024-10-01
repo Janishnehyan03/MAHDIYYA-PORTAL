@@ -37,8 +37,6 @@ function ResultView() {
           authData.role === "superAdmin" ? studyCentreId : authData.branch._id
         }`
       );
-      console.log(data);
-
       setResults(data);
       setLoading(false);
     } catch (error) {
