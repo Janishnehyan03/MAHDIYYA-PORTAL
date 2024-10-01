@@ -74,8 +74,8 @@ exports.getMyStudents = async (req, res, next) => {
       {
         $match: {
           branch: req.user.branch,
-          verified: true,
-          deleted: false,
+          verified: { $ne: true },
+          deleted: { $ne: false },
           class: mongoose.Types.ObjectId(req.params.classId),
         },
       },
