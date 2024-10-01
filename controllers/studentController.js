@@ -39,7 +39,6 @@ exports.getAllStudents = async (req, res, next) => {
   }
 };
 
-
 exports.getAdmissions = globalFunctions.getAll(Student, "branch", "class");
 exports.registerStudent = async (req, res, next) => {
   try {
@@ -104,8 +103,8 @@ exports.getBranchStudents = async (req, res, next) => {
         $match: {
           branch: mongoose.Types.ObjectId(req.params.studyCentreId),
           class: mongoose.Types.ObjectId(req.params.classId),
-          verified: true,
-          deleted: false,
+          verified: { $ne: false },
+          deleted: { $ne: true },
         },
       },
     ]);
