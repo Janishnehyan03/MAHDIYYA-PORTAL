@@ -7,7 +7,7 @@ import { toast } from "react-toastify";
 function HallTicket() {
   const [registerNo, setRegisterNo] = useState("");
   const [data, setData] = useState(null);
-  // console.log(data.data);
+  console.log(data);
   const [error, setError] = useState(null);
 
   const hallTicketRef = useRef();
@@ -104,7 +104,7 @@ function HallTicket() {
                   </div>
                 </div>
                 <h5 className="text-center border-b p-2 border-gray-800">
-                  CMS, MAHDIYYA EVEN SEMESTER EXAMINATION, FEB 2024
+                  {data?.exam?.examName}
                 </h5>
                 <div className="border-t mt-1 border-gray-800 p-3">
                   <h5 className="font-semibold text-center">HALL TICKET</h5>
@@ -129,9 +129,11 @@ function HallTicket() {
                             {data?.data?.studyCentreName}
                           </span>
                         </p>
-
-                        <p className="text-black font-semibold text-center">
-                          -{data?.data?.className}-
+                        <p className="text-[13px]">
+                          Name of the class: {' '}
+                          <span className="text-black font-semibold font-sans text-[11px]">
+                            {data?.data?.className}
+                          </span>
                         </p>
                       </div>
                     )}

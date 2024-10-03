@@ -67,9 +67,7 @@ router.post("/download", async (req, res) => {
       return res.status(400).json({ message: "Invalid Register Number" });
     }
 
-    const branch = await Branch.findOne({
-      studyCentreCode: student.studyCentreCode,
-    });
+    const branch = await Branch.findById(student.branch);
 
     const classData = await Class.findOne({ _id: student.class });
 
@@ -77,12 +75,13 @@ router.post("/download", async (req, res) => {
       .populate("exam")
       .populate("subjects.subjectId");
 
+
     const studentsWithBranchAndClassName = {
       ...student._doc,
       studyCentreName: branch ? branch.studyCentreName : null,
       className: classData ? classData.className : null,
     };
-    console.log(studentsWithBranchAndClassName);
+
     return res
       .status(200)
       .json({ ...hallTicket._doc, data: studentsWithBranchAndClassName });
