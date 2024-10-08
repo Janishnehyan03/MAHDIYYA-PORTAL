@@ -74,8 +74,8 @@ exports.getMyStudents = async (req, res, next) => {
       {
         $match: {
           branch: req.user.branch,
-          verified: { $ne: true },
-          deleted: { $ne: false },
+          verified: { $ne: false },
+          deleted: { $ne: true },
           class: mongoose.Types.ObjectId(req.params.classId),
         },
       },
@@ -91,6 +91,7 @@ exports.getMyStudents = async (req, res, next) => {
         $sort: { createdAt: 1 },
       },
     ]);
+ 
     res.status(200).json(data);
   } catch (error) {
     next(error);
