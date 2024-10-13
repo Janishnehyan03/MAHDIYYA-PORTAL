@@ -21,6 +21,9 @@ const configurationSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    lastRegisterNo: {
+      type: String,
+    },
   },
   {
     timestamps: true,
