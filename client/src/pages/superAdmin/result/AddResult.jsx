@@ -4,9 +4,11 @@ import { toast } from "react-toastify";
 import Axios from "../../../Axios";
 import { ExamContext } from "../../../context/examContext";
 import { ClassContext } from "../../../context/classContext";
+import { UserAuthContext } from "../../../context/userContext";
 
 const AddResult = () => {
   const { pathname } = useLocation();
+  const {authData}=useContext(UserAuthContext)
   const { exams, getExams } = useContext(ExamContext);
   const { classes, getClasses } = useContext(ClassContext);
   const [exam, setExam] = useState(null);
@@ -134,7 +136,7 @@ const AddResult = () => {
 
   const getAllBranches = async () => {
     try {
-      const response = await Axios.get("/study-centre?sort=studyCentreName");
+      const response = await Axios.get(`/study-centre?sort=studyCentreName&_id=${authData.branch._id}`);
       setBranches(response.data.docs);
     } catch (error) {
       console.error(error);
