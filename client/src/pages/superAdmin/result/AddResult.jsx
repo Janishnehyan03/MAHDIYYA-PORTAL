@@ -8,7 +8,7 @@ import { UserAuthContext } from "../../../context/userContext";
 
 const AddResult = () => {
   const { pathname } = useLocation();
-  const {authData}=useContext(UserAuthContext)
+  const { authData } = useContext(UserAuthContext);
   const { exams, getExams } = useContext(ExamContext);
   const { classes, getClasses } = useContext(ClassContext);
   const [exam, setExam] = useState(null);
@@ -40,17 +40,15 @@ const AddResult = () => {
       e.preventDefault();
       setLoading(true);
       try {
-        // Fetch existing results based on the selected class, subject, and exam
+        // Construct the results array with necessary data
         const response = await Axios.get(
           `/result/fetch?classId=${selectedClass}&subjectId=${subject}&examId=${exam}`
         );
         const results = response.data;
-
-        // Construct the resultsData array
         const resultsData = students.map((student) => {
-          // Find the existing result for the current student
+          // Find the result for the current student from fetched results
           const existingResult = results.find(
-            (result) => result.student._id === student._id
+            (result) => result?.student?._id === student._id
           );
 
           // Create an entry for this student
@@ -64,22 +62,17 @@ const AddResult = () => {
           };
         });
 
-        // Initialize an array for requests
-        const requests = [];
+        // Determine whether to PATCH or POST based on results length
+        const requests = results.length > 0 ? [] : []; // Initialize an empty array for requests
 
         resultsData.forEach((result) => {
-          if (
-            result.marksObtained !== undefined &&
-            result.marksObtained !== "0"
-          ) {
+          if (result.marksObtained !== undefined && result.marksObtained !== "0") {
             if (result._id) {
               // Prepare PATCH request if result already exists
               const patchData = [
-                {
-                  _id: result._id,
-                  marksObtained: parseInt(result.marksObtained),
-                },
+                { _id: result._id, marksObtained: parseInt(result.marksObtained) },
               ];
+              console.log("Sending PATCH request with data:", patchData);
               requests.push(Axios.patch("/result", patchData)); // Send as an array
             } else {
               // Prepare POST request if it's a new entry
@@ -90,6 +83,7 @@ const AddResult = () => {
                 class: result.class,
                 subject: result.subject,
               };
+              console.log("Sending POST request with data:", postData);
               requests.push(Axios.post("/result", postData));
             }
           }
@@ -98,6 +92,11 @@ const AddResult = () => {
         // Wait for all requests to complete
         const responses = await Promise.all(requests);
 
+        // Log responses from the server (optional)
+        responses.forEach((response) => {
+          console.log("Response from server:", response.data);
+        });
+
         // Notify user of success
         toast.success("Marks submitted successfully", {
           position: toast.POSITION.TOP_CENTER,
@@ -105,6 +104,7 @@ const AddResult = () => {
         });
       } catch (error) {
         // Handle any errors that occur during submission
+        console.error("Error submitting marks:", error);
         toast.error(error.response?.data?.error || "An error occurred", {
           position: toast.POSITION.TOP_CENTER,
           autoClose: 3000,
@@ -123,8 +123,11 @@ const AddResult = () => {
           `/result/fetch?examId=${exam}&subjectId=${subject}&classId=${selectedClass}`
         );
         setExistingResults(response.data);
+        console.log("====================================");
+        console.log(response.data);
+        console.log("====================================");
         const marks = response.data.reduce((acc, result) => {
-          acc[result.student._id] = result.marksObtained; // Adjusted for object structure
+          acc[result?.student?._id] = result?.marksObtained; // Adjusted for object structure
           return acc;
         }, {});
         setStudentMarks(marks);
@@ -136,7 +139,9 @@ const AddResult = () => {
 
   const getAllBranches = async () => {
     try {
-      const response = await Axios.get(`/study-centre?sort=studyCentreName&_id=${authData.branch._id}`);
+      const response = await Axios.get(
+        `/study-centre?sort=studyCentreName&_id=${authData.branch._id}`
+      );
       setBranches(response.data.docs);
     } catch (error) {
       console.error(error);
@@ -277,7 +282,7 @@ const AddResult = () => {
         {/* Exam Selection */}
 
         {/* Student Marks Table */}
-        <div>
+        <div className="mb-10">
           <p className="text-red-700 my-3">Maximum Marks {maxMark}</p>
           <table className="min-w-full border-collapse border border-gray-300">
             <thead>

@@ -277,8 +277,8 @@ exports.getResults = async (req, res) => {
             // Check for exam marks minimum criteria
             const cceSubject = studentResult.subjectResults.find(
               (sr) =>
-                sr.subject._id.toString() === subjectResult.subject._id.toString() &&
-                sr.type === "cce"
+                sr.subject._id.toString() ===
+                  subjectResult.subject._id.toString() && sr.type === "cce"
             );
             const cceMarks = cceSubject ? cceSubject.marksObtained : 0;
             return (
@@ -317,7 +317,6 @@ exports.getResults = async (req, res) => {
     return res.status(500).json({ error: "Internal Server Error" });
   }
 };
-
 
 exports.getGlobalResults = async (req, res) => {
   try {
@@ -412,7 +411,7 @@ exports.createResults = async (req, res) => {
           // Prevent duplicate entry by checking if the existing marks are already recorded
           if (existingResult.marksObtained === marksObtained) {
             // If the marks are the same, return the existing result without making changes
-            return existingResult; 
+            return existingResult;
           } else {
             // Update existing result
             existingResult.marksObtained = marksObtained; // Update field to marksObtained
@@ -440,15 +439,19 @@ exports.createResults = async (req, res) => {
     console.error(err); // Improved error logging
 
     // Handle validation errors specifically for duplicate marks if necessary
-    if (err.name === "ValidationError" && err.message.includes("Duplicate mark entry")) {
-      return res.status(400).json({ error: "Duplicate mark entry for the subject." });
+    if (
+      err.name === "ValidationError" &&
+      err.message.includes("Duplicate mark entry")
+    ) {
+      return res
+        .status(400)
+        .json({ error: "Duplicate mark entry for the subject." });
     }
 
     // General error response
     res.status(400).json({ message: err.message });
   }
 };
-
 
 exports.updateResult = async (req, res) => {
   try {
@@ -475,7 +478,6 @@ exports.updateResult = async (req, res) => {
     res.status(400).json({ message: err.message });
   }
 };
-
 
 exports.fetchToUpdate = async (req, res) => {
   try {

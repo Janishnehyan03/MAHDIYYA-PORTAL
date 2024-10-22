@@ -10,11 +10,11 @@ const {
   getExamStatistics,
 } = require("../controllers/resultController");
 
-router.post("/", protect, restrictTo("superAdmin"), createResults);
+router.post("/", protect, restrictTo("admin", "superadmin"), createResults);
 router.get("/", protect, restrictTo("admin", "superAdmin"), getResults);
 router.get("/data", protect, restrictTo("superAdmin"), getGlobalResults);
 router.get("/:examId/:registerNo", getMyResults);
 router.get("/fetch", fetchToUpdate);
 router.get("/statistics", getExamStatistics);
-router.patch("/", protect, restrictTo("superAdmin"), updateResult);
+router.patch("/", protect, restrictTo("superAdmin", "admin"), updateResult);
 module.exports = router;
