@@ -1,12 +1,11 @@
-import React, { useState, useEffect, useCallback, useContext } from "react";
+import React, { useCallback, useContext, useEffect, useState } from "react";
 import Axios from "../../../Axios";
-import { UserAuthContext } from "../../../context/userContext";
 import Loading from "../../../components/Loading";
-import { ExamContext } from "../../../context/examContext";
 import { ClassContext } from "../../../context/classContext";
+import { UserAuthContext } from "../../../context/userContext";
 
 function ResultView() {
-  const { exams, getExams } = useContext(ExamContext);
+  const [exams, setExams] = useState([]);
   const { classes, getClasses } = useContext(ClassContext);
 
   const [branches, setBranches] = useState([]);
@@ -24,6 +23,15 @@ function ResultView() {
     try {
       let { data } = await Axios.get(`/study-centre?sort=studyCentreName`);
       setBranches(data.docs);
+    } catch (error) {
+      console.log(error.response);
+    }
+  };
+  const getExams = async () => {
+    try {
+      let { data } = await Axios.get(`/exam?isActive=true`);
+  
+      setExams(data);
     } catch (error) {
       console.log(error.response);
     }
@@ -47,9 +55,9 @@ function ResultView() {
   }, [examId, classId, studyCentreId, authData?.branch?._id, authData.role]);
 
   useEffect(() => {
+    getExams();
     getClasses();
     getBranches();
-    getExams();
   }, []);
 
   useEffect(() => {
@@ -98,7 +106,7 @@ function ResultView() {
           onChange={(e) => setExamId(e.target.value)}
         >
           <option hidden>select exam</option>
-          {exams.map((item, key) => (
+          {exams?.map((item, key) => (
             <option key={key} value={item._id}>
               {item.examName}
             </option>
