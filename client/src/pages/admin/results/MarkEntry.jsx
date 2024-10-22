@@ -65,7 +65,7 @@ function MarkEntry() {
       <div className="lg:grid lg:grid-cols-3 gap-3 m-4">
         { authData.role === "admin" && (
           <>
-            <Link to={"/view-cce-mark"}>
+            <Link to={"/result-view"}>
               <div className=" py-4 overflow-hidden  cursor-pointer bg-teal-800 rounded-xl group  duration-300 shadow-2xl group">
                 <div className="flex">
                   <div className="px-4 py-4 bg-teal-300 group-hover:bg-teal-900 rounded-xl bg-opacity-30 mx-auto text-2xl">
