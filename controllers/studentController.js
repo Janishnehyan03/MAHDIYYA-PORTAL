@@ -88,10 +88,10 @@ exports.getMyStudents = async (req, res, next) => {
         },
       },
       {
-        $sort: { createdAt: 1 },
+        $sort: { registerNo: 1 }, // Sorting by registerNo in ascending order
       },
     ]);
- 
+
     res.status(200).json(data);
   } catch (error) {
     next(error);
@@ -108,6 +108,9 @@ exports.getBranchStudents = async (req, res, next) => {
           deleted: { $ne: true },
         },
       },
+      {
+        $sort: { registerNo: 1 }, // Sorting by registerNo in ascending order
+      },
     ]);
 
     res.status(200).json(data);
@@ -115,6 +118,7 @@ exports.getBranchStudents = async (req, res, next) => {
     next(error);
   }
 };
+
 exports.getMyAdmissions = async (req, res, next) => {
   try {
     let data = await Student.find({ branch: req.user.branch, verified: false })

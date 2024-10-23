@@ -30,7 +30,7 @@ function ResultView() {
   const getExams = async () => {
     try {
       let { data } = await Axios.get(`/exam?isActive=true`);
-  
+
       setExams(data);
     } catch (error) {
       console.log(error.response);
@@ -205,11 +205,12 @@ const ResultTableRow = ({ result, index, subjectNames }) => {
     <tr className="border-b border-neutral-200">
       <td className="p-2 border border-gray-300">{index + 1}</td>
       <td className="p-2 border border-gray-300">
-        {result.student?.registerNo}
+        {result.student?.registerNo || "N/A"}
       </td>
       <td className="p-2 border border-gray-300">
-        {result.student?.studentName}
+        {result.student?.studentName || "N/A"}
       </td>
+
       {Array.from(subjectNames).map((subjectName) => {
         const examResult = result.subjectResults.find(
           (sr) => sr.subject.subjectName === subjectName && sr.type === "exam"
@@ -218,22 +219,21 @@ const ResultTableRow = ({ result, index, subjectNames }) => {
           (sr) => sr.subject.subjectName === subjectName && sr.type === "cce"
         );
 
-        const cceMarks = cceResult ? cceResult.marksObtained : " ";
-        const saMarks = examResult ? examResult.marksObtained : " ";
-        const totalMarks =
-          (cceMarks !== " " ? parseFloat(cceMarks) : 0) +
-          (saMarks !== " " ? parseFloat(saMarks) : 0);
+        // Handle missing values and default to 0 where necessary
+        const cceMarks = cceResult?.marksObtained ?? 0;
+        const saMarks = examResult?.marksObtained ?? 0;
+        const totalMarks = cceMarks + saMarks;
 
         return (
           <React.Fragment key={subjectName}>
             <td className="border border-gray-300 text-center p-2">
-              {cceMarks}
+              {cceResult ? cceMarks : "-"}
             </td>
             <td className="border border-gray-300 text-center p-2">
-              {saMarks}
+              {examResult ? saMarks : "-"}
             </td>
             <td className="border border-gray-300 text-center p-2">
-              {totalMarks !== 0 ? totalMarks : " "}
+              {cceResult || examResult ? totalMarks : "-"}
             </td>
           </React.Fragment>
         );

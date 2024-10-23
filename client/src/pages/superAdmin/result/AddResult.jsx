@@ -66,7 +66,7 @@ const AddResult = () => {
         const requests = results.length > 0 ? [] : []; // Initialize an empty array for requests
 
         resultsData.forEach((result) => {
-          if (result.marksObtained !== undefined && result.marksObtained !== "0") {
+          if (result.marksObtained !== undefined) {
             if (result._id) {
               // Prepare PATCH request if result already exists
               const patchData = [
@@ -123,9 +123,6 @@ const AddResult = () => {
           `/result/fetch?examId=${exam}&subjectId=${subject}&classId=${selectedClass}`
         );
         setExistingResults(response.data);
-        console.log("====================================");
-        console.log(response.data);
-        console.log("====================================");
         const marks = response.data.reduce((acc, result) => {
           acc[result?.student?._id] = result?.marksObtained; // Adjusted for object structure
           return acc;

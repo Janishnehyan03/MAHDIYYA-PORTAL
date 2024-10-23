@@ -171,33 +171,31 @@ exports.getResults = async (req, res) => {
   try {
     let results;
 
-    // Check for required query parameters
     if (req.query.classId && req.query.examId) {
-      // Fetch exam results based on class and exam IDs
+      // Fetch exam results based on class and exam IDs, sorted by student registerNo
       results = await Result.find({
         class: mongoose.Types.ObjectId(req.query.classId),
         exam: mongoose.Types.ObjectId(req.query.examId),
       })
         .populate("student")
-        .populate("subject");
+        .populate("subject")
+        .sort({ "student.registerNo": 1 });  // Sort by student registerNo in ascending order
 
-      // Check if results are found
       if (results.length === 0) {
         return res.status(404).json({ message: "No results found" });
       }
 
-      // Fetch CCE marks based on class and exam IDs
       const cceResults = await CceMark.find({
         class: mongoose.Types.ObjectId(req.query.classId),
         exam: mongoose.Types.ObjectId(req.query.examId),
       })
         .populate("student")
-        .populate("subject");
+        .populate("subject")
+        .sort({ "student.registerNo": 1 });  // Sort by student registerNo in ascending order
 
-      // Merge exam and CCE results by student
+      // Process results as before (no changes here)
       const studentResults = {};
 
-      // Process exam results
       results.forEach((result) => {
         const studentId = result?.student?._id.toString();
         if (!studentResults[studentId]) {
@@ -210,16 +208,14 @@ exports.getResults = async (req, res) => {
           };
         }
 
-        // Accumulate exam marks
         studentResults[studentId].examMarksObtained += result.marksObtained;
         studentResults[studentId].subjectResults.push({
           subject: result.subject,
           marksObtained: result.marksObtained,
-          type: "exam", // Label to identify this as exam marks
+          type: "exam",
         });
       });
 
-      // Process CCE marks
       cceResults.forEach((cceResult) => {
         const studentId = cceResult?.student?._id.toString();
         if (!studentResults[studentId]) {
@@ -232,31 +228,26 @@ exports.getResults = async (req, res) => {
           };
         }
 
-        // Accumulate CCE marks
         studentResults[studentId].cceMarksObtained += cceResult.cceMark;
         studentResults[studentId].subjectResults.push({
           subject: cceResult.subject,
           marksObtained: cceResult.cceMark,
-          type: "cce", // Label to identify this as CCE marks
+          type: "cce",
         });
       });
 
-      // Sort and filter students based on total marks obtained
-      const sortedStudents = Object.values(studentResults).sort(
-        (a, b) =>
-          b.examMarksObtained +
-          b.cceMarksObtained -
-          (a.examMarksObtained + a.cceMarksObtained)
+      // Sort and filter as per the previous logic
+      const sortedStudents = Object.values(studentResults).sort((a, b) =>
+        a.student.registerNo.localeCompare(b.student.registerNo)
       );
 
-      // Filter students by study centre
+      // Filter and return the sorted, modified results
       const filteredStudents = sortedStudents.filter(
         (studentResult) =>
           studentResult?.student?.branch?._id.toString() ===
           req.query.studyCentreId
       );
 
-      // Calculate and return the modified results
       const modifiedResults = filteredStudents.map((studentResult, index) => {
         const totalExamMarks = studentResult.subjectResults
           .filter((result) => result.type === "exam")
@@ -271,10 +262,8 @@ exports.getResults = async (req, res) => {
         const totalMarks = totalExamMarks + totalCCEMarks;
         const percentage = (marksObtained / totalMarks) * 100;
 
-        // Check each subject's passing criteria
         const passed = studentResult.subjectResults.every((subjectResult) => {
           if (subjectResult.type === "exam") {
-            // Check for exam marks minimum criteria
             const cceSubject = studentResult.subjectResults.find(
               (sr) =>
                 sr.subject._id.toString() ===
@@ -287,10 +276,10 @@ exports.getResults = async (req, res) => {
               subjectResult.marksObtained + cceMarks >= 40
             );
           }
-          return true; // CCE alone doesn't determine passing
+          return true;
         });
 
-        const rank = index + 1; // Assign rank based on the sorted order
+        const rank = index + 1;
 
         return {
           student: studentResult.student,
