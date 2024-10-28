@@ -238,7 +238,7 @@ exports.getResults = async (req, res) => {
 
       // Sort and filter as per the previous logic
       const sortedStudents = Object.values(studentResults).sort((a, b) =>
-        a.student.registerNo.localeCompare(b.student.registerNo)
+        a.student?.registerNo?.localeCompare(b?.student?.registerNo)
       );
 
       // Filter and return the sorted, modified results
