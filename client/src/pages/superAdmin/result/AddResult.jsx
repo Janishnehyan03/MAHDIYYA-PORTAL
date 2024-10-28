@@ -40,81 +40,78 @@ const AddResult = () => {
       e.preventDefault();
       setLoading(true);
       try {
-        // Construct the results array with necessary data
+        // Fetch existing results
         const response = await Axios.get(
           `/result/fetch?classId=${selectedClass}&subjectId=${subject}&examId=${exam}`
         );
         const results = response.data;
+  
+        // Prepare results data
         const resultsData = students.map((student) => {
-          // Find the result for the current student from fetched results
           const existingResult = results.find(
             (result) => result?.student?._id === student._id
           );
-
-          // Create an entry for this student
           return {
             student: student._id,
-            exam: exam,
+            exam,
             marksObtained: studentMarks[student._id] || "0", // Default to "0" if no mark
             class: selectedClass,
             subject,
-            _id: existingResult ? existingResult._id : null, // Use fetched result._id if it exists
+            _id: existingResult ? existingResult._id : null,
           };
         });
-
-        // Determine whether to PATCH or POST based on results length
-        const requests = results.length > 0 ? [] : []; // Initialize an empty array for requests
-
-        resultsData.forEach((result) => {
-          if (result.marksObtained !== undefined) {
-            if (result._id) {
-              // Prepare PATCH request if result already exists
-              const patchData = [
-                { _id: result._id, marksObtained: parseInt(result.marksObtained) },
-              ];
-              console.log("Sending PATCH request with data:", patchData);
-              requests.push(Axios.patch("/result", patchData)); // Send as an array
-            } else {
-              // Prepare POST request if it's a new entry
-              const postData = {
-                student: result.student,
-                exam: result.exam,
-                marksObtained: parseInt(result.marksObtained), // Ensure it's an integer
-                class: result.class,
-                subject: result.subject,
-              };
-              console.log("Sending POST request with data:", postData);
-              requests.push(Axios.post("/result", postData));
-            }
+  
+        // Function to send requests in batches
+        const sendRequestsInBatches = async (data, batchSize) => {
+          for (let i = 0; i < data.length; i += batchSize) {
+            const batch = data.slice(i, i + batchSize);
+            const requests = batch.map((result) => {
+              if (result._id) {
+                // PATCH request if the result exists
+                return Axios.patch("/result", [
+                  { _id: result._id, marksObtained: parseInt(result.marksObtained) },
+                ]);
+              } else {
+                // POST request if it's a new entry
+                return Axios.post("/result", {
+                  student: result.student,
+                  exam: result.exam,
+                  marksObtained: parseInt(result.marksObtained),
+                  class: result.class,
+                  subject: result.subject,
+                });
+              }
+            });
+  
+            // Wait for the batch to complete
+            const responses = await Promise.all(requests);
+            responses.forEach((response) => {
+              console.log("Response from server:", response.data);
+            });
           }
-        });
-
-        // Wait for all requests to complete
-        const responses = await Promise.all(requests);
-
-        // Log responses from the server (optional)
-        responses.forEach((response) => {
-          console.log("Response from server:", response.data);
-        });
-
+        };
+  
+        // Send requests in batches of 10
+        await sendRequestsInBatches(resultsData, 10);
+  
         // Notify user of success
         toast.success("Marks submitted successfully", {
           position: toast.POSITION.TOP_CENTER,
           autoClose: 3000,
         });
       } catch (error) {
-        // Handle any errors that occur during submission
+        // Handle errors
         console.error("Error submitting marks:", error);
         toast.error(error.response?.data?.error || "An error occurred", {
           position: toast.POSITION.TOP_CENTER,
           autoClose: 3000,
         });
       } finally {
-        // Reset loading state
         setLoading(false);
       }
     }
   };
+  
 
   const fetchExistingResults = async () => {
     if (selectedClass && selectedBranch && exam && subject) {

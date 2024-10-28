@@ -380,39 +380,26 @@ exports.getGlobalResults = async (req, res) => {
 
 exports.createResults = async (req, res) => {
   const resultsData = Array.isArray(req.body) ? req.body : [req.body]; // Ensure it's an array
-  const processInBatches = async (data, batchSize) => {
-    const results = [];
-    for (let i = 0; i < data.length; i += batchSize) {
-      const batch = data.slice(i, i + batchSize);
-      const batchResults = await Promise.all(batch.map(processResult)); // processResult is your processing function
-      results.push(...batchResults);
-    }
-    return results;
-  };
-
-  const processResult = async (resultData) => {
-    const { student, exam, marksObtained, class: studentClass, subject } = resultData;
-
-    const existingResult = await Result.findOne({ student, subject, exam });
-
-    if (existingResult) {
-      if (existingResult.marksObtained === marksObtained) {
-        return existingResult; // Return existing result
-      } else {
-        existingResult.marksObtained = marksObtained; // Update field to marksObtained
-        await existingResult.save();
-        return existingResult; // Return updated result
-      }
-    } else {
-      const newResult = new Result({ student, exam, marksObtained, class: studentClass, subject });
-      await newResult.save();
-      return newResult; // Return newly created result
-    }
-  };
 
   try {
-    const results = await processInBatches(resultsData, 10); // Adjust batch size as needed
-    res.status(201).json(results);
+    // Prepare bulk operations
+    const bulkOps = resultsData.map((resultData) => {
+      const { student, exam, marksObtained, class: studentClass, subject, _id } = resultData;
+
+      return {
+        updateOne: {
+          filter: { student, subject, exam },
+          update: { $set: { marksObtained, class: studentClass }, $setOnInsert: { student, exam, subject } },
+          upsert: true // Create if not exists
+        }
+      };
+    });
+
+    // Execute bulk operations
+    const results = await Result.bulkWrite(bulkOps);
+
+    // Respond with success
+    res.status(201).json({ message: "Results processed", results });
   } catch (err) {
     console.error(err);
     if (err.name === "ValidationError" && err.message.includes("Duplicate mark entry")) {
@@ -421,6 +408,7 @@ exports.createResults = async (req, res) => {
     res.status(400).json({ message: err.message });
   }
 };
+
 
 
 exports.updateResult = async (req, res) => {
