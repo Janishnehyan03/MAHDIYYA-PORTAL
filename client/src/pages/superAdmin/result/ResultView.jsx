@@ -3,6 +3,7 @@ import Axios from "../../../Axios";
 import Loading from "../../../components/Loading";
 import { ClassContext } from "../../../context/classContext";
 import { UserAuthContext } from "../../../context/userContext";
+import * as XLSX from "xlsx"; // Import the XLSX library
 
 function ResultView() {
   const [exams, setExams] = useState([]);
@@ -30,7 +31,6 @@ function ResultView() {
   const getExams = async () => {
     try {
       let { data } = await Axios.get(`/exam?isActive=true`);
-
       setExams(data);
     } catch (error) {
       console.log(error.response);
@@ -73,6 +73,43 @@ function ResultView() {
     });
   });
 
+  // Function to download the results as an Excel file
+  const downloadExcel = (branchName, className) => {
+    const worksheetData = results.map((result, index) => {
+      const rowData = {
+        Index: index + 1,
+        RegisterNo: result.student?.registerNo || "N/A",
+        StudentName: result.student?.studentName || "N/A",
+      };
+
+      subjectNames.forEach((subjectName) => {
+        const examResult = result.subjectResults.find(
+          (sr) => sr.subject.subjectName === subjectName && sr.type === "exam"
+        );
+        const cceResult = result.subjectResults.find(
+          (sr) => sr.subject.subjectName === subjectName && sr.type === "cce"
+        );
+
+        const cceMarks = cceResult?.marksObtained ?? 0;
+        const saMarks = examResult?.marksObtained ?? 0;
+        const totalMarks = cceMarks + saMarks;
+
+        rowData[`${subjectName} FA`] = cceResult ? cceMarks : "-";
+        rowData[`${subjectName} SA`] = examResult ? saMarks : "-";
+        rowData[`${subjectName} Total`] =
+          cceResult || examResult ? totalMarks : "-";
+      });
+
+      return rowData;
+    });
+
+    const worksheet = XLSX.utils.json_to_sheet(worksheetData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Results");
+
+    XLSX.writeFile(workbook, `${branchName}(${className}).xlsx`);
+  };
+
   return (
     <div>
       <h1 className="text-3xl my-4 font-bold text-center">SA Results</h1>
@@ -113,6 +150,21 @@ function ResultView() {
           ))}
         </select>
       </div>
+      {results.length > 0 && (
+        <div className="flex justify-center my-4">
+          <button
+            onClick={() =>
+              downloadExcel(
+                results[0].student?.branch?.studyCentreName,
+                results[0].student?.class?.className
+              )
+            }
+            className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600"
+          >
+            Download as Excel
+          </button>
+        </div>
+      )}
       {loading ? (
         <Loading />
       ) : (
@@ -171,7 +223,9 @@ function ResultView() {
             <tbody>
               {authData.role === "superAdmin"
                 ? results
-                    .filter((result) => result.student.branch === studyCentreId)
+                    .filter(
+                      (result) => result.student.branch?._id === studyCentreId
+                    )
                     .map((result, index) => (
                       <ResultTableRow
                         key={result.student.registerNo}
@@ -182,7 +236,8 @@ function ResultView() {
                     ))
                 : results
                     .filter(
-                      (result) => result.student.branch === authData.branch._id
+                      (result) =>
+                        result.student.branch?._id === authData.branch._id
                     )
                     .map((result, index) => (
                       <ResultTableRow
@@ -202,16 +257,15 @@ function ResultView() {
 
 const ResultTableRow = ({ result, index, subjectNames }) => {
   return (
-    <tr className="border-b border-neutral-200">
-      <td className="p-2 border border-gray-300">{index + 1}</td>
-      <td className="p-2 border border-gray-300">
+    <tr>
+      <td className="border border-gray-300 text-center p-2">{index + 1}</td>
+      <td className="border border-gray-300 text-center p-2">
         {result.student?.registerNo || "N/A"}
       </td>
-      <td className="p-2 border border-gray-300">
+      <td className="border border-gray-300 text-center p-2">
         {result.student?.studentName || "N/A"}
       </td>
-
-      {Array.from(subjectNames).map((subjectName) => {
+      {Array.from(subjectNames).flatMap((subjectName) => {
         const examResult = result.subjectResults.find(
           (sr) => sr.subject.subjectName === subjectName && sr.type === "exam"
         );
@@ -219,24 +273,30 @@ const ResultTableRow = ({ result, index, subjectNames }) => {
           (sr) => sr.subject.subjectName === subjectName && sr.type === "cce"
         );
 
-        // Handle missing values and default to 0 where necessary
         const cceMarks = cceResult?.marksObtained ?? 0;
         const saMarks = examResult?.marksObtained ?? 0;
         const totalMarks = cceMarks + saMarks;
 
-        return (
-          <React.Fragment key={subjectName}>
-            <td className="border border-gray-300 text-center p-2">
-              {cceResult ? cceMarks : "-"}
-            </td>
-            <td className="border border-gray-300 text-center p-2">
-              {examResult ? saMarks : "-"}
-            </td>
-            <td className="border border-gray-300 text-center p-2">
-              {cceResult || examResult ? totalMarks : "-"}
-            </td>
-          </React.Fragment>
-        );
+        return [
+          <td
+            key={`${subjectName}-cce`}
+            className="border border-gray-300 text-center p-2"
+          >
+            {cceResult ? cceMarks : "-"}
+          </td>,
+          <td
+            key={`${subjectName}-sa`}
+            className="border border-gray-300 text-center p-2"
+          >
+            {examResult ? saMarks : "-"}
+          </td>,
+          <td
+            key={`${subjectName}-total`}
+            className="border border-gray-300 text-center p-2"
+          >
+            {cceResult || examResult ? totalMarks : "-"}
+          </td>,
+        ];
       })}
     </tr>
   );

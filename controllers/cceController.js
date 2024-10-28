@@ -96,8 +96,14 @@ exports.getResults = async (req, res) => {
         class: mongoose.Types.ObjectId(req.query.classId),
         exam: mongoose.Types.ObjectId(req.query.examId),
       })
-        .populate("student")
-        .populate("subject");
+      .populate({
+        path: 'student',
+        populate: [
+          { path: 'branch' }, // Populate branch details
+          { path: 'class' }    // Populate class details
+        ]
+      })
+      .populate('subject');
 
       if (results.length === 0) {
         return res.status(404).json({ message: "No results found" });
@@ -163,6 +169,7 @@ exports.getResults = async (req, res) => {
     return res.status(500).json({ error: "Internal Server Error" });
   }
 };
+
 
 exports.getGlobalResults = async (req, res) => {
   try {
