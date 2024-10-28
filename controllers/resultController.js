@@ -267,7 +267,7 @@ exports.getResults = async (req, res) => {
             const cceSubject = studentResult.subjectResults.find(
               (sr) =>
                 sr.subject._id.toString() ===
-                  subjectResult.subject._id.toString() && sr.type === "cce"
+                subjectResult.subject._id.toString() && sr.type === "cce"
             );
             const cceMarks = cceSubject ? cceSubject.marksObtained : 0;
             return (
@@ -379,68 +379,49 @@ exports.getGlobalResults = async (req, res) => {
 };
 
 exports.createResults = async (req, res) => {
-  // Expecting resultsData to be an array of result objects from req.body
   const resultsData = Array.isArray(req.body) ? req.body : [req.body]; // Ensure it's an array
+  const processInBatches = async (data, batchSize) => {
+    const results = [];
+    for (let i = 0; i < data.length; i += batchSize) {
+      const batch = data.slice(i, i + batchSize);
+      const batchResults = await Promise.all(batch.map(processResult)); // processResult is your processing function
+      results.push(...batchResults);
+    }
+    return results;
+  };
+
+  const processResult = async (resultData) => {
+    const { student, exam, marksObtained, class: studentClass, subject } = resultData;
+
+    const existingResult = await Result.findOne({ student, subject, exam });
+
+    if (existingResult) {
+      if (existingResult.marksObtained === marksObtained) {
+        return existingResult; // Return existing result
+      } else {
+        existingResult.marksObtained = marksObtained; // Update field to marksObtained
+        await existingResult.save();
+        return existingResult; // Return updated result
+      }
+    } else {
+      const newResult = new Result({ student, exam, marksObtained, class: studentClass, subject });
+      await newResult.save();
+      return newResult; // Return newly created result
+    }
+  };
 
   try {
-    const results = await Promise.all(
-      resultsData.map(async (resultData) => {
-        const {
-          student,
-          exam,
-          marksObtained, // Changed to marksObtained
-          class: studentClass,
-          subject,
-        } = resultData;
-
-        // Find existing result by student, subject, and exam
-        const existingResult = await Result.findOne({ student, subject, exam });
-
-        if (existingResult) {
-          // Prevent duplicate entry by checking if the existing marks are already recorded
-          if (existingResult.marksObtained === marksObtained) {
-            // If the marks are the same, return the existing result without making changes
-            return existingResult;
-          } else {
-            // Update existing result
-            existingResult.marksObtained = marksObtained; // Update field to marksObtained
-            await existingResult.save();
-            return existingResult; // Return updated result
-          }
-        } else {
-          // Create a new result
-          const newResult = new Result({
-            student,
-            exam,
-            marksObtained, // Ensure this is now marksObtained
-            class: studentClass,
-            subject,
-          });
-          await newResult.save();
-          return newResult; // Return newly created result
-        }
-      })
-    );
-
-    // Respond with the created or updated results
+    const results = await processInBatches(resultsData, 10); // Adjust batch size as needed
     res.status(201).json(results);
   } catch (err) {
-    console.error(err); // Improved error logging
-
-    // Handle validation errors specifically for duplicate marks if necessary
-    if (
-      err.name === "ValidationError" &&
-      err.message.includes("Duplicate mark entry")
-    ) {
-      return res
-        .status(400)
-        .json({ error: "Duplicate mark entry for the subject." });
+    console.error(err);
+    if (err.name === "ValidationError" && err.message.includes("Duplicate mark entry")) {
+      return res.status(400).json({ error: "Duplicate mark entry for the subject." });
     }
-
-    // General error response
     res.status(400).json({ message: err.message });
   }
 };
+
 
 exports.updateResult = async (req, res) => {
   try {
