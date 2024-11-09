@@ -166,158 +166,152 @@ exports.getMyResults = async (req, res) => {
 //     return res.status(500).json({ error: "Internal Server Error" });
 //   }
 // };
-
 exports.getResults = async (req, res) => {
   try {
-    let results;
+    if (!req.query.classId || !req.query.examId) {
+      return res.status(400).json({ message: "Class ID and Exam ID are required" });
+    }
 
-    if (req.query.classId && req.query.examId) {
-      // Fetch exam results based on class and exam IDs, sorted by student registerNo
-      results = await Result.find({
-        class: mongoose.Types.ObjectId(req.query.classId),
-        exam: mongoose.Types.ObjectId(req.query.examId),
+    // Fetch exam results based on class and exam IDs
+    const resultQuery = {
+      class: mongoose.Types.ObjectId(req.query.classId),
+      exam: mongoose.Types.ObjectId(req.query.examId),
+    };
+
+    const results = await Result.find(resultQuery)
+      .populate({
+        path: "student",
+        populate: [
+          { path: "branch" }, // Populate branch details
+          { path: "class" },   // Populate class details
+        ],
       })
-        .populate({
-          path: "student",
-          populate: [
-            { path: "branch" }, // Populate branch details
-            { path: "class" }    // Populate class details
-          ]
-        })
-        .populate("subject")
-        .sort({ "student.registerNo": 1 });  // Sort by student registerNo in ascending order
+      .populate("subject")
+      .sort({ "student.registerNo": 1 });
 
-      if (results.length === 0) {
-        return res.status(404).json({ message: "No results found" });
+    if (results.length === 0) {
+      return res.status(404).json({ message: "No results found" });
+    }
+
+    const cceResults = await CceMark.find(resultQuery)
+      .populate({
+        path: "student",
+        populate: [
+          { path: "branch" }, // Populate branch details
+          { path: "class" },   // Populate class details
+        ],
+      })
+      .populate("subject")
+      .sort({ "student.registerNo": 1 });
+
+    const studentResults = {};
+
+    // Process results to compile student data
+    results.forEach((result) => {
+      const studentId = result?.student?._id.toString();
+      if (!studentResults[studentId]) {
+        studentResults[studentId] = {
+          student: result.student,
+          totalMarks: 0,
+          examMarksObtained: 0,
+          cceMarksObtained: 0,
+          subjectResults: [],
+        };
       }
 
-      const cceResults = await CceMark.find({
-        class: mongoose.Types.ObjectId(req.query.classId),
-        exam: mongoose.Types.ObjectId(req.query.examId),
-      })
-        .populate({
-          path: "student",
-          populate: [
-            { path: "branch" }, // Populate branch details
-            { path: "class" }    // Populate class details
-          ]
-        })
-        .populate("subject")
-        .sort({ "student.registerNo": 1 });  // Sort by student registerNo in ascending order
-
-      // Process results as before (no changes here)
-      const studentResults = {};
-
-      results.forEach((result) => {
-        const studentId = result?.student?._id.toString();
-        if (!studentResults[studentId]) {
-          studentResults[studentId] = {
-            student: result.student,
-            totalMarks: 0,
-            examMarksObtained: 0,
-            cceMarksObtained: 0,
-            subjectResults: [],
-          };
-        }
-
-        studentResults[studentId].examMarksObtained += result.marksObtained;
-        studentResults[studentId].subjectResults.push({
-          subject: result.subject,
-          marksObtained: result.marksObtained,
-          type: "exam",
-        });
+      studentResults[studentId].examMarksObtained += result.marksObtained;
+      studentResults[studentId].subjectResults.push({
+        subject: result.subject,
+        marksObtained: result.marksObtained,
+        type: "exam",
       });
+    });
 
-      cceResults.forEach((cceResult) => {
-        const studentId = cceResult?.student?._id.toString();
-        if (!studentResults[studentId]) {
-          studentResults[studentId] = {
-            student: cceResult.student,
-            totalMarks: 0,
-            examMarksObtained: 0,
-            cceMarksObtained: 0,
-            subjectResults: [],
-          };
-        }
-
-        studentResults[studentId].cceMarksObtained += cceResult.cceMark;
-        studentResults[studentId].subjectResults.push({
-          subject: cceResult.subject,
-          marksObtained: cceResult.cceMark,
-          type: "cce",
-        });
-      });
-
-      // Sort and filter as per the previous logic
-      const sortedStudents = Object.values(studentResults).sort((a, b) =>
-        a.student?.registerNo?.localeCompare(b?.student?.registerNo)
-      );
-
-      // Filter and return the sorted, modified results
-      const filteredStudents = sortedStudents.filter(
-        (studentResult) =>
-          studentResult?.student?.branch?._id.toString() ===
-          req.query.studyCentreId
-      );
-
-      const modifiedResults = filteredStudents.map((studentResult, index) => {
-        const totalExamMarks = studentResult.subjectResults
-          .filter((result) => result.type === "exam")
-          .reduce((sum, result) => sum + result.subject.totalMarks, 0);
-
-        const totalCCEMarks = studentResult.subjectResults
-          .filter((result) => result.type === "cce")
-          .reduce((sum, result) => sum + result.subject.totalMarks, 0);
-
-        const marksObtained =
-          studentResult.examMarksObtained + studentResult.cceMarksObtained;
-        const totalMarks = totalExamMarks + totalCCEMarks;
-        const percentage = (marksObtained / totalMarks) * 100;
-
-        const passed = studentResult.subjectResults.every((subjectResult) => {
-          if (subjectResult.type === "exam") {
-            const cceSubject = studentResult.subjectResults.find(
-              (sr) =>
-                sr.subject._id.toString() ===
-                subjectResult.subject._id.toString() && sr.type === "cce"
-            );
-            const cceMarks = cceSubject ? cceSubject.marksObtained : 0;
-            return (
-              subjectResult.marksObtained >= 28 &&
-              cceMarks >= 1 &&
-              subjectResult.marksObtained + cceMarks >= 40
-            );
-          }
-          return true;
-        });
-
-        const rank = index + 1;
-
-        return {
-          student: studentResult.student,
-          subjectResults: studentResult.subjectResults,
-          passed,
-          failed: !passed,
-          percentage,
-          rank,
-          marksObtained,
-          totalMarks,
-          examMarks: studentResult.examMarksObtained,
-          cceMarks: studentResult.cceMarksObtained,
+    cceResults.forEach((cceResult) => {
+      const studentId = cceResult?.student?._id.toString();
+      if (!studentResults[studentId]) {
+        studentResults[studentId] = {
+          student: cceResult.student,
+          totalMarks: 0,
+          examMarksObtained: 0,
+          cceMarksObtained: 0,
+          subjectResults: [],
         };
+      }
+
+      studentResults[studentId].cceMarksObtained += cceResult.cceMark;
+      studentResults[studentId].subjectResults.push({
+        subject: cceResult.subject,
+        marksObtained: cceResult.cceMark,
+        type: "cce",
+      });
+    });
+
+    const sortedStudents = Object.values(studentResults).sort((a, b) =>
+      a.student?.registerNo?.localeCompare(b?.student?.registerNo)
+    );
+
+    // Apply studyCentreId filtering if it is provided
+    const filteredStudents = req.query.studyCentreId
+      ? sortedStudents.filter(
+          (studentResult) =>
+            studentResult?.student?.branch?._id.toString() === req.query.studyCentreId
+        )
+      : sortedStudents;
+
+    const modifiedResults = filteredStudents.map((studentResult, index) => {
+      const totalExamMarks = studentResult.subjectResults
+        .filter((result) => result.type === "exam")
+        .reduce((sum, result) => sum + result.subject.totalMarks, 0);
+
+      const totalCCEMarks = studentResult.subjectResults
+        .filter((result) => result.type === "cce")
+        .reduce((sum, result) => sum + result.subject.totalMarks, 0);
+
+      const marksObtained = studentResult.examMarksObtained + studentResult.cceMarksObtained;
+      const totalMarks = totalExamMarks + totalCCEMarks;
+      const percentage = (marksObtained / totalMarks) * 100;
+
+      const passed = studentResult.subjectResults.every((subjectResult) => {
+        if (subjectResult.type === "exam") {
+          const cceSubject = studentResult.subjectResults.find(
+            (sr) =>
+              sr.subject._id.toString() ===
+              subjectResult.subject._id.toString() && sr.type === "cce"
+          );
+          const cceMarks = cceSubject ? cceSubject.marksObtained : 0;
+          return (
+            subjectResult.marksObtained >= 28 &&
+            cceMarks >= 1 &&
+            subjectResult.marksObtained + cceMarks >= 40
+          );
+        }
+        return true;
       });
 
-      return res.json(modifiedResults);
-    } else {
-      return res
-        .status(400)
-        .json({ message: "Class ID and Exam ID are required" });
-    }
+      const rank = index + 1;
+
+      return {
+        student: studentResult.student,
+        subjectResults: studentResult.subjectResults,
+        passed,
+        failed: !passed,
+        percentage,
+        rank,
+        marksObtained,
+        totalMarks,
+        examMarks: studentResult.examMarksObtained,
+        cceMarks: studentResult.cceMarksObtained,
+      };
+    });
+
+    return res.json(modifiedResults);
   } catch (err) {
     console.error(err);
     return res.status(500).json({ error: "Internal Server Error" });
   }
 };
+
 
 
 exports.getGlobalResults = async (req, res) => {
