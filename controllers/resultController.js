@@ -202,7 +202,7 @@ exports.getResults = async (req, res) => {
         ],
       })
       .populate("subject")
-      .sort({ "student.registerNo": 1 });
+      .sort({ "student.branch": 1 });
 
     const studentResults = {};
 

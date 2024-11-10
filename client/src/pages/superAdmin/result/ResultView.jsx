@@ -47,6 +47,7 @@ function ResultView() {
       const { data } = await Axios.get(
         `/result?examId=${examId}&classId=${classId}${studyCentreParam}`
       );
+
       setResults(data);
     } catch (error) {
       setResults([]);
@@ -92,6 +93,7 @@ function ResultView() {
         Index: index + 1,
         RegisterNo: result.student?.registerNo || "N/A",
         StudentName: result.student?.studentName || "N/A",
+        StudyCentre: result.student?.branch?.studyCentreCode || "N/A",
       };
 
       subjectNames.forEach((subjectName) => {
@@ -184,26 +186,65 @@ function ResultView() {
           <table className="table-auto w-full border border-collapse border-gray-300">
             <thead>
               <tr>
-                <th className="border border-gray-300 p-2" rowSpan="2">#</th>
-                <th className="border border-gray-300 p-2" rowSpan="2">Register No</th>
-                <th className="border border-gray-300 p-2" rowSpan="2">Student</th>
+                <th className="border border-gray-300 p-2" rowSpan="2">
+                  #
+                </th>
+                <th className="border border-gray-300 p-2" rowSpan="2">
+                  Register No
+                </th>
+                <th className="border border-gray-300 p-2" rowSpan="2">
+                  Student
+                </th>
+                <th className="border border-gray-300 p-2" rowSpan="2">
+                  Study Centre Code 
+                </th>
                 {Array.from(subjectNames).map((subjectName) => (
-                  <th key={subjectName} className="border border-gray-300 text-center p-2" colSpan="3">
+                  <th
+                    key={subjectName}
+                    className="border border-gray-300 text-center p-2"
+                    colSpan="3"
+                  >
                     {subjectName}
                   </th>
                 ))}
               </tr>
               <tr>
                 {Array.from(subjectNames).flatMap((subjectName) => [
-                  <th key={`${subjectName}-cce`} className="border border-gray-300 text-center p-2"><div className="flex flex-col text-xs"><p>FA</p></div></th>,
-                  <th key={`${subjectName}-sa`} className="border border-gray-300 text-center p-2"><div className="flex flex-col text-xs"><p>SA</p></div></th>,
-                  <th key={`${subjectName}-total`} className="border border-gray-300 text-center p-2"><div className="flex flex-col text-xs"><p>Total</p></div></th>,
+                  <th
+                    key={`${subjectName}-cce`}
+                    className="border border-gray-300 text-center p-2"
+                  >
+                    <div className="flex flex-col text-xs">
+                      <p>FA</p>
+                    </div>
+                  </th>,
+                  <th
+                    key={`${subjectName}-sa`}
+                    className="border border-gray-300 text-center p-2"
+                  >
+                    <div className="flex flex-col text-xs">
+                      <p>SA</p>
+                    </div>
+                  </th>,
+                  <th
+                    key={`${subjectName}-total`}
+                    className="border border-gray-300 text-center p-2"
+                  >
+                    <div className="flex flex-col text-xs">
+                      <p>Total</p>
+                    </div>
+                  </th>,
                 ])}
               </tr>
             </thead>
             <tbody>
               {results.map((result, index) => (
-                <ResultTableRow key={result.student.registerNo} result={result} index={index} subjectNames={subjectNames} />
+                <ResultTableRow
+                  key={result.student.registerNo}
+                  result={result}
+                  index={index}
+                  subjectNames={subjectNames}
+                />
               ))}
             </tbody>
           </table>
@@ -216,8 +257,15 @@ function ResultView() {
 const ResultTableRow = ({ result, index, subjectNames }) => (
   <tr>
     <td className="border border-gray-300 p-2 text-center">{index + 1}</td>
-    <td className="border border-gray-300 p-2 text-center">{result.student?.registerNo || "N/A"}</td>
-    <td className="border border-gray-300 p-2 text-center">{result.student?.studentName || "N/A"}</td>
+    <td className="border border-gray-300 p-2 text-center">
+      {result.student?.registerNo || "N/A"}
+    </td>
+    <td className="border border-gray-300 p-2 text-center">
+      {result.student?.studentName || "N/A"}
+    </td>
+    <td className="border border-gray-300 p-2 text-center">
+      {result.student?.branch?.studyCentreCode || "N/A"}
+    </td>
     {Array.from(subjectNames).flatMap((subjectName) => {
       const examResult = result.subjectResults.find(
         (sr) => sr.subject.subjectName === subjectName && sr.type === "exam"
@@ -228,12 +276,28 @@ const ResultTableRow = ({ result, index, subjectNames }) => (
 
       const cceMarks = cceResult?.marksObtained ?? "-";
       const saMarks = examResult?.marksObtained ?? "-";
-      const totalMarks = cceMarks !== "-" && saMarks !== "-" ? cceMarks + saMarks : "-";
+      const totalMarks =
+        cceMarks !== "-" && saMarks !== "-" ? cceMarks + saMarks : "-";
 
       return [
-        <td key={`${subjectName}-cce-${index}`} className="border border-gray-300 text-center p-2">{cceMarks}</td>,
-        <td key={`${subjectName}-sa-${index}`} className="border border-gray-300 text-center p-2">{saMarks}</td>,
-        <td key={`${subjectName}-total-${index}`} className="border border-gray-300 text-center p-2">{totalMarks}</td>,
+        <td
+          key={`${subjectName}-cce-${index}`}
+          className="border border-gray-300 text-center p-2"
+        >
+          {cceMarks}
+        </td>,
+        <td
+          key={`${subjectName}-sa-${index}`}
+          className="border border-gray-300 text-center p-2"
+        >
+          {saMarks}
+        </td>,
+        <td
+          key={`${subjectName}-total-${index}`}
+          className="border border-gray-300 text-center p-2"
+        >
+          {totalMarks}
+        </td>,
       ];
     })}
   </tr>
