@@ -240,7 +240,7 @@ function ResultView() {
             <tbody>
               {results.map((result, index) => (
                 <ResultTableRow
-                  key={result.student.registerNo}
+                  key={result?.student?.registerNo}
                   result={result}
                   index={index}
                   subjectNames={subjectNames}
