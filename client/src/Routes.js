@@ -162,6 +162,11 @@ export const SuperAdminRoutes = [
     component: <TimeTables />,
     role: "superAdmin",
   },
+  {
+    route: "/transfer-student/:studentId",
+    component: <Student.TransferStudent />,
+    role: "superAdmin"
+  },
 ];
 
 export const AdminRoutes = [
@@ -186,10 +191,7 @@ export const AdminRoutes = [
     route: "/new-student",
     component: <Student.AddStudent />,
   },
-  {
-    route: "/transfer-student/:studentId",
-    component: <Student.TransferStudent />,
-  },
+
   {
     route: "/edit-student/:id",
     component: <Student.EditStudent />,
