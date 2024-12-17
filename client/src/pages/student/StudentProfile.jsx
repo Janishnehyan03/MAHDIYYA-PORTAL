@@ -73,171 +73,150 @@ function StudentProfile() {
   }, []);
   return (
     <>
-      <div className="w-full bg-gray-200">
-        {showAlert && ConfirmAlert()}
-
-        <section className="p-6">
-          <div className="bg-gray-100">
-            {/* End of Navbar */}
-            <div className="container mx-auto my-5 p-5">
-              <div className="md:flex no-wrap md:-mx-2 ">
-                {/* Left Side */}
-
-                {/* Right Side */}
-                <div className="w-full mx-2 h-64">
-                  {/* Profile tab */}
-                  {/* About Section */}
-                  <div className="bg-white p-3 shadow-sm rounded-sm">
-                    <div className="flex items-center space-x-2 font-semibold text-blue-900 leading-8">
-                      <span className="tracking-wide text-green-500 font-bold uppercase text-3xl text-center">
-                        Student Profile
-                      </span>
-                    </div>
-                    <div className="text-gray-700">
-                      <div className="grid md:grid-cols-2 text-sm">
-                        <div className="grid grid-cols-2">
-                          <div className="px-4 py-2 font-semibold">
-                            Student Name
-                          </div>
-                          <div className="px-4 py-2">{student.studentName}</div>
-                        </div>
-                        <div className="grid grid-cols-2">
-                          <div className="px-4 py-2 font-semibold">
-                            Register Number
-                          </div>
-                          <div className="px-4 py-2">{student.registerNo}</div>
-                        </div>
-                        <div className="grid grid-cols-2">
-                          <div className="px-4 py-2 font-semibold">
-                            Academic Year
-                          </div>
-                          <div className="px-4 py-2">
-                            {student?.academicYear?.year}
-                          </div>
-                        </div>
-
-                        <div className="grid grid-cols-2">
-                          <div className="px-4 py-2 font-semibold">
-                            House Name
-                          </div>
-                          <div className="px-4 py-2">{student.houseName}</div>
-                        </div>
-
-                        <div className="grid grid-cols-2">
-                          <div className="px-4 py-2 font-semibold">
-                            Father Name
-                          </div>
-                          <div className="px-4 py-2">{student.fatherName}</div>
-                        </div>
-
-                        <div className="grid grid-cols-2">
-                          <div className="px-4 py-2 font-semibold">Phone</div>
-                          <div className="px-4 py-2">+91 {student.phone}</div>
-                        </div>
-
-                        <div className="grid grid-cols-2">
-                          <div className="px-4 py-2 font-semibold">
-                            Date Of Birth
-                          </div>
-                          <div className="px-4 py-2">
-                            {moment(student.dob).format("DD-MM-YYYY")}
-                          </div>
-                        </div>
-
-                        <div className="grid grid-cols-2">
-                          <div className="px-4 py-2 font-semibold">Place</div>
-                          <div className="px-4 py-2">{student.place}</div>
-                        </div>
-                        <div className="grid grid-cols-2">
-                          <div className="px-4 py-2 font-semibold">
-                            Post Office
-                          </div>
-                          <div className="px-4 py-2">{student.postOffice}</div>
-                        </div>
-                        <div className="grid grid-cols-2">
-                          <div className="px-4 py-2 font-semibold">Pincode</div>
-                          <div className="px-4 py-2">{student.pinCode}</div>
-                        </div>
-                        <div className="grid grid-cols-2">
-                          <div className="px-4 py-2 font-semibold">
-                            District
-                          </div>
-                          <div className="px-4 py-2">{student.district}</div>
-                        </div>
-                        <div className="grid grid-cols-2">
-                          <div className="px-4 py-2 font-semibold">State</div>
-                          <div className="px-4 py-2">{student.state}</div>
-                        </div>
-
-                        <div className="grid grid-cols-2">
-                          <div className="px-4 py-2 font-semibold">
-                            Study Center
-                          </div>
-                          <div className="px-4 py-2">
-                            {student?.branch?.studyCentreName}
-                          </div>
-                        </div>
-                        <div className="grid grid-cols-2">
-                          <div className="px-4 py-2 font-semibold">Class</div>
-                          <div className="px-4 py-2">
-                            {student.class?.className}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  {/* End of profile tab */}
-                  <ul className="bg-gray-100 text-gray-600 hover:text-gray-700 hover:shadow py-2 px-3 mt-3 divide-y rounded shadow-sm">
-                    <li className="flex items-center py-3">
-                      <span>Status</span>
-                      <span className="ml-auto">
-                        {student?.verified ? (
-                          <span className="bg-green-400 py-1 px-2 rounded text-white text-sm">
-                            Active
-                          </span>
-                        ) : (
-                          <span
-                            onClick={(e) => {
-                              e.preventDefault();
-                              setShowAlert(true);
-                            }}
-                            className="bg-red-400 cursor-pointer py-1 px-2 rounded text-white text-sm"
-                          >
-                            Not Verified
-                          </span>
-                        )}
-                      </span>
-                    </li>
-                    <button
-                      onClick={(e) => handleDelete(e, student._id)}
-                      className="bg-red-500 text-white rounded-xl py-1 px-2"
-                    >
-                      <FontAwesomeIcon
-                        icon={faTrash}
-                        className="text-gray-300"
-                      />{" "}
-                      Delete Student
-                    </button>
-                  </ul>
-                </div>
+    <div className="w-full bg-gray-100">
+      {showAlert && ConfirmAlert()}
+  
+      <section className="p-6">
+        <div className="container mx-auto bg-white shadow-md rounded-md p-6">
+          <header className="text-center mb-6">
+            <h1 className="text-4xl font-bold text-gray-800 uppercase">
+              Student Profile
+            </h1>
+          </header>
+  
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Student Details */}
+            <div className="bg-gray-50 p-4 shadow-sm rounded-md">
+              <h2 className="text-2xl font-semibold text-gray-700 mb-4">
+                Details
+              </h2>
+              <div className="space-y-3">
+                <p className="flex justify-between">
+                  <span className="font-medium text-gray-600">Student Name:</span>
+                  <span className="text-gray-800">{student.studentName}</span>
+                </p>
+                <p className="flex justify-between">
+                  <span className="font-medium text-gray-600">Register No:</span>
+                  <span className="text-gray-800">{student.registerNo}</span>
+                </p>
+                <p className="flex justify-between">
+                  <span className="font-medium text-gray-600">Academic Year:</span>
+                  <span className="text-gray-800">
+                    {student?.academicYear?.year}
+                  </span>
+                </p>
+                <p className="flex justify-between">
+                  <span className="font-medium text-gray-600">House Name:</span>
+                  <span className="text-gray-800">{student.houseName}</span>
+                </p>
+                <p className="flex justify-between">
+                  <span className="font-medium text-gray-600">Father's Name:</span>
+                  <span className="text-gray-800">{student.fatherName}</span>
+                </p>
+                <p className="flex justify-between">
+                  <span className="font-medium text-gray-600">Phone:</span>
+                  <span className="text-gray-800">+91 {student.phone}</span>
+                </p>
+                <p className="flex justify-between">
+                  <span className="font-medium text-gray-600">Date of Birth:</span>
+                  <span className="text-gray-800">
+                    {moment(student.dob).format("DD-MM-YYYY")}
+                  </span>
+                </p>
+                <p className="flex justify-between">
+                  <span className="font-medium text-gray-600">Place:</span>
+                  <span className="text-gray-800">{student.place}</span>
+                </p>
+              </div>
+            </div>
+  
+            {/* Address Details */}
+            <div className="bg-gray-50 p-4 shadow-sm rounded-md">
+              <h2 className="text-2xl font-semibold text-gray-700 mb-4">
+                Address
+              </h2>
+              <div className="space-y-3">
+                <p className="flex justify-between">
+                  <span className="font-medium text-gray-600">Post Office:</span>
+                  <span className="text-gray-800">{student.postOffice}</span>
+                </p>
+                <p className="flex justify-between">
+                  <span className="font-medium text-gray-600">Pincode:</span>
+                  <span className="text-gray-800">{student.pinCode}</span>
+                </p>
+                <p className="flex justify-between">
+                  <span className="font-medium text-gray-600">District:</span>
+                  <span className="text-gray-800">{student.district}</span>
+                </p>
+                <p className="flex justify-between">
+                  <span className="font-medium text-gray-600">State:</span>
+                  <span className="text-gray-800">{student.state}</span>
+                </p>
+                <p className="flex justify-between">
+                  <span className="font-medium text-gray-600">
+                    Study Center:
+                  </span>
+                  <span className="text-gray-800">
+                    {student?.branch?.studyCentreName}
+                  </span>
+                </p>
+                <p className="flex justify-between">
+                  <span className="font-medium text-gray-600">Class:</span>
+                  <span className="text-gray-800">
+                    {student.class?.className}
+                  </span>
+                </p>
               </div>
             </div>
           </div>
-        </section>
-
-        <div className="max-w-screen-xl mx-auto">
-          <h3 className="text-4xl font-bold text-gray-800 uppercase my-4">
-            TRANSFER STUDENT
-          </h3>
-          <Link to={`/transfer-student/${student._id}`}>
-            <button className="bg-gray-800 px-4 py-3 font-bold text-white hover:bg-gray-600 transition">
-              Go To Transfer Page
-              <FontAwesomeIcon className="mx-3" icon={faArrowRight} />
-            </button>
-          </Link>
+  
+          {/* Status and Actions */}
+          <div className="mt-6 bg-gray-50 p-4 shadow-sm rounded-md">
+            <div className="flex items-center justify-between">
+              <span className="text-lg font-medium text-gray-700">Status:</span>
+              {student?.verified ? (
+                <span className="bg-green-500 text-white px-3 py-1 rounded-md text-sm">
+                  Active
+                </span>
+              ) : (
+                <span
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setShowAlert(true);
+                  }}
+                  className="bg-red-500 text-white px-3 py-1 rounded-md text-sm cursor-pointer"
+                >
+                  Not Verified
+                </span>
+              )}
+            </div>
+            <div className="mt-4 flex justify-end">
+              <button
+                onClick={(e) => handleDelete(e, student._id)}
+                className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition"
+              >
+                <FontAwesomeIcon icon={faTrash} className="mr-2" />
+                Delete Student
+              </button>
+            </div>
+          </div>
+  
+          <footer className="mt-6 text-center">
+            <h3 className="text-2xl font-bold text-gray-800 mb-4">
+              Transfer Student
+            </h3>
+            <Link to={`/transfer-student/${student._id}`}>
+              <button className="bg-teal-600 text-white px-6 py-2 rounded-md hover:bg-teal-700 transition">
+                Go To Transfer Page
+                <FontAwesomeIcon className="ml-2" icon={faArrowRight} />
+              </button>
+            </Link>
+          </footer>
         </div>
-      </div>
-    </>
+      </section>
+    </div>
+  </>
+  
   );
 
   function ConfirmAlert() {
