@@ -1,10 +1,10 @@
 import moment from "moment";
 import React, { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import Axios from "../../Axios";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faTrash } from "@fortawesome/free-solid-svg-icons";
+import { faArrowRight, faTrash } from "@fortawesome/free-solid-svg-icons";
 
 function StudentProfile() {
   const { id } = useParams();
@@ -224,19 +224,18 @@ function StudentProfile() {
             </div>
           </div>
         </section>
-        {/* {student.verified && (
-          <div className="max-w-screen-xl mx-auto">
-            <h3 className="text-4xl font-bold text-gray-800 uppercase my-4">
-              TRANSFER STUDENT
-            </h3>
-            <Link to={`/transfer/${student._id}`}>
-              <button className="bg-gray-800 px-4 py-3 font-bold text-white hover:bg-gray-600 transition">
-                Go To Transfer Page
-                <FontAwesomeIcon className="mx-3" icon={faArrowRight} />
-              </button>
-            </Link>
-          </div>
-        )} */}
+
+        <div className="max-w-screen-xl mx-auto">
+          <h3 className="text-4xl font-bold text-gray-800 uppercase my-4">
+            TRANSFER STUDENT
+          </h3>
+          <Link to={`/transfer-student/${student._id}`}>
+            <button className="bg-gray-800 px-4 py-3 font-bold text-white hover:bg-gray-600 transition">
+              Go To Transfer Page
+              <FontAwesomeIcon className="mx-3" icon={faArrowRight} />
+            </button>
+          </Link>
+        </div>
       </div>
     </>
   );

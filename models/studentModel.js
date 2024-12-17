@@ -53,7 +53,7 @@ const studentSchema = new mongoose.Schema(
       type: String,
       uppercase: true,
       maxLength: [50, "50 characters are allowed"],
-      required:false
+      required: false
     },
 
     dateOfBirth: {
@@ -67,8 +67,8 @@ const studentSchema = new mongoose.Schema(
     },
     academicYear: {
       type: mongoose.Types.ObjectId,
-      ref:"AcademicYear",
-      required:true,
+      ref: "AcademicYear",
+      required: true,
     },
     branch: {
       type: mongoose.Types.ObjectId,
@@ -76,6 +76,13 @@ const studentSchema = new mongoose.Schema(
       maxLength: [100, "100 characters are allowed"],
       ref: "Branch",
     },
+    transferredFrom: {
+      type: mongoose.Types.ObjectId,
+      required: [true, "Please select study centre"],
+      maxLength: [100, "100 characters are allowed"],
+      ref: "Branch",
+    },
+    transferReason: String,
     verified: {
       type: Boolean,
       default: false,
@@ -85,6 +92,7 @@ const studentSchema = new mongoose.Schema(
       required: [true, "Please select a class"],
       ref: "Class",
     },
+
     deleted: { type: Boolean, default: false },
   },
   { timestamps: true }

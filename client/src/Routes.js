@@ -187,6 +187,10 @@ export const AdminRoutes = [
     component: <Student.AddStudent />,
   },
   {
+    route: "/transfer-student/:studentId",
+    component: <Student.TransferStudent />,
+  },
+  {
     route: "/edit-student/:id",
     component: <Student.EditStudent />,
   },

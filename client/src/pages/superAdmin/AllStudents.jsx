@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState } from "react";
 import ReactHTMLTableToExcel from "react-html-table-to-excel"; // Import the library
 import Axios from "../../Axios";
 import Loading from "../../components/Loading";
+import { Link } from "react-router-dom";
 
 function AllStudents() {
   const tableRef = useRef(null);
@@ -139,7 +140,11 @@ function AllStudents() {
       {loading ? (
         <Loading />
       ) : (
-        <table id="students-table" ref={tableRef} className="min-w-full divide-y divide-gray-200">
+        <table
+          id="students-table"
+          ref={tableRef}
+          className="min-w-full divide-y divide-gray-200"
+        >
           <thead className="bg-gray-50">
             <tr>
               <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -192,7 +197,13 @@ function AllStudents() {
 
           <tbody className="bg-white divide-y divide-gray-200">
             {students.map((student, key) => (
-              <tr key={student._id}>
+              <tr
+                key={student._id}
+                onClick={() =>
+                  (window.location.href = `/profile/${student._id}`)
+                }
+                className="cursor-pointer hover:bg-gray-100 transition duration-150 ease-in-out"
+              >
                 <td className="text-sm text-center text-gray-600 p-2">
                   {key + 1}
                 </td>
@@ -227,7 +238,9 @@ function AllStudents() {
                   <p className="w-40">{student.phone}</p>
                 </td>
                 <td className="text-sm text-center text-gray-600 p-2">
-                  <p className="w-40">{student.dobDate}-{student.dobMonth}-{student.dobYear}</p>
+                  <p className="w-40">
+                    {student.dobDate}-{student.dobMonth}-{student.dobYear}
+                  </p>
                 </td>
                 <td className="text-sm text-center text-gray-600 p-2">
                   <p className="w-40">{student.class.className}</p>
