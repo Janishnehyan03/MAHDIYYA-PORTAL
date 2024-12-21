@@ -32,22 +32,27 @@ exports.getAll =
   };
 
 exports.getOne =
-  (Model, populateOption1, populateOption2,populateOption3) => async (req, res) => {
+  (Model, ...populateOptions) => async (req, res) => {
     try {
-      let data = await Model.findById(req.params.id)
-        .populate(populateOption1)
-        .populate(populateOption2)
-        .populate(populateOption3)
+      let query = Model.findById(req.params.id);
+      populateOptions.forEach(option => {
+        query = query.populate(option);
+      });
+      const data = await query;
       res.status(200).json(data);
     } catch (error) {
       res.status(400).json(error);
     }
   };
 exports.updateOne = (Model) => async (req, res) => {
+  console.log(req.body);
   try {
     const item = await Model.findById(req.params.id);
     if (item) {
       let data = await Model.findByIdAndUpdate(req.params.id, req.body);
+      console.log('====================================');
+      console.log(data);
+      console.log('====================================');
       res.status(200).json(data);
     } else {
       res.status(400).json({ message: "document not found" });

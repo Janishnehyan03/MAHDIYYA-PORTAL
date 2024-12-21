@@ -1,6 +1,6 @@
-import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+import {toast} from 'react-toastify';
 import Axios from "../../Axios";
 
 const TransferStudent = () => {
@@ -10,6 +10,7 @@ const TransferStudent = () => {
   const [transferReason, setTransferReason] = useState("");
   const [loading, setLoading] = useState(false);
 
+  
   const { studentId } = useParams(); // Replace with dynamic ID from route or context
 
   // Fetch student details
@@ -33,11 +34,15 @@ const TransferStudent = () => {
     setLoading(true);
     try {
       await Axios.patch(`/student/${studentId}`, {
-        studyCentre: selectedCentre,
+        branch: selectedCentre,
         transferReason,
         transferredFrom: student.branch._id, // Add transferredFrom field
       });
-      alert("Student transferred successfully!");
+      toast.success("Student transferred successfully!",{
+        position: "top-right",
+        autoClose: 3000,
+      });
+      window.location.reload();
     } catch (err) {
       console.error(err);
       alert("Failed to transfer student.");
@@ -83,7 +88,13 @@ const TransferStudent = () => {
               {student.transferredFrom && (
                 <p className="text-gray-600">
                   <strong className="text-gray-800">Transferred From:</strong>{" "}
-                  {student.transferredFrom.studyCentreName}
+                  {student.transferredFrom?.studyCentreName}
+                </p>
+              )}
+              {student.transferReason && (
+                <p className="text-gray-600">
+                  <strong className="text-gray-800">Transferred for:</strong>{" "}
+                  {student.transferReason}
                 </p>
               )}
             </div>

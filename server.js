@@ -1,10 +1,10 @@
 const mongoose = require("mongoose");
 const app = require("./app");
 const AppError = require("./utils/AppError");
-const globalError = require("./utils/gloablErrors");
+const globalError = require("./utils/globalErrors");
 
 
-mongoose.connect(process.env.MONGO_URI, (err, data) => {
+mongoose.connect(process.env.MONGO_URI,{}, (err, data) => {
   if (err) {
     console.log(err);
   } else {

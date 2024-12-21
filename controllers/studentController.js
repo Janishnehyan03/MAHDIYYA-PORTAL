@@ -8,7 +8,8 @@ exports.getStudent = globalFunctions.getOne(
   Student,
   "branch",
   "class",
-  "academicYear"
+  "academicYear",
+  "transferredFrom"
 );
 
 exports.getAllStudents = async (req, res, next) => {

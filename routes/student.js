@@ -47,7 +47,7 @@ router.delete(
 router.patch(
   "/:id",
   protect,
-  restrictTo("admin"),
+  restrictTo("admin",'superAdmin'),
   studentController.updateStudent
 );
 
