@@ -168,7 +168,7 @@ const AddStudent = () => {
       <h1 className="text-2xl font-bold mb-4">Student Form</h1>
       <form onSubmit={handleSubmit}>
         <div className="mb-4">
-          <label htmlFor="state" className="block  text-sm font-bold mb-2">
+          <label htmlFor="state" className="block  text-sm font-bold mb-2 text-[#eeeeee]">
             select class
           </label>
           <select
@@ -189,7 +189,7 @@ const AddStudent = () => {
           <div key={key} className="lg:col-span-1">
             <div className="px-4 sm:px-0">
               <label
-                className="block  text-sm font-bold mb-2"
+                className="block  text-sm font-bold mb-2 text-[#eeeeee]"
                 htmlFor="username"
               >
                 {form.labelName}

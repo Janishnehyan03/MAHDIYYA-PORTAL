@@ -60,9 +60,9 @@ function CreateStudyCentre() {
 
   return (
     <div className="w-3/4 ml-6">
-      <section className="bg-white p-6">
+      <section className="bg-gray-900 p-6">
         <div className="max-w-screen-xl mx-auto">
-          <h3 className="text-4xl font-bold text-[#003865] uppercase my-4">
+          <h3 className="text-4xl font-bold text-[#eeeeee] uppercase my-4">
             Create Study Center
           </h3>
 
@@ -70,7 +70,7 @@ function CreateStudyCentre() {
             <div className="lg:col-span-1">
               <div className="px-4 sm:px-0">
                 <label
-                  className="block  text-sm font-bold mb-2"
+                  className="block  text-sm font-bold mb-2 text-[#eeeeee]"
                   htmlFor="username"
                 >
                   Study Center Name
@@ -82,7 +82,7 @@ function CreateStudyCentre() {
                 </label>
 
                 <input
-                  className="block p-4 pl-10 w-full text-sm text-blue-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                  className="block p-4 pl-10 w-full text-sm text-[#eeeeee] bg-gray-900 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                   type="text"
                   onChange={(e) => onChange(e)}
                   required
@@ -95,7 +95,7 @@ function CreateStudyCentre() {
             <div className="lg:col-span-1">
               <div className="px-4 sm:px-0">
                 <label
-                  className="block  text-sm font-bold mb-2"
+                  className="block  text-sm font-bold mb-2 text-[#eeeeee]"
                   htmlFor="username"
                 >
                   Study Center Code
@@ -107,7 +107,7 @@ function CreateStudyCentre() {
                 </label>
 
                 <input
-                  className="block p-4 pl-10 w-full text-sm text-blue-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                  className="block p-4 pl-10 w-full text-sm text-[#eeeeee] bg-gray-900 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                   type="text"
                   onChange={(e) => onChange(e)}
                   required
@@ -121,7 +121,7 @@ function CreateStudyCentre() {
             <div className="lg:col-span-1">
               <div className="px-4 sm:px-0">
                 <label
-                  className="block  text-sm font-bold mb-2"
+                  className="block  text-sm font-bold mb-2 text-[#eeeeee] "
                   htmlFor="username"
                 >
                   Panchayath
@@ -132,7 +132,7 @@ function CreateStudyCentre() {
                   )}
                 </label>
                 <input
-                  className="block p-4 pl-10 w-full text-sm text-blue-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                  className="block p-4 pl-10 w-full text-sm text-[#eeeeee] bg-gray-900 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                   id="username"
                   type="text"
                   required
@@ -146,7 +146,7 @@ function CreateStudyCentre() {
             <div className="lg:col-span-1">
               <div className="px-4 sm:px-0">
                 <label
-                  className="block  text-sm font-bold mb-2"
+                  className="block  text-sm font-bold mb-2 text-[#eeeeee]"
                   htmlFor="username"
                 >
                   Affiliated Year
@@ -157,7 +157,7 @@ function CreateStudyCentre() {
                   )}
                 </label>
                 <input
-                  className="block p-4 pl-10 w-full text-sm text-blue-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                  className="block p-4 pl-10 w-full text-sm text-[#eeeeee] bg-gray-900 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                   id="username"
                   type="text"
                   required
@@ -171,7 +171,7 @@ function CreateStudyCentre() {
             <div className="lg:col-span-1">
               <div className="px-4 sm:px-0">
                 <label
-                  className="block  text-sm font-bold mb-2"
+                  className="block  text-sm font-bold mb-2 text-[#eeeeee]"
                   htmlFor="username"
                 >
                  Email
@@ -182,7 +182,7 @@ function CreateStudyCentre() {
                   )}
                 </label>
                 <input
-                  className="block p-4 pl-10 w-full text-sm text-blue-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                  className="block p-4 pl-10 w-full text-sm text-[#eeeeee] bg-gray-900 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                   id="username"
                   type="text"
                   required
@@ -196,7 +196,7 @@ function CreateStudyCentre() {
             <div className="lg:col-span-1">
               <div className="px-4 sm:px-0">
                 <label
-                  className="block  text-sm font-bold mb-2"
+                  className="block  text-sm font-bold mb-2 text-[#eeeeee]"
                   htmlFor="username"
                 >
                   Phone Number 
@@ -207,7 +207,7 @@ function CreateStudyCentre() {
                   )}
                 </label>
                 <input
-                  className="block p-4 pl-10 w-full text-sm text-blue-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                  className="block p-4 pl-10 w-full text-sm text-[#eeeeee] bg-gray-900 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                   id="username"
                   type="text"
                   required
@@ -223,7 +223,7 @@ function CreateStudyCentre() {
             <div className="lg:col-span-1">
               <div className="px-4 sm:px-0">
                 <label
-                  className="block  text-sm font-bold mb-2"
+                  className="block  text-sm font-bold mb-2 text-[#eeeeee]"
                   htmlFor="username"
                 >
                   Place
@@ -234,7 +234,7 @@ function CreateStudyCentre() {
                   )}
                 </label>
                 <input
-                  className="block p-4 pl-10 w-full text-sm text-blue-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                  className="block p-4 pl-10 w-full text-sm text-[#eeeeee] bg-gray-900 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                   type="text"
                   required
                   value={inputData.place}
@@ -246,7 +246,7 @@ function CreateStudyCentre() {
             </div>
             <div className="lg:col-span-1">
               <label
-                className="block  text-sm font-bold mb-2"
+                className="block  text-sm font-bold mb-2 text-[#eeeeee]"
                 htmlFor="username"
               >
                 District
@@ -262,7 +262,7 @@ function CreateStudyCentre() {
                 onChange={(e) => onChange(e)}
                 id=""
                 value={inputData.district}
-                className="bg-gray-50 border border-gray-300 text-blue-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
+                className="bg-gray-900 border border-gray-300 text-[#eeeeee] text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
               >
                 <option hidden>Select YOUR DISTRICT </option>
                 {DISTRICT.map((district, index) => (
@@ -277,7 +277,7 @@ function CreateStudyCentre() {
             <div className="lg:col-span-1">
               <div className="px-4 sm:px-0">
                 <label
-                  className="block  text-sm font-bold mb-2"
+                  className="block  text-sm font-bold mb-2 text-[#eeeeee]"
                   htmlFor="username"
                 >
                   Post Office
@@ -288,7 +288,7 @@ function CreateStudyCentre() {
                   )}
                 </label>
                 <input
-                  className="block p-4 pl-10 w-full text-sm text-blue-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                  className="block p-4 pl-10 w-full text-sm text-[#eeeeee] bg-gray-900 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                   type="text"
                   required
                   value={inputData.postOffice}
@@ -301,7 +301,7 @@ function CreateStudyCentre() {
             <div className="lg:col-span-1">
               <div className="px-4 sm:px-0">
                 <label
-                  className="block  text-sm font-bold mb-2"
+                  className="block  text-sm font-bold mb-2 text-[#eeeeee]"
                   htmlFor="username"
                 >
                   Pin Code
@@ -312,7 +312,7 @@ function CreateStudyCentre() {
                   )}
                 </label>
                 <input
-                  className="block p-4 pl-10 w-full text-sm text-blue-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                  className="block p-4 pl-10 w-full text-sm text-[#eeeeee] bg-gray-900 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                   type="text"
                   value={inputData.pinCode}
                   required
@@ -325,7 +325,7 @@ function CreateStudyCentre() {
             <div className="lg:col-span-1">
               <div className="px-4 sm:px-0">
                 <label
-                  className="block  text-sm font-bold mb-2"
+                  className="block  text-sm font-bold mb-2 text-[#eeeeee]"
                   htmlFor="username"
                 >
                   State
@@ -336,7 +336,7 @@ function CreateStudyCentre() {
                   )}
                 </label>
                 <input
-                  className="block p-4 pl-10 w-full text-sm text-blue-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                  className="block p-4 pl-10 w-full text-sm text-[#eeeeee] bg-gray-900 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                   type="text"
                   value={inputData.state}
                   required
@@ -350,13 +350,13 @@ function CreateStudyCentre() {
             <div className="lg:col-span-1">
               <div className="px-4 sm:px-0">
                 <label
-                  className="block  text-sm font-bold mb-2"
+                  className="block  text-sm font-bold mb-2 text-[#eeeeee]"
                   htmlFor="username"
                 >
                   Admin Username
                 </label>
                 <input
-                  className="block p-4 pl-10 w-full text-sm text-blue-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                  className="block p-4 pl-10 w-full text-sm text-[#eeeeee] bg-gray-900 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                   type="text"
                   value={inputData.username}
                   required
@@ -370,13 +370,13 @@ function CreateStudyCentre() {
             <div className="lg:col-span-1">
               <div className="px-4 sm:px-0">
                 <label
-                  className="block  text-sm font-bold mb-2"
+                  className="block  text-sm font-bold mb-2 text-[#eeeeee]"
                   htmlFor="username"
                 >
                   Admin Password
                 </label>
                 <input
-                  className="block p-4 pl-10 w-full text-sm text-blue-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                  className="block p-4 pl-10 w-full text-sm text-[#eeeeee] bg-gray-900 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                   type="text"
                   value={inputData.password}
                   required

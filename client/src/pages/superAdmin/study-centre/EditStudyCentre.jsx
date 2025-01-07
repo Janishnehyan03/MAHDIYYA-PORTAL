@@ -63,7 +63,7 @@ function EditStudyCentre() {
   }, [id]);
   return (
     <div className="w-3/4 ml-6">
-      <section className="bg-white p-6">
+      <section className="bg-gray-900 p-6">
         <div className="max-w-screen-xl mx-auto">
           <h3 className="text-4xl font-bold text-sky-900 uppercase my-4">
             Edit Branch
@@ -82,7 +82,7 @@ function EditStudyCentre() {
                 </label>
 
                 <input
-                  className="block p-4 pl-10 w-full  text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-gray-500 focus:border-gray-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-500 dark:focus:border-gray-500"
+                  className="block p-4 pl-10 w-full  text-white bg-gray-900 rounded-lg border border-gray-300 focus:ring-gray-500 focus:border-gray-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-500 dark:focus:border-gray-500"
                   type="text"
                   onChange={(e) => onChange(e)}
                   required
@@ -104,7 +104,7 @@ function EditStudyCentre() {
                 </label>
 
                 <input
-                  className="block p-4 pl-10 w-full  text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-gray-500 focus:border-gray-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-500 dark:focus:border-gray-500"
+                  className="block p-4 pl-10 w-full  text-white bg-gray-900 rounded-lg border border-gray-300 focus:ring-gray-500 focus:border-gray-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-500 dark:focus:border-gray-500"
                   type="text"
                   onChange={(e) => onChange(e)}
                   required
@@ -126,7 +126,7 @@ function EditStudyCentre() {
                   )}
                 </label>
                 <input
-                  className="block p-4 pl-10 w-full  text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-gray-500 focus:border-gray-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-500 dark:focus:border-gray-500"
+                  className="block p-4 pl-10 w-full  text-white bg-gray-900 rounded-lg border border-gray-300 focus:ring-gray-500 focus:border-gray-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-500 dark:focus:border-gray-500"
                   id="username"
                   type="text"
                   required
@@ -148,7 +148,7 @@ function EditStudyCentre() {
                   )}
                 </label>
                 <input
-                  className="block p-4 pl-10 w-full  text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-gray-500 focus:border-gray-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-500 dark:focus:border-gray-500"
+                  className="block p-4 pl-10 w-full  text-white bg-gray-900 rounded-lg border border-gray-300 focus:ring-gray-500 focus:border-gray-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-500 dark:focus:border-gray-500"
                   id="username"
                   type="text"
                   required
@@ -170,7 +170,7 @@ function EditStudyCentre() {
                   )}
                 </label>
                 <input
-                  className="block p-4 pl-10 w-full  text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-gray-500 focus:border-gray-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-500 dark:focus:border-gray-500"
+                  className="block p-4 pl-10 w-full  text-white bg-gray-900 rounded-lg border border-gray-300 focus:ring-gray-500 focus:border-gray-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-500 dark:focus:border-gray-500"
                   id="username"
                   type="text"
                   required
@@ -192,7 +192,7 @@ function EditStudyCentre() {
                   )}
                 </label>
                 <input
-                  className="block p-4 pl-10 w-full  text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-gray-500 focus:border-gray-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-500 dark:focus:border-gray-500"
+                  className="block p-4 pl-10 w-full  text-white bg-gray-900 rounded-lg border border-gray-300 focus:ring-gray-500 focus:border-gray-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-500 dark:focus:border-gray-500"
                   id="username"
                   type="text"
                   required
@@ -215,7 +215,7 @@ function EditStudyCentre() {
                   )}
                 </label>
                 <input
-                  className="block p-4 pl-10 w-full  text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-gray-500 focus:border-gray-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-500 dark:focus:border-gray-500"
+                  className="block p-4 pl-10 w-full  text-white bg-gray-900 rounded-lg border border-gray-300 focus:ring-gray-500 focus:border-gray-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-500 dark:focus:border-gray-500"
                   type="text"
                   required
                   value={inputData.place}
@@ -237,7 +237,7 @@ function EditStudyCentre() {
                   )}
                 </label>
                 <input
-                  className="block p-4 pl-10 w-full  text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-gray-500 focus:border-gray-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-500 dark:focus:border-gray-500"
+                  className="block p-4 pl-10 w-full  text-white bg-gray-900 rounded-lg border border-gray-300 focus:ring-gray-500 focus:border-gray-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-500 dark:focus:border-gray-500"
                   type="text"
                   required
                   value={inputData.place}
@@ -262,7 +262,7 @@ function EditStudyCentre() {
                 onChange={(e) => onChange(e)}
                 id=""
                 value={inputData.district}
-                className="bg-gray-50 border border-gray-300 text-gray-900  rounded-lg focus:ring-gray-500 focus:border-gray-500 block w-full p-2.5 "
+                className="bg-gray-900 border border-gray-300 text-white  rounded-lg focus:ring-gray-500 focus:border-gray-500 block w-full p-2.5 "
               >
                 <option hidden>Select YOUR DISTRICT </option>
                 {DISTRICT.map((district, index) => (
@@ -285,7 +285,7 @@ function EditStudyCentre() {
                   )}
                 </label>
                 <input
-                  className="block p-4 pl-10 w-full  text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-gray-500 focus:border-gray-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-500 dark:focus:border-gray-500"
+                  className="block p-4 pl-10 w-full  text-white bg-gray-900 rounded-lg border border-gray-300 focus:ring-gray-500 focus:border-gray-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-500 dark:focus:border-gray-500"
                   type="text"
                   required
                   value={inputData.postOffice}
@@ -306,7 +306,7 @@ function EditStudyCentre() {
                   )}
                 </label>
                 <input
-                  className="block p-4 pl-10 w-full  text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-gray-500 focus:border-gray-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-500 dark:focus:border-gray-500"
+                  className="block p-4 pl-10 w-full  text-white bg-gray-900 rounded-lg border border-gray-300 focus:ring-gray-500 focus:border-gray-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-500 dark:focus:border-gray-500"
                   type="text"
                   value={inputData.pinCode}
                   required
@@ -327,7 +327,7 @@ function EditStudyCentre() {
                   )}
                 </label>
                 <input
-                  className="block p-4 pl-10 w-full  text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-gray-500 focus:border-gray-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-500 dark:focus:border-gray-500"
+                  className="block p-4 pl-10 w-full  text-white bg-gray-900 rounded-lg border border-gray-300 focus:ring-gray-500 focus:border-gray-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-500 dark:focus:border-gray-500"
                   type="text"
                   value={inputData.state}
                   required
@@ -344,7 +344,7 @@ function EditStudyCentre() {
                   Principal's Name
                 </label>
                 <input
-                  className="block p-4 pl-10 w-full  text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-gray-500 focus:border-gray-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-500 dark:focus:border-gray-500"
+                  className="block p-4 pl-10 w-full  text-white bg-gray-900 rounded-lg border border-gray-300 focus:ring-gray-500 focus:border-gray-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-500 dark:focus:border-gray-500"
                   type="text"
                   value={inputData.currentPrincipal}
                   required
@@ -360,7 +360,7 @@ function EditStudyCentre() {
                   Principal Contact Number
                 </label>
                 <input
-                  className="block p-4 pl-10 w-full  text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-gray-500 focus:border-gray-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-500 dark:focus:border-gray-500"
+                  className="block p-4 pl-10 w-full  text-white bg-gray-900 rounded-lg border border-gray-300 focus:ring-gray-500 focus:border-gray-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-500 dark:focus:border-gray-500"
                   type="tel"
                   value={inputData.principalContactNumber}
                   required
@@ -376,7 +376,7 @@ function EditStudyCentre() {
                   Admin Username
                 </label>
                 <input
-                  className="block p-4 pl-10 w-full  text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-gray-500 focus:border-gray-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-500 dark:focus:border-gray-500"
+                  className="block p-4 pl-10 w-full  text-white bg-gray-900 rounded-lg border border-gray-300 focus:ring-gray-500 focus:border-gray-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-500 dark:focus:border-gray-500"
                   type="text"
                   value={inputData.username}
                   required
@@ -393,7 +393,7 @@ function EditStudyCentre() {
                   Admin Password
                 </label>
                 <input
-                  className="block p-4 pl-10 w-full  text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-gray-500 focus:border-gray-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-500 dark:focus:border-gray-500"
+                  className="block p-4 pl-10 w-full  text-white bg-gray-900 rounded-lg border border-gray-300 focus:ring-gray-500 focus:border-gray-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-500 dark:focus:border-gray-500"
                   type="text"
                   value={inputData.password}
                   required

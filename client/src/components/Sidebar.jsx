@@ -167,7 +167,7 @@ function Sidebar() {
 
           {authData ? (
             <div className="absolute bottom-2">
-              <div className="p-2.5 mt-3 flex items-center rounded-md px-4  bg-teal-500 duration-300 text-white">
+              <div className="p-2.5 mt-3 flex items-center rounded-md px-4  bg-blue-600 duration-300 text-white">
                 {authData && (
                   <Link
                     to={"/profile"}
@@ -190,7 +190,7 @@ function Sidebar() {
           ) : (
             <Link
               to={"/login"}
-              className="p-2.5 mt-3 flex items-center rounded-md px-4 duration-300 cursor-pointer bg-green-600 text-white"
+              className="p-2.5 mt-3 flex items-center rounded-md px-4 duration-300 cursor-pointer bg-blue-600 text-white"
             >
               <i className="bi bi-box-arrow-in-right" />
               <span className="text-[15px] ml-4 text-gray-200 font-bold">

@@ -38,7 +38,7 @@ const StudentResultPage = () => {
     <div className="container mx-auto ">
       <form
         onSubmit={handleSubmit}
-        className="max-w-sm mx-auto bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4"
+        className="max-w-sm mx-auto bg-gray-900 shadow-md rounded px-8 pt-6 pb-8 mb-4"
       >
         <div className="mb-4">
           <label
@@ -89,11 +89,11 @@ const StudentResultPage = () => {
 
       {studentResults.length > 0 && (
         <>
-          <div className="bg-gray-50 my-4  p-10 shadow-lg " ref={ref}>
+          <div className="bg-gray-900 my-4  p-10 shadow-lg " ref={ref}>
             <img src="/logo.png" className="h-28 mx-auto" alt="" />
 
             <div className="p-4">
-              <p className="text-lg font-semibold bg-gray-500 text-white p-3 mb-2 text-center uppercase">
+              <p className="text-lg font-semibold bg-gray-9000 text-white p-3 mb-2 text-center uppercase">
                 {studentResults[0]?.exam?.examName}
               </p>
               <p className="text-gray-700 mb-1">
@@ -160,7 +160,7 @@ const StudentResultPage = () => {
               </p>
               <p
                 className={`text-gray-200 p-1 font-semibold  ${
-                  resultData?.promoted ? "bg-green-500" : "bg-red-500"
+                  resultData?.promoted ? "bg-blue-600" : "bg-red-500"
                 }`}
               >
                 Status: {resultData?.promoted ? "Promoted" : "Not Promoted"}
@@ -170,7 +170,7 @@ const StudentResultPage = () => {
               </p>
             </div>
             <div className="p-3 text-center bg-gray-300 mt-4 w-full">
-              <h1 className="font-semibold text-gray-600">CPET DARUL HUDA </h1>
+              <h1 className="font-semibold text-white">CPET DARUL HUDA </h1>
               <a href="https://cpetdhiu.in">cpetdhiu.in </a>
             </div>
           </div>
@@ -185,7 +185,7 @@ const StudentResultPage = () => {
             trigger={() => (
               <div className="flex flex-col ">
                 <button
-                  className="text-center bg-green-500 px-2 py-1 text-white mx-auto"
+                  className="text-center bg-blue-600 px-2 py-1 text-white mx-auto"
                   type="primary"
                 >
                   Print Result

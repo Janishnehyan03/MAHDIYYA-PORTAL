@@ -21,7 +21,7 @@ function StudyCentreTeachers() {
 
   return (
     <>
-      <h1 className="text-center font-bold text-teal-700 my-3 text-2xl">
+      <h1 className="text-center font-bold text-white my-3 text-2xl">
         {teachers[0]?.branch?.studyCentreName}
       </h1>
       <div className="overflow-x-auto sm:-mx-6 lg:-mx-8">
@@ -32,26 +32,26 @@ function StudyCentreTeachers() {
                 <tr>
                   <th
                     scope="col"
-                    className="text-sm font-bold text-blue-900 px-6 py-4 text-left"
+                    className="text-sm font-bold text-[#eeeeee] px-6 py-4 text-left"
                   >
                     #
                   </th>
                   <th
                     scope="col"
-                    className="text-sm font-bold text-blue-900 px-6 py-4 text-left"
+                    className="text-sm font-bold text-[#eeeeee] px-6 py-4 text-left"
                   >
                     USERNAME
                   </th>
                   <th
                     scope="col"
-                    className="text-sm font-bold text-blue-900 px-6 py-4 text-left"
+                    className="text-sm font-bold text-[#eeeeee] px-6 py-4 text-left"
                   >
                     BRANCH
                   </th>
 
                   <th
                     scope="col"
-                    className="text-sm font-bold text-blue-900 px-6 py-4 text-left"
+                    className="text-sm font-bold text-[#eeeeee] px-6 py-4 text-left"
                   >
                     PHONE
                   </th>
@@ -60,16 +60,16 @@ function StudyCentreTeachers() {
               <tbody>
                 {teachers.map((teacher, index) => (
                   <tr key={index} className="border-b">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-900">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-[#eeeeee]">
                       {index + 1}
                     </td>
-                    <td className="text-sm text-blue-900 font-light px-6 py-4 whitespace-nowrap">
+                    <td className="text-sm text-[#eeeeee] font-light px-6 py-4 whitespace-nowrap">
                       {teacher.teacherName}
                     </td>
-                    <td className="text-sm text-blue-900 font-light px-6 py-4 whitespace-nowrap">
+                    <td className="text-sm text-[#eeeeee] font-light px-6 py-4 whitespace-nowrap">
                       {teacher.branch?.studyCentreName}
                     </td>
-                    <td className="text-sm text-blue-900 font-light px-6 py-4 whitespace-nowrap">
+                    <td className="text-sm text-[#eeeeee] font-light px-6 py-4 whitespace-nowrap">
                       {teacher.branch?.phone}
                     </td>
                   </tr>

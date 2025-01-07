@@ -29,158 +29,90 @@ function AllStudyCentres() {
 
   return (
     <>
-      <div className="">
+      <div className="bg-gray-900 p-6 rounded-lg shadow-lg">
         {studyCentres.length > 0 ? (
-          <table className=" ">
-            <thead className="border-b">
+          <table className="w-full bg-gray-900 text-left border-collapse">
+            <thead className="bg-gray-800">
               <tr>
-                <th
-                  scope="col"
-                  className="text-sm font-medium text-blue-900 px-6 py-4 text-left"
-                >
-                  #
-                </th>
-                <th
-                  scope="col"
-                  className="text-sm font-medium text-blue-900 px-6 py-4 text-left"
-                >
-                  Study Centre
-                </th>
-                <th
-                  scope="col"
-                  className="text-sm font-medium text-blue-900 px-6 py-4 text-left"
-                >
-                  Code
-                </th>
-                <th
-                  scope="col"
-                  className="text-sm font-medium text-blue-900 px-6 py-4 text-left"
-                >
-                  Phone
-                </th>
-                <th
-                  scope="col"
-                  className="text-sm font-medium text-blue-900 px-6 py-4 text-left"
-                >
-                  District
-                </th>
-                <th
-                  scope="col"
-                  className="text-sm font-medium text-blue-900 px-6 py-4 text-left"
-                >
-                  State
-                </th>
-                <th
-                  scope="col"
-                  className="text-sm font-medium text-blue-900 px-6 py-4 text-left"
-                >
-                  Panchayath
-                </th>
-                <th
-                  scope="col"
-                  className="text-sm font-medium text-blue-900 px-6 py-4 text-left"
-                >
-                  Affiliated Year
-                </th>
-                <th
-                  scope="col"
-                  className="text-sm font-medium text-blue-900 px-6 py-4 text-left"
-                >
-                  Email
-                </th>
-                <th
-                  scope="col"
-                  className="text-sm font-medium text-blue-900 px-6 py-4 text-left"
-                >
-                  Post Office
-                </th>
-                <th
-                  scope="col"
-                  className="text-sm font-medium text-blue-900 px-6 py-4 text-left"
-                >
-                  Pin Code
-                </th>
-                <th
-                  scope="col"
-                  className="text-sm font-medium text-blue-900 px-6 py-4 text-left"
-                >
-                  Place
-                </th>
-                <th
-                  scope="col"
-                  className="text-sm font-medium text-blue-900 px-6 py-4 text-left"
-                >
-                  Principal
-                </th>
-                <th
-                  scope="col"
-                  className="text-sm font-medium text-blue-900 px-6 py-4 text-left"
-                >
-                  Principal Contact
-                </th>
-                <th
-                  scope="col"
-                  className="text-sm font-medium text-blue-900 px-6 py-4 text-left"
-                >
-                  Edit
-                </th>
+                {[
+                  "#",
+                  "Study Centre",
+                  "Code",
+                  "Phone",
+                  "District",
+                  "State",
+                  "Panchayath",
+                  "Affiliated Year",
+                  "Email",
+                  "Post Office",
+                  "Pin Code",
+                  "Place",
+                  "Principal",
+                  "Principal Contact",
+                  "Edit",
+                ].map((header) => (
+                  <th
+                    key={header}
+                    className="text-sm font-semibold text-gray-300 px-4 py-2"
+                  >
+                    {header}
+                  </th>
+                ))}
               </tr>
             </thead>
             <tbody>
               {studyCentres.map((studyCentre, i) => (
                 <tr
                   key={studyCentre._id}
-                  className="border-b group-hover:text-white group hover:bg-blue-900  cursor-pointer"
+                  className="group hover:bg-gray-700 cursor-pointer transition-colors"
                 >
-                  <td className="px-6 py-4 whitespace-nowrap group-hover:text-white text-sm font-medium text-blue-900">
-                    {i + 1}
-                  </td>
+                  <td className="px-4 py-2 text-sm text-gray-300">{i + 1}</td>
                   <td
                     onClick={() => handleRowClick(studyCentre._id)}
-                    className="px-6 py-4 whitespace-nowrap group-hover:text-white text-semibold font-light text-blue-500"
+                    className="px-4 py-2 text-sm font-semibold text-blue-400 group-hover:text-blue-300 transition-colors"
                   >
                     {studyCentre.studyCentreName}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap group-hover:text-white text-sm font-light text-blue-900">
+                  <td className="px-4 py-2 text-sm text-gray-300">
                     {studyCentre.studyCentreCode}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap group-hover:text-white text-sm font-light text-blue-900">
+                  <td className="px-4 py-2 text-sm text-gray-300">
                     {studyCentre.phone}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap group-hover:text-white text-sm font-light text-blue-900">
+                  <td className="px-4 py-2 text-sm text-gray-300">
                     {studyCentre.district}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap group-hover:text-white text-sm font-light text-blue-900">
+                  <td className="px-4 py-2 text-sm text-gray-300">
                     {studyCentre.state}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap group-hover:text-white text-sm font-light text-blue-900">
+                  <td className="px-4 py-2 text-sm text-gray-300">
                     {studyCentre.panchayath}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap group-hover:text-white text-sm font-light text-blue-900">
+                  <td className="px-4 py-2 text-sm text-gray-300">
                     {studyCentre.affiliatedYear}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap group-hover:text-white text-sm font-light text-blue-900">
+                  <td className="px-4 py-2 text-sm text-gray-300">
                     {studyCentre.email}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap group-hover:text-white text-sm font-light text-blue-900">
+                  <td className="px-4 py-2 text-sm text-gray-300">
                     {studyCentre.postOffice}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap group-hover:text-white text-sm font-light text-blue-900">
+                  <td className="px-4 py-2 text-sm text-gray-300">
                     {studyCentre.pinCode}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap group-hover:text-white text-sm font-light text-blue-900">
+                  <td className="px-4 py-2 text-sm text-gray-300">
                     {studyCentre.place}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap group-hover:text-white text-sm font-light text-blue-900">
+                  <td className="px-4 py-2 text-sm text-gray-300">
                     {studyCentre.currentPrincipal}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap group-hover:text-white text-sm font-light text-blue-900">
+                  <td className="px-4 py-2 text-sm text-gray-300">
                     {studyCentre.principalContactNumber}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap group-hover:text-white text-sm font-light text-blue-900">
+                  <td className="px-4 py-2 text-sm">
                     <Link
                       to={`/edit-branch/${studyCentre._id}`}
-                      className="hover:text-white"
+                      className="text-blue-400 hover:text-blue-300 transition-colors"
                     >
                       <FontAwesomeIcon icon={faEdit} />
                     </Link>
@@ -190,7 +122,9 @@ function AllStudyCentres() {
             </tbody>
           </table>
         ) : (
-          <Loading />
+          <div className="flex justify-center items-center py-20">
+            <Loading />
+          </div>
         )}
       </div>
     </>

@@ -18,12 +18,12 @@ function AdmissionStarted() {
     getBranches();
   }, [selectedBranch]);
   return (
-    <div className="isolate bg-white">
+    <div className="isolate bg-gray-900">
       <main>
         <div className="relative px-6 lg:px-8">
           <div className="mx-auto max-w-4xl py-32 sm:py-48 lg:py-56">
             {/* <div className="hidden sm:mb-8 sm:flex sm:justify-center">
-            <div className="relative rounded-full py-1 px-3 text-sm leading-6 text-gray-600 ring-1 ring-blue-900/10 hover:ring-blue-900/20">
+            <div className="relative rounded-full py-1 px-3 text-sm leading-6 text-white ring-1 ring-blue-900/10 hover:ring-blue-900/20">
               About Us
             </div>
           </div> */}
@@ -33,7 +33,7 @@ function AdmissionStarted() {
                 Admission Started
               </h1>
               <p
-                className="mt-6 text-lg  leading-8 text-gray-600"
+                className="mt-6 text-lg  leading-8 text-white"
                 style={{
                   fontFamily: "MalayalamFont, sans-serif",
                 }}
@@ -109,7 +109,7 @@ function AdmissionStarted() {
                   name="branch"
                   onChange={(e) => setSelectedBranch(e.target.value)}
                   id=""
-                  className="bg-gray-50 mb-4 border border-gray-300 text-blue-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
+                  className="bg-gray-900 mb-4 border border-gray-300 text-[#eeeeee] text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
                 >
                   <option hidden>Select </option>
                   {DISTRICT.map((district, index) => (
@@ -124,8 +124,8 @@ function AdmissionStarted() {
               <div className="lg:grid lg:grid-cols-3 gap-2">
                 {branches.length > 0 &&
                   branches.map((item, index) => (
-                    <div className="block max-w-sm p-6 bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700">
-                      <p className="mb-2  font-semibold tracking-tight text-teal-700 dark:text-white">
+                    <div className="block max-w-sm p-6 bg-gray-900 border border-gray-200 rounded-lg shadow hover:bg-gray-100 dark:bg-gray-800 dark:border-gray-700 dark:hover:bg-gray-700">
+                      <p className="mb-2  font-semibold tracking-tight text-white dark:text-white">
                         {item?.studyCentreName}
                       </p>
                       <p className="font-normal text-gray-700 dark:text-gray-400">

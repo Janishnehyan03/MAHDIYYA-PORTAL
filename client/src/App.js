@@ -36,7 +36,7 @@ export default function App() {
 
   return (
     <>
-      <div className="flex">
+      <div className="flex bg-gray-900 min-h-screen text-white">
         <div className="w-full">
           <ToastContainer />
           <Routes>

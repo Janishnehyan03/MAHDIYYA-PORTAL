@@ -29,7 +29,7 @@ function AllNotifications() {
   }, []);
   return (
     <div className="mx-auto ">
-      <h1 className="text-teal-600 font-bold text-center text-3xl my-4">
+      <h1 className="text-white font-bold text-center text-3xl my-4">
         All Notifications
       </h1>
 
@@ -38,7 +38,7 @@ function AllNotifications() {
           <>
             {notifications.map((notification, key) => (
               <div className="relative  w-full group mt-2 mx-2">
-                <div className="relative px-7 py-6 bg-white ring-1 ring-blue-900/5 rounded-lg leading-none flex items-top justify-start space-x-6">
+                <div className="relative px-7 py-6 bg-gray-900 ring-1 ring-blue-900/5 rounded-lg leading-none flex items-top justify-start space-x-6">
                   <button onClick={() => deleteNotification(notification._id)}>
                     <FontAwesomeIcon
                       icon={faTrash}

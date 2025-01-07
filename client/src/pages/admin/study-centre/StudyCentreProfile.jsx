@@ -105,9 +105,9 @@ function StudyCentreProfile() {
   }, []);
   return (
     <div className="w-3/4 ml-6">
-      <section className="bg-white p-6">
+      <section className="bg-gray-900 p-6">
         <div className="max-w-screen-xl mx-auto">
-          <h3 className="text-4xl font-bold text-[#003865] uppercase my-4">
+          <h3 className="text-4xl font-bold text-[#eeeeee] uppercase my-4">
             Edit Your Info
           </h3>
           <div className="max-w-md mx-auto my-10">
@@ -124,7 +124,7 @@ function StudyCentreProfile() {
                   <button
                     onClick={updateCoverImage}
                     disabled={loading}
-                    className="bg-teal-600 text-white px-3 py-1 rounded hover:bg-teal-400"
+                    className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-600"
                   >
                     {loading ? "uploading..." : "upload"}
                   </button>
@@ -133,7 +133,7 @@ function StudyCentreProfile() {
             </div>
             <label
               htmlFor="image-upload"
-              className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100"
+              className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-900 hover:bg-gray-100"
             >
               <div className="flex flex-col items-center justify-center pt-5 pb-6">
                 <svg
@@ -150,11 +150,11 @@ function StudyCentreProfile() {
                     d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
                   ></path>
                 </svg>
-                <p className="mb-2 text-sm text-gray-500">
+                <p className="mb-2 text-sm text-white">
                   <span className="font-semibold">Click to upload</span> or drag
                   and drop
                 </p>
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-white">
                   PNG, JPG or GIF (MAX. 800x400px)
                 </p>
               </div>
@@ -191,7 +191,7 @@ function StudyCentreProfile() {
                 </label>
 
                 <input
-                  className="block p-4 pl-10 w-full  text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-gray-500 focus:border-gray-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-500 dark:focus:border-gray-500"
+                  className="block p-4 pl-10 w-full  text-white bg-gray-900 rounded-lg border border-gray-300 focus:ring-gray-500 focus:border-gray-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-500 dark:focus:border-gray-500"
                   type="text"
                   onChange={(e) => onChange(e)}
                   required
@@ -213,7 +213,7 @@ function StudyCentreProfile() {
                 </label>
 
                 <input
-                  className="block p-4 pl-10 w-full  text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-gray-500 focus:border-gray-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-500 dark:focus:border-gray-500"
+                  className="block p-4 pl-10 w-full  text-white bg-gray-900 rounded-lg border border-gray-300 focus:ring-gray-500 focus:border-gray-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-500 dark:focus:border-gray-500"
                   type="text"
                   onChange={(e) => onChange(e)}
                   required
@@ -235,7 +235,7 @@ function StudyCentreProfile() {
                   )}
                 </label>
                 <input
-                  className="block p-4 pl-10 w-full  text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-gray-500 focus:border-gray-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-500 dark:focus:border-gray-500"
+                  className="block p-4 pl-10 w-full  text-white bg-gray-900 rounded-lg border border-gray-300 focus:ring-gray-500 focus:border-gray-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-500 dark:focus:border-gray-500"
                   id="username"
                   type="text"
                   required
@@ -257,7 +257,7 @@ function StudyCentreProfile() {
                   )}
                 </label>
                 <input
-                  className="block p-4 pl-10 w-full  text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-gray-500 focus:border-gray-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-500 dark:focus:border-gray-500"
+                  className="block p-4 pl-10 w-full  text-white bg-gray-900 rounded-lg border border-gray-300 focus:ring-gray-500 focus:border-gray-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-500 dark:focus:border-gray-500"
                   id="username"
                   type="text"
                   required
@@ -279,7 +279,7 @@ function StudyCentreProfile() {
                   )}
                 </label>
                 <input
-                  className="block p-4 pl-10 w-full  text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-gray-500 focus:border-gray-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-500 dark:focus:border-gray-500"
+                  className="block p-4 pl-10 w-full  text-white bg-gray-900 rounded-lg border border-gray-300 focus:ring-gray-500 focus:border-gray-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-500 dark:focus:border-gray-500"
                   id="username"
                   type="text"
                   required
@@ -301,7 +301,7 @@ function StudyCentreProfile() {
                   )}
                 </label>
                 <input
-                  className="block p-4 pl-10 w-full  text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-gray-500 focus:border-gray-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-500 dark:focus:border-gray-500"
+                  className="block p-4 pl-10 w-full  text-white bg-gray-900 rounded-lg border border-gray-300 focus:ring-gray-500 focus:border-gray-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-500 dark:focus:border-gray-500"
                   id="username"
                   type="text"
                   required
@@ -324,7 +324,7 @@ function StudyCentreProfile() {
                   )}
                 </label>
                 <input
-                  className="block p-4 pl-10 w-full  text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-gray-500 focus:border-gray-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-500 dark:focus:border-gray-500"
+                  className="block p-4 pl-10 w-full  text-white bg-gray-900 rounded-lg border border-gray-300 focus:ring-gray-500 focus:border-gray-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-500 dark:focus:border-gray-500"
                   type="text"
                   required
                   value={inputData.place}
@@ -340,7 +340,7 @@ function StudyCentreProfile() {
                   Google Map URL
                 </label>
                 <input
-                  className="block p-4 pl-10 w-full  text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-gray-500 focus:border-gray-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-500 dark:focus:border-gray-500"
+                  className="block p-4 pl-10 w-full  text-white bg-gray-900 rounded-lg border border-gray-300 focus:ring-gray-500 focus:border-gray-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-500 dark:focus:border-gray-500"
                   type="text"
                   required
                   value={inputData.googleMapUrl}
@@ -365,7 +365,7 @@ function StudyCentreProfile() {
                 onChange={(e) => onChange(e)}
                 id=""
                 value={inputData.district}
-                className="bg-gray-50 border border-gray-300 text-gray-900  rounded-lg focus:ring-gray-500 focus:border-gray-500 block w-full p-2.5 "
+                className="bg-gray-900 border border-gray-300 text-white  rounded-lg focus:ring-gray-500 focus:border-gray-500 block w-full p-2.5 "
               >
                 <option hidden>Select YOUR DISTRICT </option>
                 {DISTRICT.map((district, index) => (
@@ -388,7 +388,7 @@ function StudyCentreProfile() {
                   )}
                 </label>
                 <input
-                  className="block p-4 pl-10 w-full  text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-gray-500 focus:border-gray-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-500 dark:focus:border-gray-500"
+                  className="block p-4 pl-10 w-full  text-white bg-gray-900 rounded-lg border border-gray-300 focus:ring-gray-500 focus:border-gray-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-500 dark:focus:border-gray-500"
                   type="text"
                   required
                   value={inputData.postOffice}
@@ -409,7 +409,7 @@ function StudyCentreProfile() {
                   )}
                 </label>
                 <input
-                  className="block p-4 pl-10 w-full  text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-gray-500 focus:border-gray-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-500 dark:focus:border-gray-500"
+                  className="block p-4 pl-10 w-full  text-white bg-gray-900 rounded-lg border border-gray-300 focus:ring-gray-500 focus:border-gray-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-500 dark:focus:border-gray-500"
                   type="text"
                   value={inputData.pinCode}
                   required
@@ -430,7 +430,7 @@ function StudyCentreProfile() {
                   )}
                 </label>
                 <input
-                  className="block p-4 pl-10 w-full  text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-gray-500 focus:border-gray-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-500 dark:focus:border-gray-500"
+                  className="block p-4 pl-10 w-full  text-white bg-gray-900 rounded-lg border border-gray-300 focus:ring-gray-500 focus:border-gray-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-500 dark:focus:border-gray-500"
                   type="text"
                   value={inputData.state}
                   required
@@ -447,7 +447,7 @@ function StudyCentreProfile() {
                   Principal's Name
                 </label>
                 <input
-                  className="block p-4 pl-10 w-full  text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-gray-500 focus:border-gray-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-500 dark:focus:border-gray-500"
+                  className="block p-4 pl-10 w-full  text-white bg-gray-900 rounded-lg border border-gray-300 focus:ring-gray-500 focus:border-gray-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-500 dark:focus:border-gray-500"
                   type="text"
                   value={inputData.currentPrincipal}
                   required
@@ -463,7 +463,7 @@ function StudyCentreProfile() {
                   Principal Contact Number
                 </label>
                 <input
-                  className="block p-4 pl-10 w-full  text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-gray-500 focus:border-gray-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-500 dark:focus:border-gray-500"
+                  className="block p-4 pl-10 w-full  text-white bg-gray-900 rounded-lg border border-gray-300 focus:ring-gray-500 focus:border-gray-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-500 dark:focus:border-gray-500"
                   type="tel"
                   value={inputData.principalContactNumber}
                   required
@@ -479,7 +479,7 @@ function StudyCentreProfile() {
                   Admin Username
                 </label>
                 <input
-                  className="block p-4 pl-10 w-full  text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-gray-500 focus:border-gray-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-500 dark:focus:border-gray-500"
+                  className="block p-4 pl-10 w-full  text-white bg-gray-900 rounded-lg border border-gray-300 focus:ring-gray-500 focus:border-gray-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-500 dark:focus:border-gray-500"
                   type="text"
                   value={inputData.username}
                   required
@@ -496,7 +496,7 @@ function StudyCentreProfile() {
                   Admin Password
                 </label>
                 <input
-                  className="block p-4 pl-10 w-full  text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-gray-500 focus:border-gray-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-500 dark:focus:border-gray-500"
+                  className="block p-4 pl-10 w-full  text-white bg-gray-900 rounded-lg border border-gray-300 focus:ring-gray-500 focus:border-gray-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-500 dark:focus:border-gray-500"
                   type="text"
                   value={inputData.password}
                   required

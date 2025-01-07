@@ -16,7 +16,7 @@ import {
   faTools,
   faUpload,
   faUser,
-  faUserGraduate
+  faUserGraduate,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React, { useContext, useEffect, useState } from "react";
@@ -170,103 +170,98 @@ function Dashboard() {
       {authData ? (
         <>
           {authData?.role === "admin" && (
-            <div className="lg:flex">
-              <div className="bg-gray-900 w-full items-center">
-                <h1 className="text-white lg:my-[80px]  text-center font-bold text-3xl">
-                  {branch?.studyCentreName}
-                </h1>
-              </div>
+            <div className="bg-gray-900 py-10">
+              <h1 className="text-white text-center font-extrabold text-4xl uppercase">
+                {branch?.studyCentreName}
+              </h1>
             </div>
           )}
 
           {authData.role === "superAdmin" ? (
-            <>
-              <div className="px-4 py-8 m-auto mt-5 grid grid-cols-1 lg:grid-cols-4">
+            <div className="py-10 bg-gray-800">
+              <h2 className="text-center text-3xl font-semibold text-gray-300 mb-6">
+                Super Admin Dashboard
+              </h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 px-4">
                 {SuperAdminItems.map((item, key) => (
                   <Link
                     to={item.link}
                     key={key}
-                    className="w-full p-2 cursor-pointer"
+                    className="group flex flex-col items-center justify-center p-6 bg-gray-700 rounded-lg shadow-md hover:bg-gray-600 transition duration-300"
                   >
-                    <div className=" py-4 overflow-hidden  cursor-pointer bg-gray-800 rounded-xl group  duration-300 shadow-2xl group">
-                      <div className="flex">
-                        <div className="px-4 py-4 bg-gray-300 group-hover:bg-gray-900 rounded-xl bg-opacity-30 mx-auto text-2xl">
-                          <FontAwesomeIcon
-                            icon={item.icon}
-                            color="white"
-                          ></FontAwesomeIcon>
-                        </div>
-                      </div>
-                      <h1 className="text-xl text-center font-bold group-hover:text-gray-400 text-white mt-4">
-                        {item.text}
-                      </h1>
+                    <div className="bg-gray-600 p-4 rounded-full">
+                      <FontAwesomeIcon
+                        icon={item.icon}
+                        className="text-white text-2xl"
+                      />
                     </div>
+                    <h1 className="mt-4 text-lg font-bold text-gray-200 group-hover:text-white">
+                      {item.text}
+                    </h1>
                   </Link>
                 ))}
               </div>
-            </>
+            </div>
           ) : (
-            <>
-              <div className="bg-gray-100 m-3 p-4 space-x-3 flex items-center justify-center rounded-lg shadow-md">
-                <div className="bg-white p-8 rounded-lg shadow-sm  flex items-center">
+            <div className="bg-gray-100 py-10">
+              <div className="flex flex-wrap justify-center gap-6 mb-10">
+                <div className="flex items-center bg-gray-900 shadow-lg rounded-lg p-6">
                   <FontAwesomeIcon
                     icon={faUserGraduate}
-                    className="text-blue-500 mr-3"
-                    size="3x"
+                    className="text-blue-500 text-4xl mr-4"
                   />
                   <div>
-                    <h1 className="text-lg font-semibold">Students</h1>
-                    <p className="text-2xl">{details?.students?.length}</p>
+                    <h1 className="text-xl font-semibold text-gray-700">
+                      Students
+                    </h1>
+                    <p className="text-2xl font-bold text-gray-800">
+                      {details?.students?.length}
+                    </p>
                   </div>
                 </div>
-                <div className="bg-white p-8 rounded-lg shadow-sm flex items-center">
+                <div className="flex items-center bg-gray-900 shadow-lg rounded-lg p-6">
                   <FontAwesomeIcon
                     icon={faChalkboardTeacher}
-                    className="text-green-500 mr-3"
-                    size="3x"
+                    className="text-green-500 text-4xl mr-4"
                   />
                   <div>
-                    <h1 className="text-lg font-semibold">Teachers</h1>
-                    <p className="text-2xl">{details?.teachers?.length}</p>
+                    <h1 className="text-xl font-semibold text-gray-700">
+                      Teachers
+                    </h1>
+                    <p className="text-2xl font-bold text-gray-800">
+                      {details?.teachers?.length}
+                    </p>
                   </div>
                 </div>
               </div>
-              <div className="w-full items-center px-4 py-8 mt-5 grid grid-cols-1 lg:grid-cols-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 px-4">
                 {AdminItems.map((item, key) => (
                   <Link
                     to={item.link}
                     key={key}
-                    className={`w-full p-2 ${
-                      item.text === "Admission Requests" && "relative"
-                    }`}
+                    className="relative group flex flex-col items-center justify-center p-6 bg-[#061c30] rounded-lg shadow-lg hover:shadow-xl transition duration-300"
                   >
                     {item.text === "Admission Requests" && (
-                      <div className="absolute right-6 top-3 bg-orange-400 px-3  text-white font-bold">
+                      <div className="absolute top-3 right-3 bg-orange-500 text-white px-3 py-1 rounded-full font-bold text-sm">
                         {admissionCount}
                       </div>
                     )}
-                    <div className=" py-4 overflow-hidden bg-[#061c30] rounded-xl  duration-300 shadow-2xl group">
-                      <div className="flex">
-                        <div className="px-4 py-4 bg-gray-300  rounded-xl bg-opacity-30 mx-auto text-2xl">
-                          <FontAwesomeIcon
-                            icon={item.icon}
-                            color="white"
-                          ></FontAwesomeIcon>
-                        </div>
-                      </div>
-                      <h1 className="text-xl text-center font-bold text-white mt-4 group-hover:text-gray-50">
-                        {item.text}
-                      </h1>
+                    <div className="bg-gray-700 p-4 rounded-full">
+                      <FontAwesomeIcon
+                        icon={item.icon}
+                        className="text-white text-2xl"
+                      />
                     </div>
+                    <h1 className="mt-4 text-lg font-bold text-white group-hover:text-gray-200">
+                      {item.text}
+                    </h1>
                   </Link>
                 ))}
               </div>
-            </>
+            </div>
           )}
         </>
-      ) : (
-        ""
-      )}
+      ) : null}
     </div>
   );
 }

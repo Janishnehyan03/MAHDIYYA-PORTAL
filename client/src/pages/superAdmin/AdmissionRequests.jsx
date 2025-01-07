@@ -47,7 +47,7 @@ function AdmissionRequests() {
           </table>
         </div>
       ) : (
-        <h1 className="text-center font-bold text-xl uppercase text-blue-900 my-5">
+        <h1 className="text-center font-bold text-xl uppercase text-[#eeeeee] my-5">
           There is no pending requests
         </h1>
       )}

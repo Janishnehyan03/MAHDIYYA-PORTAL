@@ -3,13 +3,13 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React from "react";
 function Footer() {
   return (
-    <footer className="text-center lg:text-left bg-gray-100 text-gray-600">
+    <footer className="text-center lg:text-left bg-gray-100 text-white">
       <div className="flex justify-center items-center lg:justify-between p-6 border-b border-gray-300">
         <div className="mr-12 hidden lg:block">
           <img src="/images/logo.png" className="h-[100px]" alt="" />
         </div>
         <div className="flex justify-center">
-          <a href="#!" className="mr-6 text-gray-600">
+          <a href="#!" className="mr-6 text-white">
             <svg
               aria-hidden="true"
               focusable="false"
@@ -26,7 +26,7 @@ function Footer() {
               ></path>
             </svg>
           </a>
-          <a href="#!" className="mr-6 text-gray-600">
+          <a href="#!" className="mr-6 text-white">
             <svg
               aria-hidden="true"
               focusable="false"
@@ -43,7 +43,7 @@ function Footer() {
               ></path>
             </svg>
           </a>
-          <a href="#!" className="mr-6 text-gray-600">
+          <a href="#!" className="mr-6 text-white">
             <svg
               aria-hidden="true"
               focusable="false"
@@ -60,7 +60,7 @@ function Footer() {
               ></path>
             </svg>
           </a>
-          <a href="#!" className="mr-6 text-gray-600">
+          <a href="#!" className="mr-6 text-white">
             <svg
               aria-hidden="true"
               focusable="false"

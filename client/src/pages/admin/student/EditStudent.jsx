@@ -80,13 +80,13 @@ function EditStudent() {
 
   return (
     <div className="w-3/4 ml-6">
-      <section className="bg-white p-6">
+      <section className="bg-gray-900 p-6">
         <div className="max-w-screen-xl mx-auto">
           <form className="">
             <div className="lg:col-span-1 mt-4 ">
               <div className="px-4 sm:px-0">
                 <label
-                  className="block  text-sm font-bold mb-2"
+                  className="block  text-sm font-bold mb-2 text-[#eeeeee]"
                   htmlFor="username"
                 >
                   Student Name
@@ -105,7 +105,7 @@ function EditStudent() {
             <div className="lg:col-span-1 mt-4 ">
               <div className="px-4 sm:px-0">
                 <label
-                  className="block  text-sm font-bold mb-2"
+                  className="block  text-sm font-bold mb-2 text-[#eeeeee]"
                   htmlFor="username"
                 >
                   Register Number
@@ -123,7 +123,7 @@ function EditStudent() {
             </div>
             <div className="px-4 sm:px-0 mt-4">
               <label
-                className="block  text-sm font-bold mb-2"
+                className="block  text-sm font-bold mb-2 text-[#eeeeee]"
                 htmlFor="username"
               >
                 Date Of Birth (DD-MM-YYYY)
@@ -142,7 +142,7 @@ function EditStudent() {
             <div className="lg:col-span-1 mt-4">
               <div className="px-4 sm:px-0">
                 <label
-                  className="block  text-sm font-bold mb-2"
+                  className="block  text-sm font-bold mb-2 text-[#eeeeee]"
                   htmlFor="username"
                 >
                   House Name
@@ -162,7 +162,7 @@ function EditStudent() {
             <div className="lg:col-span-1 mt-4">
               <div className="px-4 sm:px-0">
                 <label
-                  className="block  text-sm font-bold mb-2"
+                  className="block  text-sm font-bold mb-2 text-[#eeeeee]"
                   htmlFor="username"
                 >
                   Father's Name
@@ -182,7 +182,7 @@ function EditStudent() {
             <div className="lg:col-span-1 mt-4">
               <div className="px-4 sm:px-0">
                 <label
-                  className="block  text-sm font-bold mb-2"
+                  className="block  text-sm font-bold mb-2 text-[#eeeeee]"
                   htmlFor="username"
                 >
                   Phone Number
@@ -203,7 +203,7 @@ function EditStudent() {
             <div className="lg:col-span-1 mt-4">
               <div className="px-4 sm:px-0">
                 <label
-                  className="block  text-sm font-bold mb-2"
+                  className="block  text-sm font-bold mb-2 text-[#eeeeee]"
                   htmlFor="username"
                 >
                   Place
@@ -222,7 +222,7 @@ function EditStudent() {
             <div className="lg:col-span-1 mt-4">
               <div className="px-4 sm:px-0">
                 <label
-                  className="block  text-sm font-bold mb-2"
+                  className="block  text-sm font-bold mb-2 text-[#eeeeee]"
                   htmlFor="username"
                 >
                   Post Office
@@ -241,7 +241,7 @@ function EditStudent() {
             <div className="lg:col-span-1 mt-4">
               <div className="px-4 sm:px-0">
                 <label
-                  className="block  text-sm font-bold mb-2"
+                  className="block  text-sm font-bold mb-2 text-[#eeeeee]"
                   htmlFor="username"
                 >
                   Pin Code
@@ -260,7 +260,7 @@ function EditStudent() {
             <div className="lg:col-span-1 mt-4">
               <div className="px-4 sm:px-0">
                 <label
-                  className="block  text-sm font-bold mb-2"
+                  className="block  text-sm font-bold mb-2 text-[#eeeeee]"
                   htmlFor="username"
                 >
                   District
@@ -286,7 +286,7 @@ function EditStudent() {
             <div className="lg:col-span-1 mt-4">
               <div className="px-4 sm:px-0">
                 <label
-                  className="block  text-sm font-bold mb-2"
+                  className="block  text-sm font-bold mb-2 text-[#eeeeee]"
                   htmlFor="username"
                 >
                   State
@@ -306,7 +306,7 @@ function EditStudent() {
             <div className="lg:col-span-1 mt-4">
               <div className="px-4 sm:px-0">
                 <label
-                  className="block  text-sm font-bold mb-2"
+                  className="block  text-sm font-bold mb-2 text-[#eeeeee]"
                   htmlFor="username"
                 >
                   Class

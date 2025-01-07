@@ -56,7 +56,7 @@ function AllMahdiyyaTeachers() {
       <form className="max-w-sm mx-auto my-4">
         <label
           htmlFor="studyCentre"
-          className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+          className="block mb-2 text-sm font-medium text-white dark:text-white"
         >
           Select a study centre
         </label>
@@ -64,7 +64,7 @@ function AllMahdiyyaTeachers() {
           id="studyCentre"
           value={studyCentre}
           onChange={(e) => setStudyCentre(e.target.value)}
-          className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+          className="bg-gray-900 border border-gray-300 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
         >
           <option value="">Choose a study centre</option>
           {studyCentres.map((item) => (
@@ -100,53 +100,53 @@ function AllMahdiyyaTeachers() {
           ref={tableRef}
           className="min-w-full divide-y divide-gray-200"
         >
-          <thead className="bg-gray-50">
+          <thead className="bg-gray-900">
             <tr>
-              <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-center text-xs font-medium text-white uppercase tracking-wider">
                 #
               </th>
-              <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-center text-xs font-medium text-white uppercase tracking-wider">
                 NAME
               </th>
-              <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-center text-xs font-medium text-white uppercase tracking-wider">
                 EMAIL
               </th>
-              <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-center text-xs font-medium text-white uppercase tracking-wider">
                 PHONE
               </th>
-              <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-center text-xs font-medium text-white uppercase tracking-wider">
                 GENDER
               </th>
-              <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-center text-xs font-medium text-white uppercase tracking-wider">
                 STUDY CENTRE
               </th>
-              <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-center text-xs font-medium text-white uppercase tracking-wider">
                 MAHDIYYA
               </th>
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
+          <tbody className="bg-gray-900 divide-y divide-gray-200">
             {teachers.map((teacher, index) => (
               <tr key={teacher._id}>
-                <td className="text-sm text-center text-gray-600 p-2">
+                <td className="text-sm text-center text-white p-2">
                   {index + 1}
                 </td>
-                <td className="text-sm text-center text-gray-600 p-2">
+                <td className="text-sm text-center text-white p-2">
                   {teacher.teacherName}
                 </td>
-                <td className="text-sm text-center text-gray-600 p-2">
+                <td className="text-sm text-center text-white p-2">
                   {teacher.email}
                 </td>
-                <td className="text-sm text-center text-gray-600 p-2">
+                <td className="text-sm text-center text-white p-2">
                   {teacher.phone}
                 </td>
-                <td className="text-sm text-center text-gray-600 p-2">
+                <td className="text-sm text-center text-white p-2">
                   {teacher.gender}
                 </td>
-                <td className="text-sm text-center text-gray-600 p-2">
+                <td className="text-sm text-center text-white p-2">
                   {teacher.branch?.studyCentreName || "N/A"}
                 </td>
-                <td className="text-sm text-center text-gray-600 p-2">
+                <td className="text-sm text-center text-white p-2">
                   {teacher.mahdiyyaTeacher ? "Yes" : "No"}
                 </td>
               </tr>

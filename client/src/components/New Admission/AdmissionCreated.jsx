@@ -7,7 +7,7 @@ function AdmissionCreated() {
     <>
       {/* component */}
       <div className="bg-gray-100 h-screen">
-        <div className="bg-white p-6  md:mx-auto">
+        <div className="bg-gray-900 p-6  md:mx-auto">
           <svg
             viewBox="0 0 24 24"
             className="text-green-600 w-16 h-16 mx-auto my-6"
@@ -18,10 +18,10 @@ function AdmissionCreated() {
             ></path>
           </svg>
           <div className="text-center">
-            <h3 className="md:text-2xl text-base text-blue-900 font-semibold text-center">
+            <h3 className="md:text-2xl text-base text-[#eeeeee] font-semibold text-center">
               Your Admission Created Successfully
             </h3>
-            <p className="text-gray-600 my-2">
+            <p className="text-white my-2">
               Thank you for submitting your details
             </p>
             <p> Have a great day!</p>

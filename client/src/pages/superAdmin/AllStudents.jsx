@@ -71,7 +71,7 @@ function AllStudents() {
   }, [classId, studyCentre]);
 
   return (
-    <div className="container mx-auto">
+    <div className="container mx-auto bg-gray-900">
       <div className="flex items-center justify-around">
         <h1 className="text-3xl font-bold mb-8 text-center my-5 uppercase">
           All Students
@@ -80,7 +80,7 @@ function AllStudents() {
       <form className="max-w-sm mx-auto my-4">
         <label
           htmlFor="studyCentre"
-          className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+          className="block mb-2 text-sm font-medium text-white dark:text-white"
         >
           Select a study centre
         </label>
@@ -88,7 +88,7 @@ function AllStudents() {
           id="studyCentre"
           value={studyCentre}
           onChange={(e) => setStudyCentre(e.target.value)}
-          className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+          className="bg-gray-900 border border-gray-300 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
         >
           <option value="">Choose a study centre</option>
 
@@ -101,7 +101,7 @@ function AllStudents() {
 
         <label
           htmlFor="class"
-          className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+          className="block mb-2 text-sm font-medium text-white dark:text-white"
         >
           Select a class
         </label>
@@ -109,7 +109,7 @@ function AllStudents() {
           id="class"
           value={classId}
           onChange={(e) => setClassId(e.target.value)}
-          className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+          className="bg-gray-900 border border-gray-300 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
         >
           <option value="">Choose a class</option>
           {classes.map((item) => (
@@ -120,11 +120,11 @@ function AllStudents() {
         </select>
 
         <div className="flex justify-between items-center my-4">
-          <p className="text-green-500">{students.length} students</p>
+          <p className="">{students.length} students</p>
           {students.length > 0 && (
             <ReactHTMLTableToExcel
               id="export-button"
-              className="bg-green-400 px-3 py-1 text-white font-semibold rounded-2xl"
+              className="bg-blue-400 px-3 py-1 text-white font-semibold rounded-2xl"
               table="students-table" // The table id must match this
               filename="students"
               sheet="students"
@@ -143,59 +143,59 @@ function AllStudents() {
         <table
           id="students-table"
           ref={tableRef}
-          className="min-w-full divide-y divide-gray-200"
+          className="min-w-full divide-y divide-gray-200 bg-gray-900"
         >
-          <thead className="bg-gray-50">
+          <thead className="bg-gray-900">
             <tr>
-              <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-center text-xs font-medium text-white uppercase tracking-wider">
                 #
               </th>
-              <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-center text-xs font-medium text-white uppercase tracking-wider">
                 REG. NO
               </th>
-              <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-center text-xs font-medium text-white uppercase tracking-wider">
                 NAME
               </th>
-              <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-center text-xs font-medium text-white uppercase tracking-wider">
                 FATHER
               </th>
-              <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-center text-xs font-medium text-white uppercase tracking-wider">
                 HOUSE
               </th>
-              <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-center text-xs font-medium text-white uppercase tracking-wider">
                 PLACE
               </th>
-              <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-center text-xs font-medium text-white uppercase tracking-wider">
                 PO
               </th>
-              <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-center text-xs font-medium text-white uppercase tracking-wider">
                 PINCODE
               </th>
-              <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-center text-xs font-medium text-white uppercase tracking-wider">
                 DISTRICT
               </th>
-              <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-center text-xs font-medium text-white uppercase tracking-wider">
                 STATE
               </th>
-              <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-center text-xs font-medium text-white uppercase tracking-wider">
                 PHONE
               </th>
-              <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-center text-xs font-medium text-white uppercase tracking-wider">
                 DOB
               </th>
-              <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-center text-xs font-medium text-white uppercase tracking-wider">
                 CLASS
               </th>
-              <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-center text-xs font-medium text-white uppercase tracking-wider">
                 STUDY CENTRE
               </th>
-              <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-center text-xs font-medium text-white uppercase tracking-wider">
                 CENTRE CODE
               </th>
             </tr>
           </thead>
 
-          <tbody className="bg-white divide-y divide-gray-200">
+          <tbody className="bg-gray-900 divide-y divide-gray-200">
             {students.map((student, key) => (
               <tr
                 key={student._id}
@@ -204,51 +204,51 @@ function AllStudents() {
                 }
                 className="cursor-pointer hover:bg-gray-100 transition duration-150 ease-in-out"
               >
-                <td className="text-sm text-center text-gray-600 p-2">
+                <td className="text-sm text-center text-white p-2">
                   {key + 1}
                 </td>
-                <td className="text-sm text-center text-gray-600 p-2">
+                <td className="text-sm text-center text-white p-2">
                   {student.registerNo}
                 </td>
-                <td className="text-sm text-center text-gray-600 p-2">
+                <td className="text-sm text-center text-white p-2">
                   <p className="w-40">{student.studentName}</p>
                 </td>
-                <td className="text-sm text-center text-gray-600 p-2">
+                <td className="text-sm text-center text-white p-2">
                   <p className="w-40">{student.fatherName}</p>
                 </td>
-                <td className="text-sm text-center text-gray-600 p-2">
+                <td className="text-sm text-center text-white p-2">
                   <p className="w-40">{student.houseName}</p>
                 </td>
-                <td className="text-sm text-center text-gray-600 p-2">
+                <td className="text-sm text-center text-white p-2">
                   <p className="w-40">{student.place}</p>
                 </td>
-                <td className="text-sm text-center text-gray-600 p-2">
+                <td className="text-sm text-center text-white p-2">
                   <p className="w-40">{student.postOffice}</p>
                 </td>
-                <td className="text-sm text-center text-gray-600 p-2">
+                <td className="text-sm text-center text-white p-2">
                   {student.pinCode}
                 </td>
-                <td className="text-sm text-center text-gray-600 p-2">
+                <td className="text-sm text-center text-white p-2">
                   <p className="w-40">{student.district}</p>
                 </td>
-                <td className="text-sm text-center text-gray-600 p-2">
+                <td className="text-sm text-center text-white p-2">
                   <p className="w-40">{student.state}</p>
                 </td>
-                <td className="text-sm text-center text-gray-600 p-2">
+                <td className="text-sm text-center text-white p-2">
                   <p className="w-40">{student.phone}</p>
                 </td>
-                <td className="text-sm text-center text-gray-600 p-2">
+                <td className="text-sm text-center text-white p-2">
                   <p className="w-40">
                     {student.dobDate}-{student.dobMonth}-{student.dobYear}
                   </p>
                 </td>
-                <td className="text-sm text-center text-gray-600 p-2">
+                <td className="text-sm text-center text-white p-2">
                   <p className="w-40">{student.class.className}</p>
                 </td>
-                <td className="text-sm text-center text-gray-600 p-2">
+                <td className="text-sm text-center text-white p-2">
                   <p className="w-60">{student?.branch?.studyCentreName}</p>
                 </td>
-                <td className="text-sm text-center text-gray-600 p-2">
+                <td className="text-sm text-center text-white p-2">
                   {student?.branch?.studyCentreCode}
                 </td>
               </tr>

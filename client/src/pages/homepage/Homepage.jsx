@@ -96,7 +96,7 @@ function Homepage() {
               target={"_blank"}
               key={key}
             >
-              <div className="relative bg-white hover:bg-gray-200 rounded-lg shadow-md hover:shadow-lg transition-all duration-300">
+              <div className="relative bg-gray-900 hover:bg-gray-200 rounded-lg shadow-md hover:shadow-lg transition-all duration-300">
                 <div className="p-6 flex items-center space-x-4">
                   <svg
                     className="w-8 h-8 text-purple-600"
@@ -135,7 +135,7 @@ function Homepage() {
 
         <a
           href="/admission-started"
-          className="flex flex-col  mx-auto my-3 flex-1 items-center  bg-white border border-gray-200 lg:w-3/4 w-full rounded-lg shadow md:flex-row hover:bg-gray-100 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700"
+          className="flex flex-col  mx-auto my-3 flex-1 items-center  bg-gray-900 border border-gray-200 lg:w-3/4 w-full rounded-lg shadow md:flex-row hover:bg-gray-100 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700"
         >
           <img
             className="p-3 lg:w-3/4 w-full rounded-t-lg h-64   md:rounded-none md:rounded-l-lg"
@@ -143,7 +143,7 @@ function Homepage() {
             alt
           />
           <div className="flex flex-col justify-between p-4 leading-normal">
-            <h5 className="mb-2 text-2xl font-bold tracking-tight capitalize text-teal-500 dark:text-white">
+            <h5 className="mb-2 text-2xl font-bold tracking-tight capitalize text-white dark:text-white">
               MAHDIYYA COURSE ADMISSION STARTED
             </h5>
             <p className="mb-3 font-normal text-gray-700 dark:text-gray-400">
@@ -152,7 +152,7 @@ function Homepage() {
               പെൺകുട്ടികൾക്കായി തുടക്കം കുറിച്ച പാഠ്യ പദ്ധതിയാണ് മഹ്ദിയ്യ
               കോഴ്സ്....
             </p>
-            <button className="bg-teal-500 text-white font-bold px-3 py-2 rounded-[20px] lg:w-1/4 w-full hover:bg-transparent border border-teal-500 transition hover:text-teal-500 hover:cursor-pointer">
+            <button className="bg-blue-600 text-white font-bold px-3 py-2 rounded-[20px] lg:w-1/4 w-full hover:bg-transparent border border-teal-500 transition hover:text-white hover:cursor-pointer">
               Read More
             </button>
           </div>
@@ -160,7 +160,7 @@ function Homepage() {
 
         <a
           href="https://sites.google.com/dhiu.in/ccbp-certificatecourseinbehavi/home"
-          className="flex flex-col  mx-auto my-3 flex-1 items-center  bg-white border border-gray-200 lg:w-3/4 w-full rounded-lg shadow md:flex-row hover:bg-gray-100 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700"
+          className="flex flex-col  mx-auto my-3 flex-1 items-center  bg-gray-900 border border-gray-200 lg:w-3/4 w-full rounded-lg shadow md:flex-row hover:bg-gray-100 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700"
         >
           <img
             className="p-3 lg:w-3/4 w-full rounded-t-lg h-64   md:rounded-none md:rounded-l-lg"
@@ -168,7 +168,7 @@ function Homepage() {
             alt
           />
           <div className="flex flex-col justify-between p-4 leading-normal">
-            <h5 className="mb-2 text-2xl font-bold tracking-tight capitalize text-teal-500 dark:text-white">
+            <h5 className="mb-2 text-2xl font-bold tracking-tight capitalize text-white dark:text-white">
               certificate course in behavioural pedagogy (CCBP)
             </h5>
             <p className="mb-3 font-normal text-gray-700 dark:text-gray-400">
@@ -179,7 +179,7 @@ function Homepage() {
               its student communities sprawled across seven states and 36
               campuses in India.
             </p>
-            <button className="bg-teal-500 text-white font-bold px-3 py-2 rounded-[20px] lg:w-1/4 w-full hover:bg-transparent border border-teal-500 transition hover:text-teal-500 hover:cursor-pointer">
+            <button className="bg-blue-600 text-white font-bold px-3 py-2 rounded-[20px] lg:w-1/4 w-full hover:bg-transparent border border-teal-500 transition hover:text-white hover:cursor-pointer">
               Apply Now
             </button>
           </div>

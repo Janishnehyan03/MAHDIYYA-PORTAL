@@ -71,7 +71,7 @@ function EditCourse() {
   return (
     <>
       <div className="w-full ml-6">
-        <section className="bg-white p-6">
+        <section className="bg-gray-900 p-6">
           <div>
             <h3 className="text-4xl font-bold text-center text-violet-600 uppercase my-4">
               Edit Course Page
@@ -87,7 +87,7 @@ function EditCourse() {
                     course title
                   </label>
                   <input
-                    className="block p-4 pl-10 w-full text-sm text-blue-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                    className="block p-4 pl-10 w-full text-sm text-[#eeeeee] bg-gray-900 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                     id="username"
                     type="text"
                     required
@@ -107,7 +107,7 @@ function EditCourse() {
                     duration
                   </label>
                   <input
-                    className="block p-4 pl-10 w-full text-sm text-blue-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                    className="block p-4 pl-10 w-full text-sm text-[#eeeeee] bg-gray-900 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                     id="username"
                     type="text"
                     required
@@ -127,7 +127,7 @@ function EditCourse() {
                     course description
                   </label>
                   <input
-                    className="block p-4 pl-10 w-full text-sm text-blue-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                    className="block p-4 pl-10 w-full text-sm text-[#eeeeee] bg-gray-900 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                     id="username"
                     type="text"
                     required
@@ -147,7 +147,7 @@ function EditCourse() {
                     amount
                   </label>
                   <input
-                    className="block p-4 pl-10 w-full text-sm text-blue-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                    className="block p-4 pl-10 w-full text-sm text-[#eeeeee] bg-gray-900 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                     id="username"
                     type="text"
                     required
@@ -167,7 +167,7 @@ function EditCourse() {
                     image
                   </label>
                   <input
-                    className="block p-4 pl-10 w-full text-sm  bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                    className="block p-4 pl-10 w-full text-sm  bg-gray-900 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                     id="username"
                     type="file"
                     required
@@ -186,7 +186,7 @@ function EditCourse() {
                     type of students
                   </label>
                   <select
-                    className="block p-4 pl-10 w-full text-sm text-blue-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                    className="block p-4 pl-10 w-full text-sm text-[#eeeeee] bg-gray-900 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                     name="courseFor"
                     id=""
                     onChange={(e) => onChange(e)}

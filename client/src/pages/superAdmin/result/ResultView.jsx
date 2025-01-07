@@ -129,7 +129,7 @@ function ResultView() {
       <h1 className="text-3xl my-4 font-bold text-center">SA Results</h1>
       <div className="m-4">
         <select
-          className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block lg:w-1/2 w-full mx-auto my-2 p-2.5"
+          className="bg-gray-900 border border-gray-300 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block lg:w-1/2 w-full mx-auto my-2 p-2.5"
           onChange={(e) => setClassId(e.target.value)}
         >
           <option hidden>select class</option>
@@ -141,7 +141,7 @@ function ResultView() {
         </select>
         {authData.role === "superAdmin" && (
           <select
-            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block lg:w-1/2 w-full mx-auto my-2 p-2.5"
+            className="bg-gray-900 border border-gray-300 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block lg:w-1/2 w-full mx-auto my-2 p-2.5"
             onChange={(e) => setStudyCentreId(e.target.value)}
           >
             <option value={""}>select study centre</option>
@@ -153,7 +153,7 @@ function ResultView() {
           </select>
         )}
         <select
-          className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block lg:w-1/2 w-full mx-auto my-2 p-2.5"
+          className="bg-gray-900 border border-gray-300 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block lg:w-1/2 w-full mx-auto my-2 p-2.5"
           onChange={(e) => setExamId(e.target.value)}
         >
           <option hidden>select exam</option>
@@ -173,7 +173,7 @@ function ResultView() {
                 results[0].student?.class?.className
               )
             }
-            className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600"
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
           >
             Download as Excel
           </button>

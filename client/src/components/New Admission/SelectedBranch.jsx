@@ -89,9 +89,9 @@ function SelectedBranch({
   }, [selectedBranch]);
 
   return (
-    <section className="bg-white p-6">
+    <section className="bg-gray-900 p-6">
       <div className="max-w-screen-sm mx-auto">
-        <h3 className="text-4xl font-bold text-blue-900 uppercase my-4">
+        <h3 className="text-4xl font-bold text-[#eeeeee] uppercase my-4">
           Admission SECTION
         </h3>
 
@@ -108,7 +108,7 @@ function SelectedBranch({
               name="branch"
               onChange={(e) => setSelectedBranch(e.target.value)}
               id=""
-              className="bg-gray-50 border border-gray-300 text-blue-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
+              className="bg-gray-900 border border-gray-300 text-[#eeeeee] text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
             >
               <option hidden>Select </option>
               {DISTRICT.map((district, index) => (
@@ -134,7 +134,7 @@ function SelectedBranch({
                 <div
                   className={`px-2  py-2 rounded-lg m-2 text-white cursor-pointer ${
                     formData.branch === branch._id
-                      ? "bg-green-600"
+                      ? "bg-blue-600"
                       : "bg-violet-800"
                   }`}
                   key={index}
@@ -160,7 +160,7 @@ function SelectedBranch({
                 <div
                   className={`px-2  py-2 rounded-lg m-2 text-white cursor-pointer ${
                     formData.class === studentClass._id
-                      ? "bg-green-600"
+                      ? "bg-blue-600"
                       : "bg-gray-800"
                   }`}
                   key={index}
@@ -226,7 +226,7 @@ function SelectedBranch({
                     />
                   </div>
                 </div>
-                <div className="rounded-lg shadow-xl bg-gray-50">
+                <div className="rounded-lg shadow-xl bg-gray-900">
                   <div className="m-4">
                     <div className="my-4">
                       {loading ? (

@@ -79,7 +79,7 @@ function StudentProfile() {
         {showAlert && ConfirmAlert()}
 
         <section className="p-6">
-          <div className="container mx-auto bg-white shadow-md rounded-md p-6">
+          <div className="container mx-auto bg-gray-900 shadow-md rounded-md p-6">
             <header className="text-center mb-6">
               <h1 className="text-4xl font-bold text-gray-800 uppercase">
                 Student Profile
@@ -88,25 +88,25 @@ function StudentProfile() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Student Details */}
-              <div className="bg-gray-50 p-4 shadow-sm rounded-md">
+              <div className="bg-gray-900 p-4 shadow-sm rounded-md">
                 <h2 className="text-2xl font-semibold text-gray-700 mb-4">
                   Details
                 </h2>
                 <div className="space-y-3">
                   <p className="flex justify-between">
-                    <span className="font-medium text-gray-600">
+                    <span className="font-medium text-white">
                       Student Name:
                     </span>
                     <span className="text-gray-800">{student.studentName}</span>
                   </p>
                   <p className="flex justify-between">
-                    <span className="font-medium text-gray-600">
+                    <span className="font-medium text-white">
                       Register No:
                     </span>
                     <span className="text-gray-800">{student.registerNo}</span>
                   </p>
                   <p className="flex justify-between">
-                    <span className="font-medium text-gray-600">
+                    <span className="font-medium text-white">
                       Academic Year:
                     </span>
                     <span className="text-gray-800">
@@ -114,23 +114,23 @@ function StudentProfile() {
                     </span>
                   </p>
                   <p className="flex justify-between">
-                    <span className="font-medium text-gray-600">
+                    <span className="font-medium text-white">
                       House Name:
                     </span>
                     <span className="text-gray-800">{student.houseName}</span>
                   </p>
                   <p className="flex justify-between">
-                    <span className="font-medium text-gray-600">
+                    <span className="font-medium text-white">
                       Father's Name:
                     </span>
                     <span className="text-gray-800">{student.fatherName}</span>
                   </p>
                   <p className="flex justify-between">
-                    <span className="font-medium text-gray-600">Phone:</span>
+                    <span className="font-medium text-white">Phone:</span>
                     <span className="text-gray-800">+91 {student.phone}</span>
                   </p>
                   <p className="flex justify-between">
-                    <span className="font-medium text-gray-600">
+                    <span className="font-medium text-white">
                       Date of Birth:
                     </span>
                     <span className="text-gray-800">
@@ -138,38 +138,38 @@ function StudentProfile() {
                     </span>
                   </p>
                   <p className="flex justify-between">
-                    <span className="font-medium text-gray-600">Place:</span>
+                    <span className="font-medium text-white">Place:</span>
                     <span className="text-gray-800">{student.place}</span>
                   </p>
                 </div>
               </div>
 
               {/* Address Details */}
-              <div className="bg-gray-50 p-4 shadow-sm rounded-md">
+              <div className="bg-gray-900 p-4 shadow-sm rounded-md">
                 <h2 className="text-2xl font-semibold text-gray-700 mb-4">
                   Address
                 </h2>
                 <div className="space-y-3">
                   <p className="flex justify-between">
-                    <span className="font-medium text-gray-600">
+                    <span className="font-medium text-white">
                       Post Office:
                     </span>
                     <span className="text-gray-800">{student.postOffice}</span>
                   </p>
                   <p className="flex justify-between">
-                    <span className="font-medium text-gray-600">Pincode:</span>
+                    <span className="font-medium text-white">Pincode:</span>
                     <span className="text-gray-800">{student.pinCode}</span>
                   </p>
                   <p className="flex justify-between">
-                    <span className="font-medium text-gray-600">District:</span>
+                    <span className="font-medium text-white">District:</span>
                     <span className="text-gray-800">{student.district}</span>
                   </p>
                   <p className="flex justify-between">
-                    <span className="font-medium text-gray-600">State:</span>
+                    <span className="font-medium text-white">State:</span>
                     <span className="text-gray-800">{student.state}</span>
                   </p>
                   <p className="flex justify-between">
-                    <span className="font-medium text-gray-600">
+                    <span className="font-medium text-white">
                       Study Center:
                     </span>
                     <span className="text-gray-800">
@@ -177,7 +177,7 @@ function StudentProfile() {
                     </span>
                   </p>
                   <p className="flex justify-between">
-                    <span className="font-medium text-gray-600">Class:</span>
+                    <span className="font-medium text-white">Class:</span>
                     <span className="text-gray-800">
                       {student.class?.className}
                     </span>
@@ -187,13 +187,13 @@ function StudentProfile() {
             </div>
 
             {/* Status and Actions */}
-            <div className="mt-6 bg-gray-50 p-4 shadow-sm rounded-md">
+            <div className="mt-6 bg-gray-900 p-4 shadow-sm rounded-md">
               <div className="flex items-center justify-between">
                 <span className="text-lg font-medium text-gray-700">
                   Status:
                 </span>
                 {student?.verified ? (
-                  <span className="bg-green-500 text-white px-3 py-1 rounded-md text-sm">
+                  <span className="bg-blue-600 text-white px-3 py-1 rounded-md text-sm">
                     Active
                   </span>
                 ) : (
@@ -225,7 +225,7 @@ function StudentProfile() {
                   Transfer Student
                 </h3>
                 <Link to={`/transfer-student/${student._id}`}>
-                  <button className="bg-teal-600 text-white px-6 py-2 rounded-md hover:bg-teal-700 transition">
+                  <button className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-600 transition">
                     Go To Transfer Page
                     <FontAwesomeIcon className="ml-2" icon={faArrowRight} />
                   </button>
@@ -275,7 +275,7 @@ function StudentProfile() {
                 <button
                   type="button"
                   onClick={(e) => handleSubmit(e)}
-                  className="inline-block px-6 py-2.5 bg-green-600 text-white font-medium text-xs leading-tight uppercase rounded shadow-md hover:bg-green-700 hover:shadow-lg focus:bg-green-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-green-800 active:shadow-lg transition duration-150 ease-in-out ml-1"
+                  className="inline-block px-6 py-2.5 bg-blue-600 text-white font-medium text-xs leading-tight uppercase rounded shadow-md hover:bg-blue-600 hover:shadow-lg focus:bg-blue-600 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-blue-600 active:shadow-lg transition duration-150 ease-in-out ml-1"
                 >
                   Verify
                 </button>

@@ -100,7 +100,7 @@ const AdminConfigPage = () => {
   return (
     <div className="min-h-screen bg-gray-100 py-6 flex flex-col justify-center sm:py-12">
       <div className="flex justify-between space-x-3 py-3 sm:max-w-3xl sm:mx-auto">
-        <div className="px-4 py-4 bg-white shadow-lg sm:rounded-3xl sm:p-20">
+        <div className="px-4 py-4 bg-gray-900 shadow-lg sm:rounded-3xl sm:p-20">
           <div className="max-w-2xl mx-auto">
             <div>
               <h1 className="text-2xl font-semibold mb-6">Admin Configuration</h1>
@@ -122,10 +122,10 @@ const AdminConfigPage = () => {
                         settings.saSubmission
                           ? "translate-x-5"
                           : "translate-x-0"
-                      } pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow transform ring-0 transition ease-in-out duration-200`}
+                      } pointer-events-none inline-block h-5 w-5 rounded-full bg-gray-900 shadow transform ring-0 transition ease-in-out duration-200`}
                     />
                   </button>
-                  <span className="ml-3 text-sm text-gray-500">
+                  <span className="ml-3 text-sm text-white">
                     {settings.saSubmission ? "Enabled" : "Disabled"}
                   </span>
                 </div>
@@ -147,10 +147,10 @@ const AdminConfigPage = () => {
                         settings.faSubmission
                           ? "translate-x-5"
                           : "translate-x-0"
-                      } pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow transform ring-0 transition ease-in-out duration-200`}
+                      } pointer-events-none inline-block h-5 w-5 rounded-full bg-gray-900 shadow transform ring-0 transition ease-in-out duration-200`}
                     />
                   </button>
-                  <span className="ml-3 text-sm text-gray-500">
+                  <span className="ml-3 text-sm text-white">
                     {settings.faSubmission ? "Enabled" : "Disabled"}
                   </span>
                 </div>
@@ -185,10 +185,10 @@ const AdminConfigPage = () => {
                         settings.newAdmission
                           ? "translate-x-5"
                           : "translate-x-0"
-                      } pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow transform ring-0 transition ease-in-out duration-200`}
+                      } pointer-events-none inline-block h-5 w-5 rounded-full bg-gray-900 shadow transform ring-0 transition ease-in-out duration-200`}
                     />
                   </button>
-                  <span className="ml-3 text-sm text-gray-500">
+                  <span className="ml-3 text-sm text-white">
                     {settings.newAdmission ? "Enabled" : "Disabled"}
                   </span>
                 </div>

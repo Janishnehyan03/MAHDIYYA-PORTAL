@@ -22,20 +22,20 @@ function ViewTeacher() {
     <div>
       <div className="md:w-3/12 lg:mx-auto md:mx-2">
         {/* Profile Card */}
-        <div className="bg-white p-3 text-center border-t-4 border-green-400">
+        <div className="bg-gray-900 p-3 text-center border-t-4 border-green-400">
         
-          <h1 className="text-blue-900 font-bold text-xl leading-8 my-1">
+          <h1 className="text-[#eeeeee] font-bold text-xl leading-8 my-1">
             {teacher.teacherName}
           </h1>
-          <h3 className="text-gray-600 font-lg text-semibold leading-6">
+          <h3 className="text-white font-lg text-semibold leading-6">
             {teacher?.email}
           </h3>
 
-          <ul className="bg-gray-100 text-gray-600 hover:text-gray-700 hover:shadow py-2 px-3 mt-3 divide-y rounded shadow-sm">
+          <ul className="bg-gray-100 text-white hover:text-gray-700 hover:shadow py-2 px-3 mt-3 divide-y rounded shadow-sm">
             <li className="flex items-center py-3">
               <span>Phone</span>
               <span className="ml-auto">
-                <span className=" py-1 px-2 rounded text-blue-900 text-sm">
+                <span className=" py-1 px-2 rounded text-[#eeeeee] text-sm">
                   {teacher.phone}
                 </span>
               </span>
@@ -43,14 +43,14 @@ function ViewTeacher() {
             <li className="flex items-center py-3">
               <span>Gender</span>
               <span className="ml-auto">
-                <span className=" py-1 px-2 rounded text-blue-900 text-sm">
+                <span className=" py-1 px-2 rounded text-[#eeeeee] text-sm">
                   {teacher.gender}
                 </span>
               </span>
             </li>
             <li className="flex items-center py-3">
               <span className="ml-auto">
-                <span className=" py-1 px-2 rounded text-blue-900 text-sm">
+                <span className=" py-1 px-2 rounded text-[#eeeeee] text-sm">
                   {teacher?.branch?.studyCentreName}
                 </span>
               </span>

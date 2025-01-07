@@ -89,13 +89,13 @@ function AllStudents() {
                     <div className="p-6 space-y-6">
                       <div>
                         <label
-                          className="block mb-2 text-sm font-medium text-blue-900 dark:text-gray-300"
+                          className="block mb-2 text-sm font-medium text-[#eeeeee] dark:text-gray-300"
                           htmlFor="file_input"
                         >
                           upload excel file here..
                         </label>
                         <input
-                          className="block w-full text-sm text-blue-900 bg-gray-50 rounded-lg border border-gray-300 cursor-pointer dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400"
+                          className="block w-full text-sm text-[#eeeeee] bg-gray-900 rounded-lg border border-gray-300 cursor-pointer dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400"
                           id="file_input"
                           type="file"
                           onChange={(e) => {
@@ -178,7 +178,7 @@ function StudentsTable({ setShowModal, students }) {
           {
             <button
               onClick={(e) => setShowModal(true)}
-              className="bg-green-500 px-3 py-2 w-full font-bold text-white hover:bg-green-600 rounded-md"
+              className="bg-blue-600 px-3 py-2 w-full font-bold text-white hover:bg-blue-600 rounded-md"
             >
               Add Students
             </button>

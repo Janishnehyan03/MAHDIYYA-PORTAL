@@ -55,8 +55,8 @@ function MyUploads() {
   return (
     <div className="overflow-x-auto relative">
       <h1 className="text-center font-bold my-4 uppercase">Uploaded Files </h1>
-      <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-        <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+      <table className="w-full text-sm text-left text-white dark:text-gray-400">
+        <thead className="text-xs text-gray-700 uppercase bg-gray-900 dark:bg-gray-700 dark:text-gray-400">
           <tr>
             <th scope="col" className="py-3 px-6">
               #
@@ -74,16 +74,16 @@ function MyUploads() {
         </thead>
         <tbody>
           {uploads.map((upload, key) => (
-            <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+            <tr className="bg-gray-900 border-b dark:bg-gray-800 dark:border-gray-700">
               <th
                 scope="row"
-                className="py-4 px-6 font-medium text-blue-900 whitespace-nowrap dark:text-white"
+                className="py-4 px-6 font-medium text-[#eeeeee] whitespace-nowrap dark:text-white"
               >
                 {key + 1}
               </th>
               <th
                 scope="row"
-                className="py-4 px-6 font-medium text-blue-900 whitespace-nowrap dark:text-white"
+                className="py-4 px-6 font-medium text-[#eeeeee] whitespace-nowrap dark:text-white"
               >
                 {upload?.referenceId?.title}
               </th>
@@ -111,8 +111,8 @@ function MyUploads() {
       <h1 className="text-center font-bold my-4 uppercase text-[#333]">
         Pending Files{" "}
       </h1>
-      <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-        <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+      <table className="w-full text-sm text-left text-white dark:text-gray-400">
+        <thead className="text-xs text-gray-700 uppercase bg-gray-900 dark:bg-gray-700 dark:text-gray-400">
           <tr>
             <th scope="col" className="py-3 px-6">
               #
@@ -133,17 +133,17 @@ function MyUploads() {
             .map((download, key) => (
               <tr
                 key={key}
-                className="bg-white border-b dark:bg-gray-800 dark:border-gray-700"
+                className="bg-gray-900 border-b dark:bg-gray-800 dark:border-gray-700"
               >
                 <th
                   scope="row"
-                  className="py-4 px-6 font-medium text-blue-900 whitespace-nowrap dark:text-white"
+                  className="py-4 px-6 font-medium text-[#eeeeee] whitespace-nowrap dark:text-white"
                 >
                   {key + 1}
                 </th>
                 <th
                   scope="row"
-                  className="py-4 px-6 font-medium text-blue-900 whitespace-nowrap dark:text-white"
+                  className="py-4 px-6 font-medium text-[#eeeeee] whitespace-nowrap dark:text-white"
                 >
                   {download.title}
                 </th>

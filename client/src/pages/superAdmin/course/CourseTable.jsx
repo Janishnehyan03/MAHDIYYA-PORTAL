@@ -93,8 +93,8 @@ function CourseTable() {
           <tbody>
             {courses?.map((course, index) => (
               <tr className="border-b">
-                <td className="px-5 py-3 bg-white text-sm">{index + 1}</td>
-                <td className="px-5 py-3 bg-white text-sm">
+                <td className="px-5 py-3 bg-gray-900 text-sm">{index + 1}</td>
+                <td className="px-5 py-3 bg-gray-900 text-sm">
                   <a target={"_blank"} href={course.image}>
                     <img
                       src={`${course?.image}`}
@@ -103,23 +103,23 @@ function CourseTable() {
                     />
                   </a>
                 </td>
-                <td className="px-5 py-3 bg-white text-sm">
+                <td className="px-5 py-3 bg-gray-900 text-sm">
                   {course.courseTitle}
                 </td>
-                <td className="px-5 py-3 bg-white text-sm">
+                <td className="px-5 py-3 bg-gray-900 text-sm">
                   {course.duration}
                 </td>
-                <td className="px-5 py-3 bg-white text-sm">
+                <td className="px-5 py-3 bg-gray-900 text-sm">
                   {course.courseFor}
                 </td>
-                <td className="px-5 py-3 bg-white text-sm">{course.amount}</td>
+                <td className="px-5 py-3 bg-gray-900 text-sm">{course.amount}</td>
 
-                <td className="px-5 py-3 bg-white text-sm">
+                <td className="px-5 py-3 bg-gray-900 text-sm">
                   <Link to={`/edit-course/${course._id}`}>
                     <FontAwesomeIcon icon={faEdit} className="cursor-pointer" />
                   </Link>
                 </td>
-                <td className="px-5 py-3 bg-white text-sm">
+                <td className="px-5 py-3 bg-gray-900 text-sm">
                   <FontAwesomeIcon
                     onClick={(e) => deleteCourse(course._id)}
                     icon={faTrash}

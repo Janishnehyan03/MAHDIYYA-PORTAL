@@ -2,12 +2,12 @@ import React from "react";
 
 function CenterRegister() {
   return (
-    <div className="isolate bg-white">
+    <div className="isolate bg-gray-900">
       <main>
         <div className="relative px-6 lg:px-8">
           <div className="mx-auto max-w-4xl py-32 sm:py-48 lg:py-56">
             <div className="hidden sm:mb-8 sm:flex sm:justify-center">
-              <div className="relative rounded-full py-1 px-3 text-sm leading-6 text-gray-600 ring-1 ring-blue-900/10 hover:ring-blue-900/20">
+              <div className="relative rounded-full py-1 px-3 text-sm leading-6 text-white ring-1 ring-blue-900/10 hover:ring-blue-900/20">
                 Registration Started
               </div>
             </div>
@@ -15,7 +15,7 @@ function CenterRegister() {
               <h1 className="text-xl font-bold  text-[#2ab38e] sm:text-6xl">
                 Centre for Public Education and Training (CPET)
               </h1>
-              <p className="mt-6 text-lg leading-8 text-gray-600">
+              <p className="mt-6 text-lg leading-8 text-white">
                 Centre for Public Education and Training is an extension of 
                 Darul Huda Islamic University devised for providing socio-educational empowerment
                 programs for the public. CPET plans, designs and implements

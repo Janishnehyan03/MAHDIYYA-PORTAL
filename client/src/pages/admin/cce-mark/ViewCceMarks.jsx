@@ -95,7 +95,7 @@ function ResultView() {
       <h1 className="text-3xl my-4 font-bold text-center">FA Results</h1>
       <div className="m-4">
         <select
-          className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-green-500 focus:border-green-500 block lg:w-1/2 w-full mx-auto my-2 p-2.5"
+          className="bg-gray-900 border border-gray-300 text-white text-sm rounded-lg focus:ring-green-500 focus:border-green-500 block lg:w-1/2 w-full mx-auto my-2 p-2.5"
           onChange={(e) => setClassId(e.target.value)}
         >
           <option hidden>select class</option>
@@ -107,7 +107,7 @@ function ResultView() {
         </select>
         {authData.role === "superAdmin" && (
           <select
-            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-green-500 focus:border-green-500 block lg:w-1/2 w-full mx-auto my-2 p-2.5"
+            className="bg-gray-900 border border-gray-300 text-white text-sm rounded-lg focus:ring-green-500 focus:border-green-500 block lg:w-1/2 w-full mx-auto my-2 p-2.5"
             onChange={(e) => setStudyCentreId(e.target.value)}
           >
             <option hidden>select study centre</option>
@@ -119,7 +119,7 @@ function ResultView() {
           </select>
         )}
         <select
-          className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-green-500 focus:border-green-500 block lg:w-1/2 w-full mx-auto my-2 p-2.5"
+          className="bg-gray-900 border border-gray-300 text-white text-sm rounded-lg focus:ring-green-500 focus:border-green-500 block lg:w-1/2 w-full mx-auto my-2 p-2.5"
           onChange={(e) => setExamId(e.target.value)}
         >
           <option hidden>select exam</option>
@@ -142,7 +142,7 @@ function ResultView() {
                   results[0].student?.class?.className
                 )
               }
-              className="mb-4 bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded"
+              className="mb-4 bg-blue-600 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded"
             >
               Download Excel
             </button>
@@ -203,7 +203,7 @@ function ResultTableRow({ result, index, subjectNames }) {
         return (
           <td
             className={`whitespace-nowrap text-sm text-left px-6 py-4 ${
-              subjectResult?.cceMark !== 1 ? "bg-gray-200" : "bg-red-400"
+              subjectResult?.cceMark !== 1 ? "" : "bg-red-800"
             }`}
             key={subjectName}
           >

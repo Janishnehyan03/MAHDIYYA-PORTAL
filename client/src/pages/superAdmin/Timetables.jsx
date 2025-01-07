@@ -126,7 +126,7 @@ function TimetableForm({ onSubmitSuccess, editingHallTicket }) {
       <div className="mb-4">
         <label className="block text-sm font-bold mb-2">Exam</label>
         <select
-          className="bg-gray-50 border border-gray-300 text-sm rounded-lg w-full p-2"
+          className="bg-gray-900 border border-gray-300 text-sm rounded-lg w-full p-2"
           onChange={(e) => setExam(e.target.value)}
           value={exam}
           required
@@ -144,7 +144,7 @@ function TimetableForm({ onSubmitSuccess, editingHallTicket }) {
       <div className="mb-4">
         <label className="block text-sm font-bold mb-2">Class</label>
         <select
-          className="bg-gray-50 border border-gray-300 text-sm rounded-lg w-full p-2"
+          className="bg-gray-900 border border-gray-300 text-sm rounded-lg w-full p-2"
           onChange={(e) => setSelectedClass(e.target.value)}
           value={selectedClass}
           required
@@ -164,7 +164,7 @@ function TimetableForm({ onSubmitSuccess, editingHallTicket }) {
         {inputs.map((inputItem, key) => (
           <div key={key} className="flex space-x-2 mb-2">
             <select
-              className="bg-gray-50 border border-gray-300 text-sm rounded-lg w-full p-2"
+              className="bg-gray-900 border border-gray-300 text-sm rounded-lg w-full p-2"
               name="subjectId"
               onChange={(event) => handleInputChange(key, event)}
               value={inputItem.subjectId}
@@ -180,7 +180,7 @@ function TimetableForm({ onSubmitSuccess, editingHallTicket }) {
               ))}
             </select>
             <input
-              className="bg-gray-50 border border-gray-300 text-sm rounded-lg w-full p-2"
+              className="bg-gray-900 border border-gray-300 text-sm rounded-lg w-full p-2"
               name="time"
               type="time"
               onChange={(event) => handleInputChange(key, event)}
@@ -188,7 +188,7 @@ function TimetableForm({ onSubmitSuccess, editingHallTicket }) {
               required
             />
             <input
-              className="bg-gray-50 border border-gray-300 text-sm rounded-lg w-full p-2"
+              className="bg-gray-900 border border-gray-300 text-sm rounded-lg w-full p-2"
               name="date"
               type="date"
               onChange={(event) => handleInputChange(key, event)}
@@ -210,7 +210,7 @@ function TimetableForm({ onSubmitSuccess, editingHallTicket }) {
         <button
           type="button"
           onClick={handleAddRow}
-          className="bg-teal-600 text-white px-4 py-2 rounded-lg"
+          className="bg-blue-600 text-white px-4 py-2 rounded-lg"
         >
           Add Subject
         </button>
@@ -297,14 +297,14 @@ function HallTicketTable({ hallTickets, onDelete, onEdit }) {
       {hallTickets.map((hallTicket) => (
         <div
           key={hallTicket._id}
-          className="relative bg-white shadow-md rounded-lg p-6 border border-gray-300 transition-transform transform hover:scale-105"
+          className="relative bg-gray-900 shadow-md rounded-lg p-6 border border-gray-300 transition-transform transform hover:scale-105"
         >
           {/* Exam and Class Name */}
           <div className="mb-4 mt-10">
             <h2 className="text-xl font-bold text-gray-800">
               {hallTicket.exam.examName}
             </h2>
-            <p className="text-gray-500 italic">{hallTicket.class.className}</p>
+            <p className="text-white italic">{hallTicket.class.className}</p>
           </div>
 
           {/* Subjects */}

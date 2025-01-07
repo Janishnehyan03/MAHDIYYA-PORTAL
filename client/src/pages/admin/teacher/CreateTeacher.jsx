@@ -112,7 +112,7 @@ function CreateTeacher() {
   }, []);
   return (
     <div className="w-2/4 mx-auto">
-      <section className="bg-white p-6">
+      <section className="bg-gray-900 p-6">
         <div className="max-w-screen-xl mx-auto">
           <h3 className="text-4xl font-bold text-violet-600 uppercase my-4">
             Create Teacher
@@ -122,7 +122,7 @@ function CreateTeacher() {
             <div className="lg:col-span-1">
               <div className="px-4 sm:px-0">
                 <label
-                  className="block  text-sm font-bold mb-2"
+                  className="block  text-sm font-bold mb-2 text-[#eeeeee]"
                   htmlFor="username"
                 >
                   TEACHER'S USERNAME
@@ -143,7 +143,7 @@ function CreateTeacher() {
             <div className="lg:col-span-1">
               <div className="px-4 sm:px-0">
                 <label
-                  className="block  text-sm font-bold mb-2"
+                  className="block  text-sm font-bold mb-2 text-[#eeeeee]"
                   htmlFor="username"
                 >
                   EMAIL
@@ -165,7 +165,7 @@ function CreateTeacher() {
             <div className="lg:col-span-1">
               <div className="px-4 sm:px-0">
                 <label
-                  className="block  text-sm font-bold mb-2"
+                  className="block  text-sm font-bold mb-2 text-[#eeeeee]"
                   htmlFor="username"
                 >
                   Phone Number
@@ -187,7 +187,7 @@ function CreateTeacher() {
             <div className="lg:col-span-1">
               <div className="px-4 sm:px-0">
                 <label
-                  className="block  text-sm font-bold mb-2"
+                  className="block  text-sm font-bold mb-2 text-[#eeeeee]"
                   htmlFor="username"
                 >
                   Gender
@@ -195,7 +195,7 @@ function CreateTeacher() {
                 <span className="text-red-600">{errors?.gender}</span>
 
                 <select
-                  className="bg-gray-50 border border-gray-300 text-sky-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
+                  className="bg-gray-900 border border-gray-300 text-sky-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
                   name="gender"
                   onChange={(e) => onChange(e)}
                   id=""
@@ -218,7 +218,7 @@ function CreateTeacher() {
                 id="teacher"
                 name="teacher"
                 onChange={() => onChangeTeacherType(true)}
-                className="bg-gray-50 border border-gray-300 text-sky-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5"
+                className="bg-gray-900 border border-gray-300 text-sky-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5"
               />
             </div>
             <div className="px-4 sm:px-0 mt-4">
@@ -233,17 +233,17 @@ function CreateTeacher() {
                 id="teacher"
                 name="teacher"
                 onChange={() => onChangeTeacherType(false)}
-                className="bg-gray-50 border border-gray-300 text-sky-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5"
+                className="bg-gray-900 border border-gray-300 text-sky-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5"
               />
             </div>
             {formData.mahdiyyaTeacher && (
               <div className="lg:col-span-1">
                 <div className="px-4 sm:px-0">
-                  <label className="block  text-sm font-bold mb-2">
+                  <label className="block  text-sm font-bold mb-2 text-[#eeeeee]">
                     Subjects
                   </label>{" "}
                   <select
-                    className="bg-gray-50 border text-bold border-gray-300 text-sky-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
+                    className="bg-gray-900 border text-bold border-gray-300 text-sky-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
                     onChange={(e) => handleSubjects(e.target.value)}
                   >
                     <option hidden>Select subjects </option>
@@ -261,7 +261,7 @@ function CreateTeacher() {
             {formData.mahdiyyaTeacher && (
               <div className="lg:col-span-1 mt-4">
                 <div className="px-4 sm:px-0">
-                  <label className="block  text-sm font-bold mb-2">
+                  <label className="block  text-sm font-bold mb-2 text-[#eeeeee]">
                     Selected Subjects
                   </label>
                   {selectedSubjects.map((item, key) => (

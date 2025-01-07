@@ -65,34 +65,34 @@ const TransferStudent = () => {
               Student Details
             </h2>
             <div className="grid grid-cols-2 gap-4 text-sm">
-              <p className="text-gray-600">
+              <p className="text-white">
                 <strong className="text-gray-800">Name:</strong>{" "}
                 {student.studentName}
               </p>
-              <p className="text-gray-600">
+              <p className="text-white">
                 <strong className="text-gray-800">Register No:</strong>{" "}
                 {student.registerNo}
               </p>
-              <p className="text-gray-600">
+              <p className="text-white">
                 <strong className="text-gray-800">Father's Name:</strong>{" "}
                 {student.fatherName}
               </p>
-              <p className="text-gray-600">
+              <p className="text-white">
                 <strong className="text-gray-800">Class:</strong>{" "}
                 {student.class.className}
               </p>
-              <p className="text-gray-600">
+              <p className="text-white">
                 <strong className="text-gray-800">Current Study Centre:</strong>{" "}
                 {student.branch?.studyCentreName}
               </p>
               {student.transferredFrom && (
-                <p className="text-gray-600">
+                <p className="text-white">
                   <strong className="text-gray-800">Transferred From:</strong>{" "}
                   {student.transferredFrom?.studyCentreName}
                 </p>
               )}
               {student.transferReason && (
-                <p className="text-gray-600">
+                <p className="text-white">
                   <strong className="text-gray-800">Transferred for:</strong>{" "}
                   {student.transferReason}
                 </p>
@@ -173,7 +173,7 @@ const TransferStudent = () => {
           </button>
         </div>
       ) : (
-        <p className="text-center text-gray-500">Loading student details...</p>
+        <p className="text-center text-white">Loading student details...</p>
       )}
     </div>
   );

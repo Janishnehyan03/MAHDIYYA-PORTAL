@@ -25,43 +25,43 @@ function AllTeachers() {
           <tr>
             <th
               scope="col"
-              className="text-sm font-medium text-blue-900 px-6 py-4 text-left"
+              className="text-sm font-medium text-[#eeeeee] px-6 py-4 text-left"
             >
               #
             </th>
             <th
               scope="col"
-              className="text-sm font-medium text-blue-900 px-6 py-4 text-left"
+              className="text-sm font-medium text-[#eeeeee] px-6 py-4 text-left"
             >
               Name
             </th>
             <th
               scope="col"
-              className="text-sm font-medium text-blue-900 px-6 py-4 text-left"
+              className="text-sm font-medium text-[#eeeeee] px-6 py-4 text-left"
             >
               Email
             </th>
             <th
               scope="col"
-              className="text-sm font-medium text-blue-900 px-6 py-4 text-left"
+              className="text-sm font-medium text-[#eeeeee] px-6 py-4 text-left"
             >
               Gender
             </th>
             <th
               scope="col"
-              className="text-sm font-medium text-blue-900 px-6 py-4 text-left"
+              className="text-sm font-medium text-[#eeeeee] px-6 py-4 text-left"
             >
               Phone
             </th>
             <th
               scope="col"
-              className="text-sm font-medium text-blue-900 px-6 py-4 text-left"
+              className="text-sm font-medium text-[#eeeeee] px-6 py-4 text-left"
             >
               Mahdiyya Teacher
             </th>
             <th
               scope="col"
-              className="text-sm font-medium text-blue-900 px-6 py-4 text-left"
+              className="text-sm font-medium text-[#eeeeee] px-6 py-4 text-left"
             >
               Edit
             </th>
@@ -71,28 +71,28 @@ function AllTeachers() {
           {teachers.length > 0 &&
             teachers.map((teacher, i) => (
               <tr className="border-b ">
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-900">
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-[#eeeeee]">
                   {i + 1}
                 </td>
-                <td className="text-sm   text-blue-900 hover:text-blue-700 font-semibold cursor-pointer px-6 py-4 whitespace-nowrap">
+                <td className="text-sm   text-[#eeeeee] hover:text-blue-700 font-semibold cursor-pointer px-6 py-4 whitespace-nowrap">
                   <Link to={`/teacher/${teacher._id}`}>
                     {teacher.teacherName}
                   </Link>
                 </td>
-                <td className="text-sm text-blue-900 font-light px-6 py-4 whitespace-nowrap">
+                <td className="text-sm text-[#eeeeee] font-light px-6 py-4 whitespace-nowrap">
                   {teacher.email}
                 </td>
-                <td className="text-sm text-blue-900 font-light px-6 py-4 whitespace-nowrap">
+                <td className="text-sm text-[#eeeeee] font-light px-6 py-4 whitespace-nowrap">
                   {teacher.gender}
                 </td>
-                <td className="text-sm text-blue-900 font-light px-6 py-4 whitespace-nowrap">
+                <td className="text-sm text-[#eeeeee] font-light px-6 py-4 whitespace-nowrap">
                   {teacher.phone}
                 </td>
-                <td className="text-sm text-blue-900 font-light px-6 py-4 whitespace-nowrap">
+                <td className="text-sm text-[#eeeeee] font-light px-6 py-4 whitespace-nowrap">
                   {teacher?.mahdiyyaTeacher ? "YES":"NO"}
                 </td>
 
-                <td className="text-sm text-blue-900 font-light px-6 py-4 whitespace-nowrap">
+                <td className="text-sm text-[#eeeeee] font-light px-6 py-4 whitespace-nowrap">
                   <Link to={`/edit-teacher/${teacher._id}`}>
                     <FontAwesomeIcon icon={faEdit} />
                   </Link>

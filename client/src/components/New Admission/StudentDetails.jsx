@@ -88,9 +88,9 @@ function StudentDetails({ onChange, formData, nextPage, formErrors }) {
   ];
 
   return (
-    <section className="bg-white p-6">
+    <section className="bg-gray-900 p-6">
       <div className="max-w-screen-xl mx-auto">
-        <h3 className="text-4xl text-center font-bold text-blue-900 uppercase my-4">
+        <h3 className="text-4xl text-center font-bold text-[#eeeeee] uppercase my-4">
           Admission SECTION
         </h3>
         <div className="flex items-center flex-col justify-center">
@@ -107,7 +107,7 @@ function StudentDetails({ onChange, formData, nextPage, formErrors }) {
             <div key={key} className="lg:col-span-1">
               <div className="px-4 sm:px-0">
                 <label
-                  className="block  text-sm font-bold mb-2"
+                  className="block  text-sm font-bold mb-2 text-[#eeeeee]"
                   htmlFor="username"
                 >
                   {form.labelName}
@@ -127,13 +127,13 @@ function StudentDetails({ onChange, formData, nextPage, formErrors }) {
           ))}
 
           <div className="lg:col-span-1">
-            <label className="block  text-sm font-bold mb-2" htmlFor="username">
+            <label className="block  text-sm font-bold mb-2 text-[#eeeeee]" htmlFor="username">
               District
             </label>
             <select
               name="district"
               onChange={(e) => onChange(e)}
-              className="bg-gray-50 border border-gray-300 text-blue-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full py-4 "
+              className="bg-gray-900 border border-gray-300 text-[#eeeeee] text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full py-4 "
             >
               <option hidden>Select YOUR DISTRICT </option>
               {DISTRICT.map((district, index) => (

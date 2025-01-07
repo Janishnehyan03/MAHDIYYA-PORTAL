@@ -55,9 +55,9 @@ function VerifyDetails({
   return (
     <>
       <div className="lg:w-2/4 w-full lg:mx-auto">
-        <section className="bg-white p-6">
+        <section className="bg-gray-900 p-6">
           <div className="mx-auto">
-            <h3 className="text-4xl font-bold text-blue-900 uppercase my-4">
+            <h3 className="text-4xl font-bold text-[#eeeeee] uppercase my-4">
               verify details
             </h3>
             <form className="lg:grid lg:grid-cols-2 lg:gap-8">
@@ -65,7 +65,7 @@ function VerifyDetails({
                 <div key={key} className="lg:col-span-1">
                   <div className="px-4 sm:px-0">
                     <label
-                      className="block  text-sm font-bold mb-2"
+                      className="block  text-sm font-bold mb-2 text-[#eeeeee]"
                       htmlFor="username"
                     >
                       {form.lableName}
@@ -87,7 +87,7 @@ function VerifyDetails({
               <div className="lg:col-span-1">
                 <div className="px-4 sm:px-0">
                   <label
-                    className="block  text-sm font-bold mb-2"
+                    className="block  text-sm font-bold mb-2 text-[#eeeeee]"
                     htmlFor="username"
                   >
                     Selected Branch

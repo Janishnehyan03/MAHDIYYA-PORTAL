@@ -66,7 +66,7 @@ function FileUpload() {
       <div className="w-full">
         <label
           htmlFor="dropzone-file"
-          className="block mb-2 text-sm font-medium text-gray-900"
+          className="block mb-2 text-sm font-medium text-white"
         >
           File 
         </label>
@@ -75,14 +75,14 @@ function FileUpload() {
           type="file"
           onChange={(e) => setFile(e.target.files[0])}
           required
-          className="bg-gray-50 border border-gray-300 cursor-pointer w-full text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block  p-2"
+          className="bg-gray-900 border border-gray-300 cursor-pointer w-full text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block  p-2"
         />
       </div>
       <div className="w-full">
         {" "}
         <label
           htmlFor="Remarks"
-          className="block mb-2 text-sm font-medium text-gray-900"
+          className="block mb-2 text-sm font-medium text-white"
         >
           Remarks
         </label>
@@ -90,7 +90,7 @@ function FileUpload() {
           id="dropzone-file"
           type="text"
           onChange={(e) => setRemarks(e.target.value)}
-          className="bg-gray-50 border border-gray-300 w-full text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block  p-2.5 dark:bg-gray-700"
+          className="bg-gray-900 border border-gray-300 w-full text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block  p-2.5 dark:bg-gray-700"
         />
       </div>
 

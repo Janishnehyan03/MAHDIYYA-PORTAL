@@ -89,7 +89,7 @@ function Downloads() {
           <div className="w-full">
             <label
               htmlFor="countries"
-              className="block mb-2 text-sm font-medium text-blue-900 dark:text-white"
+              className="block mb-2 text-sm font-medium text-[#eeeeee] dark:text-white"
             >
               Select an option
             </label>
@@ -98,7 +98,7 @@ function Downloads() {
               value={type}
               onChange={(e) => setType(e.target.value)}
               required
-              className="bg-gray-50 border border-gray-300 text-blue-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+              className="bg-gray-900 border border-gray-300 text-[#eeeeee] text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
             >
               <option selected>Choose one</option>
               <option value="student">Student</option>
@@ -159,7 +159,7 @@ function Downloads() {
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
         {downloads.map((download, key) => (
           <div
-            className="bg-white shadow-md rounded-lg p-6 text-gray-800 transition-transform transform hover:scale-105"
+            className="bg-gray-900 shadow-md rounded-lg p-6 text-gray-800 transition-transform transform hover:scale-105"
             key={download._id}
           >
             <div className="flex items-center justify-between mb-4">
@@ -196,7 +196,7 @@ function Downloads() {
               >
                 Download
               </a>
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-white">
                 {/* Optional additional info */}
               </p>
             </div>

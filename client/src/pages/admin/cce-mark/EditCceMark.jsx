@@ -98,7 +98,7 @@ function EditCceMark() {
       <h1 className="text-center font-bold uppercase text-3xl my-4">
         Edit FA Marks
       </h1>
-      <div className="bg-gray-50 flex-col flex items-center justify-center">
+      <div className="bg-gray-900 flex-col flex items-center justify-center">
         <div className="mb-4 w-1/2">
           <label className="block text-gray-700 font-bold mb-2" htmlFor="class">
             Class

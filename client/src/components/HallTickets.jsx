@@ -119,14 +119,14 @@ function HallTickets() {
           <div className="lg:col-span-1">
             <div className="px-4 sm:px-0">
               <label
-                className="block  text-sm font-bold mb-2"
+                className="block  text-sm font-bold mb-2 text-[#eeeeee]"
                 htmlFor="username"
               >
                 Exam
               </label>
 
               <select
-                className="bg-gray-50 border border-gray-300 text-sky-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
+                className="bg-gray-900 border border-gray-300 text-sky-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
                 name="gender"
                 id=""
                 onChange={(e) => setExam(e.target.value)}
@@ -141,14 +141,14 @@ function HallTickets() {
           <div className="lg:col-span-1">
             <div className="px-4 sm:px-0">
               <label
-                className="block  text-sm font-bold mb-2"
+                className="block  text-sm font-bold mb-2 text-[#eeeeee]"
                 htmlFor="username"
               >
                 Class
               </label>
 
               <select
-                className="bg-gray-50 border border-gray-300 text-sky-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
+                className="bg-gray-900 border border-gray-300 text-sky-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
                 name="class"
                 id=""
                 onChange={(e) => setSelectedClass(e.target.value)}
@@ -163,7 +163,7 @@ function HallTickets() {
           <div className="lg:col-span-1">
             <div className="px-4 sm:px-0">
               <label
-                className="block  text-sm font-bold mb-2"
+                className="block  text-sm font-bold mb-2 text-[#eeeeee]"
                 htmlFor="username"
               >
                 Subjects
@@ -171,7 +171,7 @@ function HallTickets() {
               {inputs.map((inputItem, key) => (
                 <div className="flex items-center">
                   <select
-                    className="bg-gray-50 border border-gray-300 text-sky-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
+                    className="bg-gray-900 border border-gray-300 text-sky-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
                     id="username"
                     type="text"
                     required
@@ -212,7 +212,7 @@ function HallTickets() {
           <div className="flex justify-between items-center">
             <button
               onClick={(e) => handleAddRow(e)}
-              className="text-white mt-3 bg-teal-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+              className="text-white mt-3 bg-blue-600 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
             >
               add subject
             </button>
@@ -226,7 +226,7 @@ function HallTickets() {
           </div>
         </form>
 
-        <div className="bg-white shadow-md rounded-lg p-4">
+        <div className="bg-gray-900 shadow-md rounded-lg p-4">
           {hallTickets.length > 0 ? (
             hallTickets.map((hallTicket) => (
               <div
@@ -234,7 +234,7 @@ function HallTickets() {
                 className="mb-4 p-4 border border-gray-200 rounded-lg"
               >
                 <div className="flex justify-between items-center">
-                  <h3 className="text-xl font-bold text-gray-900">
+                  <h3 className="text-xl font-bold text-white">
                     {hallTicket?.exam?.examName}
                   </h3>
                   <button
@@ -244,7 +244,7 @@ function HallTickets() {
                     Delete
                   </button>
                 </div>
-                <p className="text-gray-600 mt-2">
+                <p className="text-white mt-2">
                   {hallTicket?.class?.className}
                 </p>
                 <div className="mt-2">
@@ -254,10 +254,10 @@ function HallTickets() {
                         {subject?.subjectId?.subjectName}
                       </span>{" "}
                       -{" "}
-                      <span className="text-sm text-gray-500">
+                      <span className="text-sm text-white">
                         {subject?.subjectId?.subjectCode}
                       </span>
-                      <span className="text-sm text-gray-500 ml-4">
+                      <span className="text-sm text-white ml-4">
                         ({moment(subject?.date).format("MMM DD, YYYY")}){" "}
                         {subject?.time}
                       </span>
@@ -267,7 +267,7 @@ function HallTickets() {
               </div>
             ))
           ) : (
-            <p className="text-gray-600">No hall tickets available</p>
+            <p className="text-white">No hall tickets available</p>
           )}
         </div>
       </div>

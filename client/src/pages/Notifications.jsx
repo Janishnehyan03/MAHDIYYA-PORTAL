@@ -16,7 +16,7 @@ function Notifications() {
   }, []);
   return (
     <div className="mx-auto ">
-      <h1 className="text-teal-600 font-bold text-center text-3xl my-4">
+      <h1 className="text-white font-bold text-center text-3xl my-4">
         All Notifications
       </h1>
 
@@ -28,7 +28,7 @@ function Notifications() {
                 href={notification?.url}
                 className="relative  w-full group mt-2 mx-2"
               >
-                <div className="relative px-7 py-6 bg-white ring-1 ring-blue-900/5 rounded-lg leading-none flex items-top justify-start space-x-6">
+                <div className="relative px-7 py-6 bg-gray-900 ring-1 ring-blue-900/5 rounded-lg leading-none flex items-top justify-start space-x-6">
                   <svg
                     className="w-8 h-8 text-purple-600"
                     fill="none"

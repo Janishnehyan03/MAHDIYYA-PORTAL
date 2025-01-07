@@ -91,7 +91,7 @@ function CreateMessage() {
   }, []);
   return (
     <div>
-      <form className="bg-white shadow-md rounded max-w-2xl mx-auto my-7 px-8 pt-6 pb-8 mb-4">
+      <form className="bg-gray-900 shadow-md rounded max-w-2xl mx-auto my-7 px-8 pt-6 pb-8 mb-4">
         <div className="mb-4">
           <label
             className="block text-gray-700 text-sm font-bold mb-2"
@@ -110,20 +110,20 @@ function CreateMessage() {
           />
         </div>
         <div className="mb-4  flex">
-          <label className="block mb-2 text-sm font-medium mr-4 text-blue-900 dark:text-white">
+          <label className="block mb-2 text-sm font-medium mr-4 text-[#eeeeee] dark:text-white">
             Messages To All Study Centres
           </label>
           <input type="checkbox" onClick={() => handleSetAll()} />
         </div>
         {!forAll && (
           <div className="mb-4">
-            <label className="block mb-2 text-sm font-medium text-blue-900 dark:text-white">
+            <label className="block mb-2 text-sm font-medium text-[#eeeeee] dark:text-white">
               Select a recipient
             </label>
             <select
               id="recipient"
               onChange={(e) => handleSelectChange(e)}
-              className="bg-gray-50 border rounded-lg focus:ring focus:border-blue-500 block w-full p-2.5"
+              className="bg-gray-900 border rounded-lg focus:ring focus:border-blue-500 block w-full p-2.5"
               required
             >
               <option hidden>Choose one</option>
@@ -170,7 +170,7 @@ function CreateMessage() {
           )}
         </div>
         <div>
-          <label className="block mb-2 text-sm font-medium text-blue-900 dark:text-white">
+          <label className="block mb-2 text-sm font-medium text-[#eeeeee] dark:text-white">
             Selected Recipients
           </label>
           {forAll ? (

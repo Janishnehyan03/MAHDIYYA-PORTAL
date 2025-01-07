@@ -66,7 +66,7 @@ function MarkEntry() {
         { authData.role === "admin" && (
           <>
             <Link to={"/result-view"}>
-              <div className=" py-4 overflow-hidden  cursor-pointer bg-teal-800 rounded-xl group  duration-300 shadow-2xl group">
+              <div className=" py-4 overflow-hidden  cursor-pointer bg-blue-600 rounded-xl group  duration-300 shadow-2xl group">
                 <div className="flex">
                   <div className="px-4 py-4 bg-teal-300 group-hover:bg-teal-900 rounded-xl bg-opacity-30 mx-auto text-2xl">
                     <FontAwesomeIcon
@@ -75,13 +75,13 @@ function MarkEntry() {
                     ></FontAwesomeIcon>
                   </div>
                 </div>
-                <h1 className="text-xl text-center font-bold group-hover:text-teal-400 text-white mt-4">
+                <h1 className="text-xl text-center font-bold group-hover:text-white text-white mt-4">
                   Summative Assessment
                 </h1>
               </div>
             </Link>
             {configuration?.saSubmission &&<Link to={"/add-result"}>
-              <div className=" py-4 overflow-hidden  cursor-pointer bg-teal-800 rounded-xl group  duration-300 shadow-2xl group">
+              <div className=" py-4 overflow-hidden  cursor-pointer bg-blue-600 rounded-xl group  duration-300 shadow-2xl group">
                 <div className="flex">
                   <div className="px-4 py-4 bg-teal-300 group-hover:bg-teal-900 rounded-xl bg-opacity-30 mx-auto text-2xl">
                     <FontAwesomeIcon
@@ -90,7 +90,7 @@ function MarkEntry() {
                     ></FontAwesomeIcon>
                   </div>
                 </div>
-                <h1 className="text-xl text-center font-bold group-hover:text-teal-400 text-white mt-4">
+                <h1 className="text-xl text-center font-bold group-hover:text-white text-white mt-4">
                   Add SA Marks
                 </h1>
               </div>

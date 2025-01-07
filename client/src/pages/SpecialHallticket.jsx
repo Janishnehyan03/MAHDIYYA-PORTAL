@@ -167,7 +167,7 @@ drawColumnText(
       {pdfBytes && (
         <button
           onClick={handleGeneratePdf}
-          className="bg-green-500 hover:bg-green-600 text-white mr-3 py-2 px-4 rounded"
+          className="bg-blue-600 hover:bg-blue-600 text-white mr-3 py-2 px-4 rounded"
         >
           Generate PDF
         </button>

@@ -30,10 +30,10 @@ function AllClasses() {
 
   return (
     <>
-      <h1 className="text-teal-800 font-bold text-3xl mt-4 text-center">
+      <h1 className="text-white font-bold text-3xl mt-4 text-center">
         {authData?.branch.studyCentreName}
       </h1>
-      <h1 className="bg-teal-700 my-3 text-center text-white p-3 font-semibold">
+      <h1 className="bg-blue-600 my-3 text-center text-white p-3 font-semibold">
         All Students
       </h1>
       <Link to={`/new-student`}>
@@ -48,7 +48,7 @@ function AllClasses() {
             key={key}
             className="w-full p-2"
           >
-            <div className=" py-4 overflow-hidden bg-teal-800 rounded-xl  duration-300 shadow-2xl group">
+            <div className=" py-4 overflow-hidden bg-blue-600 rounded-xl  duration-300 shadow-2xl group">
               <div className="flex">
                 <div className="px-4 py-4 bg-teal-300  rounded-xl bg-opacity-30 mx-auto text-2xl">
                   <FontAwesomeIcon
@@ -65,7 +65,7 @@ function AllClasses() {
         ))}
       </div>
       <a href="/CMS STUDENT FORM.xlsx">
-        <div className="flex bg-teal-500 hover:bg-teal-700 cursor-pointer transition px-4 py-2 text-white font-bold space-x-2 items-center rounded-full max-w-md m-3 text-center justify-center">
+        <div className="flex bg-blue-600 hover:bg-blue-600 cursor-pointer transition px-4 py-2 text-white font-bold space-x-2 items-center rounded-full max-w-md m-3 text-center justify-center">
           <FontAwesomeIcon icon={faDownload} />
           <p> Download Excel Sheet</p>
         </div>

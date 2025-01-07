@@ -29,7 +29,7 @@ function MessageTable({ messages, getMessages }) {
   };
 
   return (
-    <table className="w-2xl mx-auto  text-center bg-white shadow-md rounded-lg">
+    <table className="w-2xl mx-auto  text-center bg-gray-900 shadow-md rounded-lg">
       <thead className="bg-gray-300">
         <tr>
           <th className="px-4 py-2 text-sm font-normal">#</th>
