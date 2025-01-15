@@ -54,7 +54,7 @@ function Login() {
                   <label className="block text-sm">Username</label>
                   <input
                     type="text"
-                    className="w-full px-4 py-2 text-sm border rounded-md focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-600"
+                    className="w-full px-4 py-2 text-sm text-gray-700 border rounded-md focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-600"
                     placeholder
                     onChange={(e) => setUsername(e.target.value)}
                     value={username}
@@ -80,7 +80,7 @@ function Login() {
                   </label>
 
                   <input
-                    className="w-full px-4 py-2 text-sm border rounded-md focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-600"
+                    className="w-full px-4 py-2 text-sm text-gray-700 border rounded-md focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-600"
                     placeholder
                     type={show ? "text" : "password"}
                     onChange={(e) => setPassword(e.target.value)}

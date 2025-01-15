@@ -134,11 +134,11 @@ const AddResult = () => {
   const getAllBranches = async () => {
     try {
       const response = await Axios.get(
-        `/study-centre?sort=studyCentreName&_id=${authData.branch._id}`
+        `/study-centre?sort=studyCentreName${authData.branch?._id ? `&_id=${authData.branch._id}` : ''}`
       );
       setBranches(response.data.docs);
     } catch (error) {
-      console.error(error);
+      console.error(error.response);
     }
   };
 
@@ -302,7 +302,7 @@ const AddResult = () => {
                   <td className="border border-gray-700 px-2 py-2">
                     <input
                       type="number"
-                      className="w-20"
+                      className="w-20 text-gray-700"
                       value={studentMarks[student._id] || "0"}
                       max={maxMark}
                       onChange={(e) =>

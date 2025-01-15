@@ -35,13 +35,13 @@ function TimetableForm({ onSubmitSuccess, editingHallTicket }) {
 
   useEffect(() => {
     if (editingHallTicket) {
-      setExam(editingHallTicket.exam._id);
-      setSelectedClass(editingHallTicket.class._id);
+      setExam(editingHallTicket?.exam._id);
+      setSelectedClass(editingHallTicket?.class._id);
       setInputs(
-        editingHallTicket.subjects.map((subject) => ({
-          subjectId: subject.subjectId._id,
-          time: subject.time,
-          date: moment(subject.date).format("YYYY-MM-DD"),
+        editingHallTicket?.subjects.map((subject) => ({
+          subjectId: subject?.subjectId._id,
+          time: subject?.time,
+          date: moment(subject?.date).format("YYYY-MM-DD"),
         }))
       );
     } else {
@@ -73,7 +73,7 @@ function TimetableForm({ onSubmitSuccess, editingHallTicket }) {
       let res;
       if (editingHallTicket) {
         res = await Axios.patch(
-          `/hall-ticket/${editingHallTicket._id}`,
+          `/hall-ticket/${editingHallTicket?._id}`,
           payload
         );
       } else {
@@ -119,14 +119,19 @@ function TimetableForm({ onSubmitSuccess, editingHallTicket }) {
   };
 
   return (
-    <form className="mx-auto mt-4 w-1/2" onSubmit={submitHallTicket}>
-      <h1 className="text-2xl font-bold mb-4">
+    <form
+      className="mx-auto mt-8 max-w-xl bg-gray-800 p-6 rounded-lg shadow-lg"
+      onSubmit={submitHallTicket}
+    >
+      <h1 className="text-2xl font-bold text-white mb-6 text-center">
         {editingHallTicket ? "Edit" : "Create"} Exam Time Table
       </h1>
       <div className="mb-4">
-        <label className="block text-sm font-bold mb-2">Exam</label>
+        <label className="block text-sm font-bold text-gray-300 mb-2">
+          Exam
+        </label>
         <select
-          className="bg-gray-900 border border-gray-300 text-sm rounded-lg w-full p-2"
+          className="bg-gray-900 border border-gray-600 text-sm rounded-lg w-full p-2 focus:ring-blue-500 focus:border-blue-500"
           onChange={(e) => setExam(e.target.value)}
           value={exam}
           required
@@ -142,9 +147,11 @@ function TimetableForm({ onSubmitSuccess, editingHallTicket }) {
         </select>
       </div>
       <div className="mb-4">
-        <label className="block text-sm font-bold mb-2">Class</label>
+        <label className="block text-sm font-bold text-gray-300 mb-2">
+          Class
+        </label>
         <select
-          className="bg-gray-900 border border-gray-300 text-sm rounded-lg w-full p-2"
+          className="bg-gray-900 border border-gray-600 text-sm rounded-lg w-full p-2 focus:ring-blue-500 focus:border-blue-500"
           onChange={(e) => setSelectedClass(e.target.value)}
           value={selectedClass}
           required
@@ -160,11 +167,13 @@ function TimetableForm({ onSubmitSuccess, editingHallTicket }) {
         </select>
       </div>
       <div className="mb-4">
-        <label className="block text-sm font-bold mb-2">Subjects</label>
+        <label className="block text-sm font-bold text-gray-300 mb-2">
+          Subjects
+        </label>
         {inputs.map((inputItem, key) => (
-          <div key={key} className="flex space-x-2 mb-2">
+          <div key={key} className="flex items-center gap-2 mb-2">
             <select
-              className="bg-gray-900 border border-gray-300 text-sm rounded-lg w-full p-2"
+              className="bg-gray-900 border border-gray-600 text-sm rounded-lg w-full p-2 focus:ring-blue-500 focus:border-blue-500"
               name="subjectId"
               onChange={(event) => handleInputChange(key, event)}
               value={inputItem.subjectId}
@@ -174,13 +183,13 @@ function TimetableForm({ onSubmitSuccess, editingHallTicket }) {
                 Select Subject
               </option>
               {subjects.map((subject) => (
-                <option key={subject._id} value={subject._id}>
-                  {subject.subjectCode} - {subject.subjectName}
+                <option key={subject?._id} value={subject?._id}>
+                  {subject?.subjectCode} - {subject?.subjectName}
                 </option>
               ))}
             </select>
             <input
-              className="bg-gray-900 border border-gray-300 text-sm rounded-lg w-full p-2"
+              className="bg-gray-900 border border-gray-600 text-sm rounded-lg w-full p-2 focus:ring-blue-500 focus:border-blue-500"
               name="time"
               type="time"
               onChange={(event) => handleInputChange(key, event)}
@@ -188,7 +197,7 @@ function TimetableForm({ onSubmitSuccess, editingHallTicket }) {
               required
             />
             <input
-              className="bg-gray-900 border border-gray-300 text-sm rounded-lg w-full p-2"
+              className="bg-gray-900 border border-gray-600 text-sm rounded-lg w-full p-2 focus:ring-blue-500 focus:border-blue-500"
               name="date"
               type="date"
               onChange={(event) => handleInputChange(key, event)}
@@ -198,7 +207,11 @@ function TimetableForm({ onSubmitSuccess, editingHallTicket }) {
             <button
               type="button"
               onClick={() => handleRemoveRow(key)}
-              className="bg-red-500 text-white px-2 py-1 rounded-lg"
+              className={`bg-red-600 text-white px-3 py-1 rounded-lg ${
+                inputs.length === 1
+                  ? "opacity-50 cursor-not-allowed"
+                  : "hover:bg-red-500"
+              }`}
               disabled={inputs.length === 1}
             >
               Remove
@@ -206,17 +219,17 @@ function TimetableForm({ onSubmitSuccess, editingHallTicket }) {
           </div>
         ))}
       </div>
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center mt-6">
         <button
           type="button"
           onClick={handleAddRow}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg"
+          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
         >
           Add Subject
         </button>
         <button
           type="submit"
-          className="bg-gray-600 text-white px-4 py-2 rounded-lg"
+          className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition"
         >
           {editingHallTicket ? "Update" : "Submit"}
         </button>
@@ -228,7 +241,7 @@ function TimetableForm({ onSubmitSuccess, editingHallTicket }) {
 function TimeTables() {
   const [hallTickets, setHallTickets] = useState([]);
   const [editingHallTicket, setEditingHallTicket] = useState(null);
-
+  console.log(hallTickets);
   useEffect(() => {
     getHallTickets();
   }, []);
@@ -293,57 +306,61 @@ function TimeTables() {
 
 function HallTicketTable({ hallTickets, onDelete, onEdit }) {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-8">
-      {hallTickets.map((hallTicket) => (
-        <div
-          key={hallTicket._id}
-          className="relative bg-gray-900 shadow-md rounded-lg p-6 border border-gray-300 transition-transform transform hover:scale-105"
-        >
-          {/* Exam and Class Name */}
-          <div className="mb-4 mt-10">
-            <h2 className="text-xl font-bold text-gray-800">
-              {hallTicket.exam.examName}
-            </h2>
-            <p className="text-white italic">{hallTicket.class.className}</p>
-          </div>
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 p-6">
+      {hallTickets?.length > 0 &&
+        hallTickets?.map((hallTicket) => (
+          <div
+            key={hallTicket?._id}
+            className="relative bg-gray-900 shadow-md rounded-xl p-6 border border-gray-700 transition-transform transform hover:scale-105 hover:shadow-lg"
+          >
+            {/* Exam and Class Name */}
+            <div className="mb-6 mt-8">
+              <h2 className="text-2xl font-semibold text-white mb-1">
+                {hallTicket?.exam.examName}
+              </h2>
+              <p className="text-gray-400 italic">
+                {hallTicket?.class.className}
+              </p>
+            </div>
 
-          {/* Subjects */}
-          <div className="mb-4">
-            <h3 className="font-semibold text-lg">Subjects:</h3>
-            {hallTicket.subjects.map((subject, key) => (
-              <div
-                key={key}
-                className="bg-gray-200 rounded-lg p-3 mb-2 transition duration-200 hover:bg-gray-300"
-              >
-                <div className="flex justify-between items-center">
-                  <p className="text-gray-800 text-sm font-bold">
-                    {subject.subjectId.subjectName}
-                  </p>
-                  <p className="text-xs">
-                    {subject.time}, {moment(subject.date).format("DD-MM-YYYY")}
-                  </p>
+            {/* Subjects */}
+            <div className="mb-4">
+              <h3 className="text-lg font-medium text-white mb-3">Subjects:</h3>
+              {hallTicket?.subjects?.map((subject, key) => (
+                <div
+                  key={key}
+                  className="bg-gray-800 rounded-lg p-3 mb-2 border border-gray-700 hover:bg-gray-700 transition-colors"
+                >
+                  <div className="flex justify-between items-center">
+                    <p className="text-sm font-bold text-gray-200">
+                      {subject?.subjectId?.subjectName}
+                    </p>
+                    <p className="text-xs text-gray-400">
+                      {subject?.time},{" "}
+                      {moment(subject?.date).format("DD-MM-YYYY")}
+                    </p>
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
 
-          {/* Edit and Delete Buttons */}
-          <div className="absolute top-4 right-4 space-x-2 flex justify-between">
-            <button
-              className="bg-gray-600 text-white  p-2 rounded-lg hover:bg-gray-700 transition transform hover:scale-105"
-              onClick={() => onEdit(hallTicket)}
-            >
-              <FontAwesomeIcon icon={faPen} />
-            </button>
-            <button
-              className="bg-red-700 text-white p-2 rounded-lg hover:bg-red-500 transition transform hover:scale-105"
-              onClick={() => onDelete(hallTicket._id)}
-            >
-              <FontAwesomeIcon icon={faTrash} />
-            </button>
+            {/* Edit and Delete Buttons */}
+            <div className="absolute top-4 right-4 flex space-x-2">
+              <button
+                className="bg-blue-600 text-white p-2 rounded-lg hover:bg-blue-500 transition-transform transform hover:scale-110"
+                onClick={() => onEdit(hallTicket)}
+              >
+                <FontAwesomeIcon icon={faPen} />
+              </button>
+              <button
+                className="bg-red-600 text-white p-2 rounded-lg hover:bg-red-500 transition-transform transform hover:scale-110"
+                onClick={() => onDelete(hallTicket?._id)}
+              >
+                <FontAwesomeIcon icon={faTrash} />
+              </button>
+            </div>
           </div>
-        </div>
-      ))}
+        ))}
     </div>
   );
 }
