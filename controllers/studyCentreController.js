@@ -24,7 +24,35 @@ exports.createBranch = async (req, res, next) => {
     next(error);
   }
 };
+exports.getStudyCentreDetails = async (req, res) => {
+  try {
+    const { id } = req.params;
 
+    // Fetch the study centre profile
+    const studyCentre = await StudyCentre.findById(id);
+    if (!studyCentre) {
+      return res.status(404).json({ message: "Study Centre not found" });
+    }
+
+    // Count students and teachers
+    const [studentCount, teacherCount] = await Promise.all([
+      Student.countDocuments({ branch: id }),
+      Teacher.countDocuments({ branch: id }),
+    ]);
+
+    // Return the complete profile
+    res.status(200).json({
+      message: "Study Centre details fetched successfully",
+      data: {
+        studyCentre,
+        studentCount,
+        teacherCount,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({ message: "An error occurred", error: error.message });
+  }
+};
 exports.editBranch = async (req, res, next) => {
   let studyCentreId;
   if (req.user.role === "superAdmin") {

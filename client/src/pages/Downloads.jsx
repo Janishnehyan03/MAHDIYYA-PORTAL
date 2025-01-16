@@ -82,123 +82,134 @@ function Downloads() {
     getDownloads();
   }, [type]);
   return (
-    <div className="container mx-auto p-8">
-      <h1 className="text-3xl font-bold text-center mb-8">Downloads</h1>
+    <div className="container mx-auto px-6 py-8">
+      <h1 className="text-4xl font-extrabold text-center text-gray-800 dark:text-white mb-10">
+        Downloads
+      </h1>
+
       {authData?.role === "superAdmin" && (
-        <div className="max-w-xl mx-auto">
-          <div className="w-full">
+        <div className="max-w-xl mx-auto bg-gray-800 shadow-md rounded-lg p-6 mb-8">
+          {/* Select Dropdown */}
+          <div className="mb-6">
             <label
               htmlFor="countries"
-              className="block mb-2 text-sm font-medium text-[#eeeeee] dark:text-white"
+              className="block mb-2 text-sm font-medium text-gray-300"
             >
-              Select an option
+              Select an Option
             </label>
             <select
               id="countries"
               value={type}
               onChange={(e) => setType(e.target.value)}
-              required
-              className="bg-gray-900 border border-gray-300 text-[#eeeeee] text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+              className="w-full bg-gray-900 border border-gray-700 text-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 p-3 transition"
             >
-              <option selected>Choose one</option>
+              <option value="" disabled>
+                Choose one
+              </option>
               <option value="student">Student</option>
               <option value="admin">Admin</option>
             </select>
           </div>
-          <div className="mb-3 ">
+
+          {/* File Input */}
+          <div className="mb-6">
             <label
               htmlFor="formFile"
-              className="mb-2 inline-block text-neutral-500 dark:text-neutral-400"
+              className="block mb-2 text-sm font-medium text-gray-300"
             >
-              Put Your File Here
+              Upload Your File
             </label>
             <input
-              className="relative m-0 block w-full min-w-0 flex-auto cursor-pointer rounded border border-solid border-secondary-500 bg-transparent bg-clip-padding px-3 py-[0.32rem] text-base font-normal text-surface transition duration-300 ease-in-out file:-mx-3 file:-my-[0.32rem] file:me-3 file:cursor-pointer file:overflow-hidden file:rounded-none file:border-0 file:border-e file:border-solid file:border-inherit file:bg-transparent file:px-3  file:py-[0.32rem] file:text-surface focus:border-primary focus:text-gray-700 focus:shadow-inset focus:outline-none dark:border-white/70 dark:text-white  file:dark:text-white"
               type="file"
               id="formFile"
               onChange={(e) => handleFileChange(e.target.files[0])}
+              className="w-full bg-gray-900 border border-gray-700 text-gray-300 rounded-lg p-3 cursor-pointer focus:ring-indigo-500 focus:border-indigo-500 transition"
             />
           </div>
 
-          <div>
+          {/* Title Input */}
+          <div className="mb-6">
             <label
-              htmlFor="formFile"
-              className="mb-2 inline-block text-neutral-500 dark:text-neutral-400"
+              htmlFor="file-title"
+              className="block mb-2 text-sm font-medium text-gray-300"
             >
-              Title Here
+              Title
             </label>
             <input
               type="text"
               id="file-title"
-              className="relative m-0 block w-full min-w-0 flex-auto  rounded border border-solid border-secondary-500 bg-transparent bg-clip-padding px-3 py-[0.32rem] text-base font-normal text-surface transition duration-300 ease-in-out file:-mx-3 file:-my-[0.32rem] file:me-3 file:cursor-pointer file:overflow-hidden file:rounded-none file:border-0 file:border-e file:border-solid file:border-inherit file:bg-transparent file:px-3  file:py-[0.32rem] file:text-surface focus:border-primary focus:text-gray-700 focus:shadow-inset focus:outline-none dark:border-white/70 dark:text-white  file:dark:text-white"
-              placeholder="File Name Here..."
               value={title}
               onChange={(e) => setTitle(e.target.value)}
+              placeholder="Enter a title..."
+              className="w-full bg-gray-900 border border-gray-700 text-gray-300 rounded-lg p-3 focus:ring-indigo-500 focus:border-indigo-500 transition"
               required
             />
           </div>
 
-          {
-            <>
-              {loading ? (
-                <button className="bg-indigo-900 w-full text-white font-bold px-4 py-2 mb-3 hover:bg-indigo-900 mt-2">
-                  Uploading...
-                </button>
-              ) : (
-                <button
-                  onClick={fileUpload}
-                  className="bg-indigo-900 w-full text-white font-bold px-4 py-2 mb-3 hover:bg-indigo-900 mt-2"
-                >
-                  Upload
-                </button>
-              )}
-            </>
-          }
+          {/* Upload Button */}
+          <div>
+            {loading ? (
+              <button
+                className="w-full bg-indigo-600 text-white font-bold py-2 rounded-lg opacity-70 cursor-not-allowed"
+                disabled
+              >
+                Uploading...
+              </button>
+            ) : (
+              <button
+                onClick={fileUpload}
+                className="w-full bg-indigo-600 text-white font-bold py-2 rounded-lg hover:bg-indigo-500 transition"
+              >
+                Upload
+              </button>
+            )}
+          </div>
         </div>
       )}
+
+      {/* Downloads Section */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
         {downloads.map((download, key) => (
           <div
-            className="bg-gray-900 shadow-md rounded-lg p-6 text-gray-800 transition-transform transform hover:scale-105"
             key={download._id}
+            className="bg-gray-800 shadow-md rounded-lg p-6 hover:shadow-lg transition-transform transform hover:scale-105"
           >
+            {/* Header */}
             <div className="flex items-center justify-between mb-4">
-              <p
-                className={`text-sm font-semibold uppercase tracking-wide text-indigo-900`}
-              >
+              <span className="text-sm font-semibold uppercase text-indigo-500">
                 {download.type}
-              </p>
+              </span>
               {authData?.role === "superAdmin" && (
                 <button
                   onClick={(e) => deleteFile(e, download._id)}
-                  className="bg-red-800 p-2 px-3 rounded-full hover:bg-red-700 text-white transition duration-300 ease-in-out"
+                  className="bg-red-600 p-2 rounded-full hover:bg-red-500 text-white transition"
                 >
                   <FontAwesomeIcon icon={faTrash} />
                 </button>
               )}
             </div>
 
+            {/* Title */}
             <a
+              href={download.fileName}
               target="_blank"
               rel="noopener noreferrer"
-              href={`${download.fileName}`}
-              className="text-lg mb-4 font-bold text-gray-800 hover:text-indigo-900 transition duration-200"
+              className="block text-lg font-bold text-gray-200 hover:text-indigo-500 transition"
             >
               {download.title}
             </a>
 
-            <div className="flex justify-between items-center">
+            {/* Download Button */}
+            <div className="mt-4 flex items-center justify-between">
               <a
+                href={download.fileName}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="bg-indigo-900 px-4 py-2 text-white rounded-lg hover:bg-indigo-600 transition duration-200"
-                href={`${download.fileName}`}
+                className="bg-indigo-600 text-white py-2 px-4 rounded-lg hover:bg-indigo-500 transition"
               >
                 Download
               </a>
-              <p className="text-sm text-white">
-                {/* Optional additional info */}
-              </p>
+              <p className="text-sm text-gray-400">{/* Optional Info */}</p>
             </div>
           </div>
         ))}

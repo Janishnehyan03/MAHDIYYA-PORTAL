@@ -17,6 +17,7 @@ router.post(
 );
 router.get("/", branchController.getAllBranches);
 router.get("/:id", protect, branchController.getBranch);
+router.get("/details/:id", protect, branchController.getStudyCentreDetails);
 router.patch("/:id", protect, branchController.editBranch);
 router.get(
   "/details/:studyCentreId",

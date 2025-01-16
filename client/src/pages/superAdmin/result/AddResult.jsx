@@ -177,159 +177,155 @@ const AddResult = () => {
   }, [pathname]);
 
   return (
-    <div className="mt-8">
-      <div className="max-w-4xl space-x-2 mx-auto">
-        <h2 className="text-2xl font-bold mb-4 text-center">Add SA Mark</h2>
-
-        {/* Study Centre Selection */}
-        <div className="flex">
-          <div className="mb-4">
-            <label
-              className="block text-gray-700 font-bold mb-2"
-              htmlFor="branch"
-            >
-              Study Centre
-            </label>
-            <select
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              id="branch"
-              onChange={(e) => setSelectedBranch(e.target.value)}
-            >
-              <option hidden>select study centre</option>
-              {branches.map((branch) => (
-                <option value={branch._id} key={branch._id}>
-                  {branch.studyCentreName}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Class Selection */}
-          <div className="mb-4">
-            <label
-              className="block text-gray-700 font-bold mb-2"
-              htmlFor="class"
-            >
-              Class
-            </label>
-            <select
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              id="class"
-              onChange={(e) => setSelectedClass(e.target.value)}
-            >
-              <option hidden>select a class</option>
-              {classes.map((classItem) => (
-                <option value={classItem._id} key={classItem._id}>
-                  {classItem.className}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="mb-4">
-            <label
-              className="block text-gray-700 font-bold mb-2"
-              htmlFor="exam"
-            >
-              Exam
-            </label>
-            <select
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              id="exam"
-              onChange={(e) => setExam(e.target.value)}
-            >
-              <option hidden>select exam</option>
-              {exams.map((examItem) => (
-                <option value={examItem._id} key={examItem._id}>
-                  {examItem.examName}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Subject Selection */}
-        </div>
-        <div className="mb-4">
+    <div className="mt-8 bg-gray-900 text-gray-300 p-6 rounded-lg shadow-lg">
+    <div className="max-w-4xl space-x-2 mx-auto">
+      <h2 className="text-2xl font-bold mb-4 text-center text-white">Add SA Mark</h2>
+  
+      {/* Study Centre Selection */}
+      <div className="flex flex-wrap gap-4">
+        <div className="mb-4 flex-1">
           <label
-            className="block text-gray-700 font-bold mb-2"
-            htmlFor="subject"
+            className="block text-gray-400 font-bold mb-2"
+            htmlFor="branch"
           >
-            Subject
+            Study Centre
           </label>
           <select
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-            id="subject"
-            onChange={(e) => setSubject(e.target.value)}
+            className="bg-gray-800 border border-gray-600 rounded w-full py-2 px-3 text-gray-300 focus:outline-none focus:ring focus:ring-teal-500"
+            id="branch"
+            onChange={(e) => setSelectedBranch(e.target.value)}
           >
-            <option hidden>select subject</option>
-            {selectedClass &&
-              subjects
-                .filter((item) => item.class?._id === selectedClass)
-                .map((subjectItems) => (
-                  <option value={subjectItems._id} key={subjectItems._id}>
-                    {subjectItems.subjectName} {subjectItems.subjectCode}
-                  </option>
-                ))}
+            <option hidden>select study centre</option>
+            {branches.map((branch) => (
+              <option value={branch._id} key={branch._id}>
+                {branch.studyCentreName}
+              </option>
+            ))}
           </select>
         </div>
-
+  
+        {/* Class Selection */}
+        <div className="mb-4 flex-1">
+          <label
+            className="block text-gray-400 font-bold mb-2"
+            htmlFor="class"
+          >
+            Class
+          </label>
+          <select
+            className="bg-gray-800 border border-gray-600 rounded w-full py-2 px-3 text-gray-300 focus:outline-none focus:ring focus:ring-teal-500"
+            id="class"
+            onChange={(e) => setSelectedClass(e.target.value)}
+          >
+            <option hidden>select a class</option>
+            {classes.map((classItem) => (
+              <option value={classItem._id} key={classItem._id}>
+                {classItem.className}
+              </option>
+            ))}
+          </select>
+        </div>
+  
         {/* Exam Selection */}
-
-        {/* Student Marks Table */}
-        <div className="mb-10">
-          <p className="text-red-700 my-3">Maximum Marks {maxMark}</p>
-          <table className="min-w-full border-collapse border border-gray-300">
-            <thead>
-              <tr>
-                <th className="border border-gray-700 px-2 py-2">
-                  Register No
-                </th>
-                <th className="border border-gray-700 px-2 py-2">
-                  Student Name
-                </th>
-                <th className="border border-gray-700 px-2 py-2">Marks</th>
-              </tr>
-            </thead>
-            <tbody>
-              {students.map((student) => (
-                <tr key={student._id}>
-                  <td className="border border-gray-700 px-2 py-2">
-                    {student?.registerNo}
-                  </td>
-                  <td className="border border-gray-700 px-2 py-2">
-                    {student.studentName}
-                  </td>
-                  <td className="border border-gray-700 px-2 py-2">
-                    <input
-                      type="number"
-                      className="w-20 text-gray-700"
-                      value={studentMarks[student._id] || "0"}
-                      max={maxMark}
-                      onChange={(e) =>
-                        handleMarkChange(student._id, e.target.value)
-                      }
-                    />
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-
-          {loading ? (
-            <button className="bg-blue-900 text-white w-full mt-4 py-3 font-bold">
-              Uploading...
-            </button>
-          ) : (
-            <button
-              className="bg-blue-900 text-white w-full mt-4 py-3 font-bold"
-              onClick={handleSubmit}
-            >
-              Submit
-            </button>
-          )}
+        <div className="mb-4 flex-1">
+          <label
+            className="block text-gray-400 font-bold mb-2"
+            htmlFor="exam"
+          >
+            Exam
+          </label>
+          <select
+            className="bg-gray-800 border border-gray-600 rounded w-full py-2 px-3 text-gray-300 focus:outline-none focus:ring focus:ring-teal-500"
+            id="exam"
+            onChange={(e) => setExam(e.target.value)}
+          >
+            <option hidden>select exam</option>
+            {exams.map((examItem) => (
+              <option value={examItem._id} key={examItem._id}>
+                {examItem.examName}
+              </option>
+            ))}
+          </select>
         </div>
       </div>
+  
+      {/* Subject Selection */}
+      <div className="mb-4">
+        <label
+          className="block text-gray-400 font-bold mb-2"
+          htmlFor="subject"
+        >
+          Subject
+        </label>
+        <select
+          className="bg-gray-800 border border-gray-600 rounded w-full py-2 px-3 text-gray-300 focus:outline-none focus:ring focus:ring-teal-500"
+          id="subject"
+          onChange={(e) => setSubject(e.target.value)}
+        >
+          <option hidden>select subject</option>
+          {selectedClass &&
+            subjects
+              .filter((item) => item.class?._id === selectedClass)
+              .map((subjectItems) => (
+                <option value={subjectItems._id} key={subjectItems._id}>
+                  {subjectItems.subjectName} {subjectItems.subjectCode}
+                </option>
+              ))}
+        </select>
+      </div>
+  
+      {/* Student Marks Table */}
+      <div className="mb-10">
+        <p className="text-teal-400 my-3">Maximum Marks: {maxMark}</p>
+        <table className="min-w-full border-collapse border border-gray-700">
+          <thead>
+            <tr>
+              <th className="border border-gray-700 px-4 py-2">Register No</th>
+              <th className="border border-gray-700 px-4 py-2">Student Name</th>
+              <th className="border border-gray-700 px-4 py-2">Marks</th>
+            </tr>
+          </thead>
+          <tbody>
+            {students.map((student) => (
+              <tr key={student._id}>
+                <td className="border border-gray-700 px-4 py-2">
+                  {student?.registerNo}
+                </td>
+                <td className="border border-gray-700 px-4 py-2">
+                  {student.studentName}
+                </td>
+                <td className="border border-gray-700 px-4 py-2">
+                  <input
+                    type="number"
+                    className="w-20 bg-gray-800 text-gray-300 border border-gray-600 rounded px-2 py-1 focus:ring focus:ring-teal-500"
+                    value={studentMarks[student._id] || "0"}
+                    max={maxMark}
+                    onChange={(e) =>
+                      handleMarkChange(student._id, e.target.value)
+                    }
+                  />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+  
+        {loading ? (
+          <button className="bg-teal-700 text-white w-full mt-4 py-3 font-bold rounded">
+            Uploading...
+          </button>
+        ) : (
+          <button
+            className="bg-teal-700 text-white w-full mt-4 py-3 font-bold rounded hover:bg-teal-600 transition duration-300"
+            onClick={handleSubmit}
+          >
+            Submit
+          </button>
+        )}
+      </div>
     </div>
+  </div>
+  
   );
 };
 

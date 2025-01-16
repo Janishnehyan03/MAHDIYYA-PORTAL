@@ -200,20 +200,22 @@ const AddCceMark = () => {
 
   return (
     <div className="mt-8">
-      <div className="max-w-4xl mx-auto">
-        <h2 className="text-2xl font-bold mb-4 text-center">Add FA Mark</h2>
+      <div className="max-w-4xl mx-auto bg-gray-900 p-6 rounded-lg shadow-lg">
+        <h2 className="text-2xl font-bold mb-4 text-center text-white">
+          Add FA Mark
+        </h2>
 
         {/* Row for Study Centre, Class, and Exam */}
-        <div className="flex flex-wrap mb-4">
+        <div className="flex flex-wrap mb-6">
           <div className="flex-1 mr-2">
             <label
-              className="block text-gray-700 font-bold mb-2"
+              className="block text-gray-300 font-bold mb-2"
               htmlFor="branch"
             >
               Study Centre
             </label>
             <select
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              className="shadow appearance-none border border-gray-700 rounded w-full py-2 px-3 bg-gray-800 text-gray-300 focus:outline-none focus:ring-2 focus:ring-teal-500"
               id="branch"
               onChange={(e) => setSelectedBranch(e.target.value)}
             >
@@ -228,13 +230,13 @@ const AddCceMark = () => {
 
           <div className="flex-1 mx-2">
             <label
-              className="block text-gray-700 font-bold mb-2"
+              className="block text-gray-300 font-bold mb-2"
               htmlFor="class"
             >
               Class
             </label>
             <select
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              className="shadow appearance-none border border-gray-700 rounded w-full py-2 px-3 bg-gray-800 text-gray-300 focus:outline-none focus:ring-2 focus:ring-teal-500"
               id="class"
               onChange={(e) => setSelectedClass(e.target.value)}
             >
@@ -249,13 +251,13 @@ const AddCceMark = () => {
 
           <div className="flex-1 ml-2">
             <label
-              className="block text-gray-700 font-bold mb-2"
+              className="block text-gray-300 font-bold mb-2"
               htmlFor="exam"
             >
               Exam
             </label>
             <select
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              className="shadow appearance-none border border-gray-700 rounded w-full py-2 px-3 bg-gray-800 text-gray-300 focus:outline-none focus:ring-2 focus:ring-teal-500"
               id="exam"
               onChange={(e) => setExam(e.target.value)}
             >
@@ -270,15 +272,15 @@ const AddCceMark = () => {
         </div>
 
         {/* Subject Dropdown */}
-        <div className="mb-4">
+        <div className="mb-6">
           <label
-            className="block text-gray-700 font-bold mb-2"
+            className="block text-gray-300 font-bold mb-2"
             htmlFor="subject"
           >
             Subject
           </label>
           <select
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            className="shadow appearance-none border border-gray-700 rounded w-full py-2 px-3 bg-gray-800 text-gray-300 focus:outline-none focus:ring-2 focus:ring-teal-500"
             id="subject"
             onChange={(e) => setSubject(e.target.value)}
           >
@@ -296,41 +298,48 @@ const AddCceMark = () => {
 
         {/* Student Marks Table */}
         <div>
-          <p className="text-red-500 my-4">Maximum Marks ({maxMark})</p>
-          <table className="min-w-full">
+          <p className="text-teal-400 my-4 font-semibold">
+            Maximum Marks ({maxMark})
+          </p>
+          <table className="min-w-full border-collapse">
             <thead>
               <tr>
-                <th className="border border-gray-700 px-2">Register No</th>
-                <th className="border border-gray-700 px-2">Student Name</th>
-                <th className="border border-gray-700 px-2">Mark</th>
+                <th className="border border-gray-700 px-4 py-2 text-gray-300">
+                  Register No
+                </th>
+                <th className="border border-gray-700 px-4 py-2 text-gray-300">
+                  Student Name
+                </th>
+                <th className="border border-gray-700 px-4 py-2 text-gray-300">
+                  Mark
+                </th>
               </tr>
             </thead>
             <tbody>
               {students.map((student) => (
                 <tr key={student._id}>
-                  <td className="border border-gray-700 px-2">
-                    {student?.registerNo} {/* Displaying student name */}
+                  <td className="border border-gray-700 px-4 py-2 text-gray-400">
+                    {student?.registerNo}
                   </td>
-                  <td className="border border-gray-700 px-2">
-                    {student.studentName} {/* Displaying student name */}
+                  <td className="border border-gray-700 px-4 py-2 text-gray-400">
+                    {student.studentName}
                   </td>
-                  <td>
+                  <td className="border border-gray-700 px-4 py-2">
                     <input
                       type="text"
-                      className="w-full"
-                      value={studentMarks[student._id] ?? ""} // Use ?? to handle null or undefined, but keep 0
+                      className="w-full bg-gray-800 text-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-teal-500"
+                      value={studentMarks[student._id] ?? ""}
                       onChange={(e) => {
                         const value =
                           e.target.value === ""
                             ? ""
-                            : parseFloat(e.target.value); // Handle empty string
+                            : parseFloat(e.target.value);
 
                         if (isNaN(value) || value <= maxMark) {
-                          // Ensure the value is not greater than maxMark
                           handleMarkChange(
                             student._id,
                             isNaN(value) ? "" : value
-                          ); // Only update if the value is valid or within limit
+                          );
                         }
                       }}
                       max={maxMark}
@@ -342,12 +351,12 @@ const AddCceMark = () => {
           </table>
 
           {loading ? (
-            <button className="bg-blue-900 text-white w-full mt-4 py-3 font-bold">
+            <button className="bg-teal-800 text-gray-300 w-full mt-6 py-3 font-bold rounded shadow-md">
               Uploading...
             </button>
           ) : (
             <button
-              className="bg-blue-900 text-white w-full mt-4 py-3 font-bold"
+              className="bg-teal-800 text-gray-300 w-full mt-6 py-3 font-bold rounded shadow-md hover:bg-teal-700 transition"
               onClick={handleSubmit}
             >
               Submit

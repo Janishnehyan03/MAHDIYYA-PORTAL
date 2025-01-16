@@ -12,8 +12,16 @@ router.post("/", async (req, res, next) => {
   }
 });
 
+router.get("/data/admin", async (req, res, next) => {
+  try {
+    let data = await Exam.find();
+    res.status(200).json(data);
+  } catch (error) {
+    next(error);
+  }
+});
 router.get("/", async (req, res, next) => {
-  let query = req.query;
+  let query = { ...req.query, isActive: true };
   try {
     let data = await Exam.find(query);
     res.status(200).json(data);

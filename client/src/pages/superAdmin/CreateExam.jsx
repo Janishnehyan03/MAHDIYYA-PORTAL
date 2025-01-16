@@ -49,7 +49,7 @@ function CreateEditExam() {
 
   const getExams = async () => {
     try {
-      let { data } = await Axios.get("/exam");
+      let { data } = await Axios.get("/exam/data/admin");
       setExams(data);
     } catch (error) {
       console.log(error);
