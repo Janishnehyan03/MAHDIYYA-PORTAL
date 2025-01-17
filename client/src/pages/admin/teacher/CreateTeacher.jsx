@@ -112,197 +112,181 @@ function CreateTeacher() {
   }, []);
   return (
     <div className="w-2/4 mx-auto">
-      <section className="bg-gray-900 p-6">
-        <div className="max-w-screen-xl mx-auto">
-          <h3 className="text-4xl font-bold text-violet-600 uppercase my-4">
-            Create Teacher
-          </h3>
-
-          <form className="lg:grid lg:grid-cols-1 lg:gap-8">
-            <div className="lg:col-span-1">
-              <div className="px-4 sm:px-0">
-                <label
-                  className="block  text-sm font-bold mb-2 text-[#eeeeee]"
-                  htmlFor="username"
-                >
-                  TEACHER'S USERNAME
-                </label>
-                <input
-                  className="focus:ring-indigo-500 focus:border-indigo-500 shadow appearance-none border rounded w-full py-4 px-3  leading-tight focus:outline-none focus:shadow-outline uppercase"
-                  id="username"
-                  type="text"
-                  required
-                  value={formData.username}
-                  onChange={(e) => onChange(e)}
-                  placeholder="USERNAME"
-                  name="teacherName"
-                />
-                <span className="text-red-600">{errors?.teacherName}</span>
-              </div>
-            </div>
-            <div className="lg:col-span-1">
-              <div className="px-4 sm:px-0">
-                <label
-                  className="block  text-sm font-bold mb-2 text-[#eeeeee]"
-                  htmlFor="username"
-                >
-                  EMAIL
-                </label>
-                <input
-                  className="focus:ring-indigo-500 focus:border-indigo-500 shadow appearance-none border rounded w-full py-4 px-3  leading-tight focus:outline-none focus:shadow-outline uppercase"
-                  id="username"
-                  type="email"
-                  required
-                  value={formData.email}
-                  onChange={(e) => onChange(e)}
-                  placeholder="EMAIL"
-                  name="email"
-                />
-                <span className="text-red-600">{errors?.email}</span>
-              </div>
-            </div>
-
-            <div className="lg:col-span-1">
-              <div className="px-4 sm:px-0">
-                <label
-                  className="block  text-sm font-bold mb-2 text-[#eeeeee]"
-                  htmlFor="username"
-                >
-                  Phone Number
-                </label>
-                <input
-                  className="focus:ring-indigo-500 focus:border-indigo-500 shadow appearance-none border rounded w-full py-4 px-3  leading-tight focus:outline-none focus:shadow-outline uppercase"
-                  id="username"
-                  type="text"
-                  required
-                  value={formData.phone}
-                  onChange={(e) => onChange(e)}
-                  placeholder="Phone No:"
-                  name="phone"
-                />{" "}
-                <span className="text-red-600">{errors?.phone}</span>
-              </div>
-            </div>
-
-            <div className="lg:col-span-1">
-              <div className="px-4 sm:px-0">
-                <label
-                  className="block  text-sm font-bold mb-2 text-[#eeeeee]"
-                  htmlFor="username"
-                >
-                  Gender
-                </label>
-                <span className="text-red-600">{errors?.gender}</span>
-
-                <select
-                  className="bg-gray-900 border border-gray-300 text-sky-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
-                  name="gender"
-                  onChange={(e) => onChange(e)}
-                  id=""
-                >
-                  <option hidden>Select Gender </option>
-                  <option value={"male"}>Male </option>
-                  <option value={"female"}>Female </option>
-                </select>
-              </div>
-            </div>
-            <div className="px-4 sm:px-0 mt-4">
+    <section className="bg-gray-800 p-6 rounded-lg shadow-lg">
+      <div className="max-w-screen-xl mx-auto">
+        <h3 className="text-4xl font-bold text-violet-500 uppercase my-4">
+          Create Teacher
+        </h3>
+  
+        <form className="lg:grid lg:grid-cols-1 lg:gap-8">
+          <div className="lg:col-span-1">
+            <div className="px-4 sm:px-0">
               <label
-                className="block text-sm font-bold mb-2"
-                htmlFor="mahdiyyaTeacher"
+                className="block text-sm font-bold mb-2 text-gray-300"
+                htmlFor="username"
               >
-                Mahdiyya Teacher
+                Teacher's Username
               </label>
               <input
-                type="radio"
-                id="teacher"
-                name="teacher"
-                onChange={() => onChangeTeacherType(true)}
-                className="bg-gray-900 border border-gray-300 text-sky-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5"
+                className="focus:ring-violet-500 focus:border-violet-500 shadow appearance-none border border-gray-600 rounded w-full py-4 px-3 text-gray-100 bg-gray-700 leading-tight focus:outline-none"
+                id="username"
+                type="text"
+                required
+                value={formData.username}
+                onChange={(e) => onChange(e)}
+                placeholder="USERNAME"
+                name="teacherName"
               />
+              <span className="text-red-500">{errors?.teacherName}</span>
             </div>
-            <div className="px-4 sm:px-0 mt-4">
-              <label
-                className="block text-sm font-bold mb-2"
-                htmlFor="mahdiyyaTeacher"
-              >
-                Non Mahdiyya Teacher
+          </div>
+  
+          <div className="lg:col-span-1">
+            <div className="px-4 sm:px-0">
+              <label className="block text-sm font-bold mb-2 text-gray-300" htmlFor="email">
+                Email
               </label>
               <input
-                type="radio"
-                id="teacher"
-                name="teacher"
-                onChange={() => onChangeTeacherType(false)}
-                className="bg-gray-900 border border-gray-300 text-sky-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5"
+                className="focus:ring-violet-500 focus:border-violet-500 shadow appearance-none border border-gray-600 rounded w-full py-4 px-3 text-gray-100 bg-gray-700 leading-tight focus:outline-none"
+                id="email"
+                type="email"
+                required
+                value={formData.email}
+                onChange={(e) => onChange(e)}
+                placeholder="EMAIL"
+                name="email"
               />
+              <span className="text-red-500">{errors?.email}</span>
             </div>
-            {formData.mahdiyyaTeacher && (
-              <div className="lg:col-span-1">
+          </div>
+  
+          <div className="lg:col-span-1">
+            <div className="px-4 sm:px-0">
+              <label className="block text-sm font-bold mb-2 text-gray-300" htmlFor="phone">
+                Phone Number
+              </label>
+              <input
+                className="focus:ring-violet-500 focus:border-violet-500 shadow appearance-none border border-gray-600 rounded w-full py-4 px-3 text-gray-100 bg-gray-700 leading-tight focus:outline-none"
+                id="phone"
+                type="text"
+                required
+                value={formData.phone}
+                onChange={(e) => onChange(e)}
+                placeholder="Phone No:"
+                name="phone"
+              />
+              <span className="text-red-500">{errors?.phone}</span>
+            </div>
+          </div>
+  
+          <div className="lg:col-span-1">
+            <div className="px-4 sm:px-0">
+              <label className="block text-sm font-bold mb-2 text-gray-300" htmlFor="gender">
+                Gender
+              </label>
+              <select
+                className="bg-gray-700 border border-gray-600 text-gray-100 text-sm rounded-lg focus:ring-violet-500 focus:border-violet-500 block w-full p-3"
+                name="gender"
+                onChange={(e) => onChange(e)}
+                id="gender"
+              >
+                <option hidden>Select Gender</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+              </select>
+              <span className="text-red-500">{errors?.gender}</span>
+            </div>
+          </div>
+  
+          <div className="px-4 sm:px-0 mt-4">
+            <label className="block text-sm font-bold mb-2 text-gray-300">Mahdiyya Teacher</label>
+            <input
+              type="radio"
+              id="teacher"
+              name="teacher"
+              onChange={() => onChangeTeacherType(true)}
+              className="focus:ring-violet-500 focus:border-violet-500"
+            />
+          </div>
+  
+          <div className="px-4 sm:px-0 mt-4">
+            <label className="block text-sm font-bold mb-2 text-gray-300">
+              Non Mahdiyya Teacher
+            </label>
+            <input
+              type="radio"
+              id="non-teacher"
+              name="teacher"
+              onChange={() => onChangeTeacherType(false)}
+              className="focus:ring-violet-500 focus:border-violet-500"
+            />
+          </div>
+  
+          {formData.mahdiyyaTeacher && (
+            <>
+              <div className="lg:col-span-1 mt-4">
                 <div className="px-4 sm:px-0">
-                  <label className="block  text-sm font-bold mb-2 text-[#eeeeee]">
+                  <label className="block text-sm font-bold mb-2 text-gray-300">
                     Subjects
-                  </label>{" "}
+                  </label>
                   <select
-                    className="bg-gray-900 border text-bold border-gray-300 text-sky-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 "
+                    className="bg-gray-700 border border-gray-600 text-gray-100 text-sm rounded-lg focus:ring-violet-500 focus:border-violet-500 block w-full p-3"
                     onChange={(e) => handleSubjects(e.target.value)}
                   >
-                    <option hidden>Select subjects </option>
+                    <option hidden>Select subjects</option>
                     {subjects.map((subject, index) => (
                       <option key={index} value={subject._id}>
-                        {subject.subjectName}
-                        {subject.subjectCode}
+                        {subject.subjectName} {subject.subjectCode}
                       </option>
                     ))}
                   </select>
                 </div>
               </div>
-            )}
-
-            {formData.mahdiyyaTeacher && (
+  
               <div className="lg:col-span-1 mt-4">
                 <div className="px-4 sm:px-0">
-                  <label className="block  text-sm font-bold mb-2 text-[#eeeeee]">
+                  <label className="block text-sm font-bold mb-2 text-gray-300">
                     Selected Subjects
                   </label>
                   {selectedSubjects.map((item, key) => (
-                    <div className="flex justify-between mx-2 text-center font-bold cursor-pointer  items-center bg-[#296d8a] px-2 my-2  text-white py-3">
-                      <h6
-                        key={key}
-                        className="text-white font-bold text-center"
-                      >
-                        {item.subjectName} {item.subjectCode}
-                      </h6>
+                    <div
+                      key={key}
+                      className="flex justify-between items-center bg-violet-500 px-3 py-2 rounded-md mb-2 text-gray-100"
+                    >
+                      <h6>{item.subjectName} {item.subjectCode}</h6>
                       <FontAwesomeIcon
                         onClick={() => removeSubject(item._id)}
                         icon={faTrash}
-                        color="white"
-                        className="hover:text-red-400"
+                        className="hover:text-red-400 cursor-pointer"
                       />
                     </div>
                   ))}
                 </div>
               </div>
-            )}
-          </form>
+            </>
+          )}
+  
           <div className="lg:col-span-1 mt-4">
             <div className="px-4 sm:px-0">
               {!loading ? (
                 <button
                   onClick={(e) => handleSubmit(e)}
-                  className="w-full lg:w-1/2 bg-violet-500 hover:bg-violet-800 text-white font-bold py-4 px-4 rounded focus:outline-none focus:shadow-outline uppercase"
+                  className="w-full lg:w-1/2 bg-violet-600 hover:bg-violet-700 text-gray-100 font-bold py-4 px-4 rounded uppercase focus:outline-none"
                 >
                   Submit
                 </button>
               ) : (
-                <h1 className="text-white text-center w-full lg:w-1/2 bg-violet-500 hover:bg-violet-500  font-bold py-4 px-4 rounded focus:outline-none focus:shadow-outline uppercase">
-                  Processing..
+                <h1 className="text-gray-100 text-center w-full lg:w-1/2 bg-violet-600 font-bold py-4 px-4 rounded uppercase">
+                  Processing...
                 </h1>
               )}
             </div>
           </div>
-        </div>
-      </section>
-    </div>
+        </form>
+      </div>
+    </section>
+  </div>
+  
   );
 }
 

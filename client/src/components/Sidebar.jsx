@@ -11,7 +11,7 @@ import {
   faPersonChalkboard,
   faPowerOff,
   faRecycle,
-  faUser
+  faUser,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React, { useContext, useState } from "react";
@@ -47,7 +47,7 @@ function Sidebar() {
       route: "/",
       icon: faHome,
     },
-   
+
     {
       name: "Study Centers",
       route: "/study-centre-section",
@@ -87,37 +87,37 @@ function Sidebar() {
 
   return (
     <>
-      <div onClick={() => setOpenSidebar(!openSidebar)}>
-        <span className="absolute z-40 text-white text-4xl top-1 right-1 cursor-pointer">
+      <div
+        onClick={() => setOpenSidebar(!openSidebar)}
+        className="relative z-40"
+      >
+        <span className="absolute top-1 right-1 text-white text-4xl cursor-pointer">
           <button
-            className="bi bi-filter-left px-2  rounded-md"
+            className="bi bi-filter-left px-2 rounded-md"
             onClick={() => setOpenSidebar(!openSidebar)}
           >
             {!openSidebar ? (
               <FontAwesomeIcon
                 icon={faBars}
-                color="black"
-                className=" cursor-pointer ml-28 lg:hidden"
-              ></FontAwesomeIcon>
+                className="cursor-pointer ml-28 lg:hidden"
+              />
             ) : (
               <FontAwesomeIcon
                 icon={faClose}
-                color="white"
                 className="cursor-pointer ml-28 lg:hidden"
-              ></FontAwesomeIcon>
+              />
             )}
           </button>
         </span>
 
         <div
-          className={`fixed 
-            lg:block ${
-              !openSidebar && "hidden"
-            } top-0 bottom-0 lg:left-0 p-2 lg:w-[250px] w-full overflow-y-auto text-center bg-gray-900`}
+          className={`fixed top-0 bottom-0 lg:left-0 p-4 lg:w-[250px] w-full overflow-y-auto bg-gray-900 text-center transition-transform duration-300 ${
+            !openSidebar ? "transform -translate-x-full lg:transform-none" : ""
+          }`}
         >
-          <div className="p-2.5 mt-1 mb-6 flex items-center">
-            <Link to={"/"} className=" ml-3">
-              <h1 className="font-bold text-3xl text-gray-400 border-b-2">
+          <div className="p-3 mt-1 mb-6 flex items-center justify-between">
+            <Link to={"/"} className="ml-3">
+              <h1 className="font-bold text-3xl text-gray-400 border-b-2 pb-1">
                 DASHBOARD
               </h1>
             </Link>
@@ -126,95 +126,84 @@ function Sidebar() {
 
           {authData?.role === "admin" &&
             navigations.map((navigation, index) => (
-              <>
-                <NavLink
-                  to={navigation.route}
-                  key={index}
-                  className={({ isActive }) =>
-                    isActive
-                      ? "p-2.5 mt-3 flex items-center rounded-md px-4 duration-300 bg-blue-600 cursor-pointer hover:bg-blue-600 text-white"
-                      : "p-2.5 mt-3 flex items-center rounded-md px-4 duration-300 cursor-pointer hover:bg-blue-600 text-white"
-                  }
-                >
-                  <FontAwesomeIcon icon={navigation.icon} />
-                  <span className="text-[15px] ml-4 text-gray-200 font-bold">
-                    {navigation.name}
-                  </span>
-                </NavLink>
-              </>
+              <NavLink
+                to={navigation.route}
+                key={index}
+                className={({ isActive }) =>
+                  isActive
+                    ? "p-3 mt-3 flex items-center rounded-md px-4 bg-teal-600 text-white duration-300"
+                    : "p-3 mt-3 flex items-center rounded-md px-4 text-white hover:bg-teal-600 duration-300"
+                }
+              >
+                <FontAwesomeIcon icon={navigation.icon} className="text-xl" />
+                <span className="text-sm ml-4 font-semibold">
+                  {navigation.name}
+                </span>
+              </NavLink>
             ))}
+
           {authData?.role === "superAdmin" &&
             SuperAdmin.map((navigation, index) => (
-              <>
-                <NavLink
-                  to={navigation.route}
-                  key={index}
-                  className={({ isActive }) =>
-                    isActive
-                      ? "p-2.5 mt-3 flex items-center rounded-md px-4 duration-300 bg-blue-600 cursor-pointer hover:bg-blue-600 text-white"
-                      : "p-2.5 mt-3 flex items-center rounded-md px-4 duration-300 cursor-pointer hover:bg-blue-600 text-white"
-                  }
-                >
-                  <FontAwesomeIcon icon={navigation.icon} />
-                  <span className="text-[15px] ml-4 text-gray-200 font-bold">
-                    {navigation.name}
-                  </span>
-                </NavLink>
-              </>
+              <NavLink
+                to={navigation.route}
+                key={index}
+                className={({ isActive }) =>
+                  isActive
+                    ? "p-3 mt-3 flex items-center rounded-md px-4 bg-teal-600 text-white duration-300"
+                    : "p-3 mt-3 flex items-center rounded-md px-4 text-white hover:bg-teal-600 duration-300"
+                }
+              >
+                <FontAwesomeIcon icon={navigation.icon} className="text-xl" />
+                <span className="text-sm ml-4 font-semibold">
+                  {navigation.name}
+                </span>
+              </NavLink>
             ))}
 
           <div className="my-4 bg-gray-600 h-[1px]" />
 
           {authData ? (
-            <div className="absolute bottom-2">
-              <div className="p-2.5 mt-3 flex items-center rounded-md px-4  bg-blue-600 duration-300 text-white">
-                {authData && (
-                  <Link
-                    to={"/profile"}
-                    className="text-[15px] ml-4  px-3 text-white font-bold uppercase"
-                  >
-                    <FontAwesomeIcon icon={faUser} /> {authData.username}
-                  </Link>
-                )}
+            <div className="absolute bottom-2 w-full">
+              <div className="p-3 mt-3 flex items-center justify-between rounded-md bg-teal-600 text-white">
+                <Link
+                  to={"/profile"}
+                  className="text-sm ml-4 font-semibold text-white uppercase"
+                >
+                  <FontAwesomeIcon icon={faUser} /> {authData.username}
+                </Link>
               </div>
+
               <div
                 onClick={() => logout()}
-                className="p-2.5 mt-3 flex items-center rounded-md px-4 duration-300 cursor-pointer hover:bg-red-600 text-white"
+                className="p-3 mt-3 flex items-center rounded-md cursor-pointer hover:bg-red-600 text-white"
               >
                 <FontAwesomeIcon icon={faPowerOff} />
-                <span className="text-[15px] ml-4 text-gray-200 font-bold">
-                  Logout
-                </span>
+                <span className="text-sm ml-4 font-semibold">Logout</span>
               </div>
             </div>
           ) : (
             <Link
               to={"/login"}
-              className="p-2.5 mt-3 flex items-center rounded-md px-4 duration-300 cursor-pointer bg-blue-600 text-white"
+              className="p-3 mt-3 flex items-center rounded-md bg-teal-600 text-white cursor-pointer"
             >
               <i className="bi bi-box-arrow-in-right" />
-              <span className="text-[15px] ml-4 text-gray-200 font-bold">
-                Login
-              </span>
+              <span className="text-sm ml-4 font-semibold">Login</span>
             </Link>
           )}
+
           {authData?.role === "admin" && (
             <NavLink
               to={"/my-messages"}
               className={({ isActive }) =>
                 isActive
-                  ? "p-2.5 mt-3 flex items-center rounded-md px-4 duration-300 bg-blue-600 cursor-pointer hover:bg-blue-600 text-white"
-                  : "p-2.5 mt-3 flex items-center rounded-md px-4 duration-300 cursor-pointer hover:bg-blue-600 text-white"
+                  ? "p-3 mt-3 flex items-center rounded-md px-4 bg-teal-600 text-white duration-300"
+                  : "p-3 mt-3 flex items-center rounded-md px-4 text-white hover:bg-teal-600 duration-300"
               }
             >
-              <FontAwesomeIcon icon={faMessage} />
-              <span className="text-[15px] ml-4 text-gray-200 font-bold">
-                My Messages
-              </span>
-              {/* <span className="text-white ml-2 bg-red-500 px-2 rounded-full">{unreadMessages}</span> */}
+              <FontAwesomeIcon icon={faMessage} className="text-xl" />
+              <span className="text-sm ml-4 font-semibold">My Messages</span>
             </NavLink>
           )}
-          
         </div>
       </div>
     </>

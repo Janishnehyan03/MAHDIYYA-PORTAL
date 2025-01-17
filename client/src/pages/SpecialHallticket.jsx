@@ -6,7 +6,6 @@ import Axios from "../Axios";
 
 const PdfCustomizer = () => {
   const [registerNumber, setRegisterNumber] = useState("");
-  const [studentData, setStudentData] = useState(null);
   const [pdfBytes, setPdfBytes] = useState(null); // State variable to store PDF bytes
   const [error, setError] = useState(null);
 
@@ -20,7 +19,6 @@ const PdfCustomizer = () => {
         `/hall-ticket/special-hallticket/${registerNumber}`
       );
       console.log(data);
-      setStudentData(data);
       setError(null);
 
       // Fetch the PDF file from the server

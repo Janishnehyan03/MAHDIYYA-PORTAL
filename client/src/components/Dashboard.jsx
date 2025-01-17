@@ -10,6 +10,7 @@ import {
   faFileArchive,
   faGraduationCap,
   faMarker,
+  faPaperPlane,
   faPenAlt,
   faSchool,
   faToolbox,
@@ -148,6 +149,11 @@ function Dashboard() {
       icon: faPenAlt,
       link: "/mark-entry",
     },
+    {
+      text: "Hall Tickets",
+      icon: faFileArchive,
+      link: "/hall-tickets",
+    },
 
     {
       text: "Exam Results",
@@ -203,56 +209,26 @@ function Dashboard() {
               </div>
             </div>
           ) : (
-            <div className="bg-gray-100 py-10">
-              <div className="flex flex-wrap justify-center gap-6 mb-10">
-                <div className="flex items-center bg-gray-900 shadow-lg rounded-lg p-6">
-                  <FontAwesomeIcon
-                    icon={faUserGraduate}
-                    className="text-blue-500 text-4xl mr-4"
-                  />
-                  <div>
-                    <h1 className="text-xl font-semibold text-gray-700">
-                      Students
-                    </h1>
-                    <p className="text-2xl font-bold text-gray-800">
-                      {details?.students?.length}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center bg-gray-900 shadow-lg rounded-lg p-6">
-                  <FontAwesomeIcon
-                    icon={faChalkboardTeacher}
-                    className="text-green-500 text-4xl mr-4"
-                  />
-                  <div>
-                    <h1 className="text-xl font-semibold text-gray-700">
-                      Teachers
-                    </h1>
-                    <p className="text-2xl font-bold text-gray-800">
-                      {details?.teachers?.length}
-                    </p>
-                  </div>
-                </div>
-              </div>
+            <div className="py-10">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 px-4">
                 {AdminItems.map((item, key) => (
                   <Link
                     to={item.link}
                     key={key}
-                    className="relative group flex flex-col items-center justify-center p-6 bg-[#061c30] rounded-lg shadow-lg hover:shadow-xl transition duration-300"
+                    className="relative group flex flex-col items-center justify-center p-6 bg-[#1a2a3a] rounded-lg shadow-md hover:shadow-xl transition duration-300 ease-in-out"
                   >
                     {item.text === "Admission Requests" && (
-                      <div className="absolute top-3 right-3 bg-orange-500 text-white px-3 py-1 rounded-full font-bold text-sm">
+                      <div className="absolute top-3 right-3 bg-orange-600 text-white px-3 py-1 rounded-full font-bold text-sm shadow-lg">
                         {admissionCount}
                       </div>
                     )}
-                    <div className="bg-gray-700 p-4 rounded-full">
+                    <div className="bg-[#2d3b4c] p-4 rounded-full shadow-md group-hover:bg-[#3e4a5c] transition-colors">
                       <FontAwesomeIcon
                         icon={item.icon}
                         className="text-white text-2xl"
                       />
                     </div>
-                    <h1 className="mt-4 text-lg font-bold text-white group-hover:text-gray-200">
+                    <h1 className="mt-4 text-lg font-semibold text-white group-hover:text-gray-300">
                       {item.text}
                     </h1>
                   </Link>

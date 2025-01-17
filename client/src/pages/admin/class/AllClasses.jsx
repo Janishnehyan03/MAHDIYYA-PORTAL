@@ -30,47 +30,45 @@ function AllClasses() {
 
   return (
     <>
-      <h1 className="text-white font-bold text-3xl mt-4 text-center">
-        {authData?.branch.studyCentreName}
-      </h1>
-      <h1 className="bg-blue-600 my-3 text-center text-white p-3 font-semibold">
-        All Students
-      </h1>
-      <Link to={`/new-student`}>
-        <button className="px-4 py-2 bg-blue-900 text-white font-semibold ml-4 hover:bg-blue-800">
-          New Student{" "}
-        </button>
-      </Link>
-      <div className="w-full items-center px-4 py-8 m-auto mt-5 grid grid-cols-1 lg:grid-cols-3">
-        {classes.map((item, key) => (
-          <Link
-            to={`/all-students/${item._id}`}
-            key={key}
-            className="w-full p-2"
-          >
-            <div className=" py-4 overflow-hidden bg-blue-600 rounded-xl  duration-300 shadow-2xl group">
-              <div className="flex">
-                <div className="px-4 py-4 bg-teal-300  rounded-xl bg-opacity-30 mx-auto text-2xl">
-                  <FontAwesomeIcon
-                    icon={faSchoolCircleCheck}
-                    color="white"
-                  ></FontAwesomeIcon>
-                </div>
+    <h1 className="text-teal-300 font-bold text-3xl mt-4 text-center">
+      {authData?.branch.studyCentreName}
+    </h1>
+    <h1 className="my-3 text-center text-teal-200 p-3 font-semibold">
+      All Students
+    </h1>
+    <Link to={`/new-student`}>
+      <button className="px-4 py-2 bg-teal-700 hover:bg-teal-600 text-white font-semibold ml-4 rounded-md shadow-lg">
+        New Student
+      </button>
+    </Link>
+    <div className="w-full items-center px-4 py-8 m-auto mt-5 grid grid-cols-1 lg:grid-cols-3 gap-4">
+      {classes.map((item, key) => (
+        <Link
+          to={`/all-students/${item._id}`}
+          key={key}
+          className="w-full p-2 group"
+        >
+          <div className="py-4 overflow-hidden bg-gray-800 rounded-xl duration-300 shadow-lg transform hover:scale-105 hover:bg-gray-700">
+            <div className="flex justify-center">
+              <div className="px-4 py-4 bg-teal-700 rounded-xl bg-opacity-70 text-white text-2xl">
+                <FontAwesomeIcon icon={faSchoolCircleCheck} />
               </div>
-              <h1 className="text-xl text-center font-bold text-white mt-4 group-hover:text-teal-50">
-                {item.className}
-              </h1>
             </div>
-          </Link>
-        ))}
+            <h1 className="text-xl text-center font-bold text-teal-300 mt-4 group-hover:text-teal-200">
+              {item.className}
+            </h1>
+          </div>
+        </Link>
+      ))}
+    </div>
+    <a href="/CMS STUDENT FORM.xlsx">
+      <div className="flex cursor-pointer transition px-4 py-2 bg-teal-800 hover:bg-teal-700 text-teal-200 font-bold space-x-2 items-center rounded-full max-w-md m-3 text-center justify-center shadow-lg">
+        <FontAwesomeIcon icon={faDownload} />
+        <p>Download Excel Sheet</p>
       </div>
-      <a href="/CMS STUDENT FORM.xlsx">
-        <div className="flex bg-blue-600 hover:bg-blue-600 cursor-pointer transition px-4 py-2 text-white font-bold space-x-2 items-center rounded-full max-w-md m-3 text-center justify-center">
-          <FontAwesomeIcon icon={faDownload} />
-          <p> Download Excel Sheet</p>
-        </div>
-      </a>
-    </>
+    </a>
+  </>
+  
   );
 }
 

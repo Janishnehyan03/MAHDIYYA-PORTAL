@@ -7,7 +7,6 @@ import { toast } from "react-toastify";
 function HallTicket() {
   const [registerNo, setRegisterNo] = useState("");
   const [data, setData] = useState(null);
-  console.log(data);
   const [error, setError] = useState(null);
 
   const hallTicketRef = useRef();

@@ -6,6 +6,9 @@ const Branch = require("../models/studyCentreModel");
 const Class = require("../models/classModel");
 const { deleteOne } = require("../utils/globalFuctions");
 const SpecialHallTicket = require("../models/specialHallTicket");
+const path = require("path");
+const fs = require("fs");
+const archiver = require("archiver");
 
 router.post("/", protect, restrictTo("superAdmin"), async (req, res) => {
   try {
@@ -90,6 +93,67 @@ router.post("/download", async (req, res) => {
     return res.status(400).json(error);
   }
 });
+
+
+router.post("/bulk-download", protect, async (req, res) => {
+  try {
+    const branchId = req.user.branch; // Get the user's branch from the authenticated user
+    const { class: classId } = req.body; // Get the classId from the request body
+
+    // Validate if classId is provided
+    if (!classId) {
+      return res.status(400).json({ message: "Class ID is required" });
+    }
+
+    // Step 1: Find all students that belong to the given class and branch
+    const students = await Student.find({ class: classId, branch: branchId }).populate("class branch");
+
+    if (students.length === 0) {
+      return res.status(404).json({ message: "No students found for this class and branch" });
+    }
+
+    // Step 3: Fetch hall ticket data for each student concurrently
+    const hallTicketPromises = students.map(async (student) => {
+
+
+      let hallTicket = await HallTicket.findOne({ class: classId, })
+        .populate("exam")
+        .populate("subjects.subjectId");
+
+      if (!hallTicket) {
+        return null; // Skip if no hall ticket found for the student
+      }
+
+      return {
+        studentName: student.studentName,
+        registerNo: student.registerNo,
+        hallTicketDetails: hallTicket,
+        institution: student.branch.studyCentreName,
+        className: student.class.className,
+      };
+    });
+
+    // Wait for all promises to resolve
+    const resolvedHallTickets = await Promise.all(hallTicketPromises);
+
+    // Filter out null values (students without hall tickets)
+    const validHallTickets = resolvedHallTickets.filter(ticket => ticket !== null);
+
+    if (validHallTickets.length === 0) {
+      return res.status(404).json({ message: "No hall tickets found for the given students" });
+    }
+
+    // Step 4: Send the hall ticket data as JSON
+    return res.status(200).json({ hallTickets: validHallTickets });
+
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Error generating bulk download", error: error.message });
+  }
+});
+
+
+
 router.get("/special-hallticket/:registerNumber", async (req, res) => {
   try {
     const students = await SpecialHallTicket.find({

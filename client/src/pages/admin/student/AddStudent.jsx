@@ -164,66 +164,70 @@ const AddStudent = () => {
     getAllClasses();
   }, []);
   return (
-    <div className="max-w-lg mx-auto mt-8">
-      <h1 className="text-2xl font-bold mb-4">Student Form</h1>
-      <form onSubmit={handleSubmit}>
-        <div className="mb-4">
-          <label htmlFor="state" className="block  text-sm font-bold mb-2 text-[#eeeeee]">
-            select class
-          </label>
-          <select
-            id="state"
-            name="class"
-            onChange={onChange}
-            className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
-          >
-            <option hidden>Select a class</option>
-            {classes.map((item, key) => (
-              <option value={item._id} key={key}>
-                {item.className}
-              </option>
-            ))}
-          </select>
-        </div>
-        {forms.map((form, key) => (
-          <div key={key} className="lg:col-span-1">
-            <div className="px-4 sm:px-0">
-              <label
-                className="block  text-sm font-bold mb-2 text-[#eeeeee]"
-                htmlFor="username"
-              >
-                {form.labelName}
-              </label>
-              <input
-                className="focus:ring-indigo-500 focus:border-indigo-500 appearance-none border rounded w-full py-4 px-3  leading-tight focus:outline-none  uppercase"
-                type={form.type}
-                onChange={(e) => onChange(e)}
-                required={form.required}
-                placeholder={form.placeholder}
-                name={form.name}
-                value={form.value}
-              />
-              <div className="text-red-500 font-sm">{form.error}</div>
-            </div>
-          </div>
+    <div className="max-w-lg mx-auto mt-8 bg-gray-800 p-6 rounded-lg shadow-lg">
+  <h1 className="text-2xl font-bold text-teal-300 mb-6 text-center">Student Form</h1>
+  <form onSubmit={handleSubmit}>
+    {/* Select Class */}
+    <div className="mb-6">
+      <label htmlFor="state" className="block text-sm font-semibold text-teal-200 mb-2">
+        Select Class
+      </label>
+      <select
+        id="state"
+        name="class"
+        onChange={onChange}
+        className="block w-full px-3 py-2 border border-gray-600 bg-gray-700 text-teal-100 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 sm:text-sm"
+      >
+        <option hidden>Select a class</option>
+        {classes.map((item, key) => (
+          <option value={item._id} key={key}>
+            {item.className}
+          </option>
         ))}
-
-        <div className="mt-4">
-          {loading ? (
-            <button className="inline-flex w-full items-center px-4 py-2 border border-transparent  shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-              loading...
-            </button>
-          ) : (
-            <button
-              type="submit"
-              className="inline-flex w-full items-center px-4 py-2 border border-transparent  shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-            >
-              Submit
-            </button>
-          )}
-        </div>
-      </form>
+      </select>
     </div>
+
+    {/* Dynamic Form Fields */}
+    {forms.map((form, key) => (
+      <div key={key} className="mb-6">
+        <label htmlFor={form.name} className="block text-sm font-semibold text-teal-200 mb-2">
+          {form.labelName}
+        </label>
+        <input
+          id={form.name}
+          className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-teal-100 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 sm:text-sm uppercase"
+          type={form.type}
+          onChange={(e) => onChange(e)}
+          required={form.required}
+          placeholder={form.placeholder}
+          name={form.name}
+          value={form.value}
+        />
+        {form.error && <p className="text-red-500 text-sm mt-1">{form.error}</p>}
+      </div>
+    ))}
+
+    {/* Submit Button */}
+    <div className="mt-6">
+      {loading ? (
+        <button
+          className="w-full px-4 py-2 bg-teal-700 text-teal-100 font-semibold rounded-md shadow-lg flex items-center justify-center cursor-not-allowed"
+          disabled
+        >
+          Loading...
+        </button>
+      ) : (
+        <button
+          type="submit"
+          className="w-full px-4 py-2 bg-teal-600 hover:bg-teal-500 text-white font-semibold rounded-md shadow-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2"
+        >
+          Submit
+        </button>
+      )}
+    </div>
+  </form>
+</div>
+
   );
 };
 

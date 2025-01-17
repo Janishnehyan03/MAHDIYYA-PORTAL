@@ -75,21 +75,21 @@ function StudentProfile() {
   }, []);
   return (
     <>
-      <div className="w-full bg-gray-100">
+      <div className="w-full ">
         {showAlert && ConfirmAlert()}
 
         <section className="p-6">
-          <div className="container mx-auto bg-gray-900 shadow-md rounded-md p-6">
+          <div className="container mx-auto shadow-md rounded-md p-6">
             <header className="text-center mb-6">
-              <h1 className="text-4xl font-bold text-gray-800 uppercase">
+              <h1 className="text-4xl font-bold text-gray-200 uppercase">
                 Student Profile
               </h1>
             </header>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Student Details */}
-              <div className="bg-gray-900 p-4 shadow-sm rounded-md">
-                <h2 className="text-2xl font-semibold text-gray-700 mb-4">
+              <div className=" p-4 shadow-sm rounded-md">
+                <h2 className="text-2xl font-semibold text-gray-300 mb-4">
                   Details
                 </h2>
                 <div className="space-y-3">
@@ -97,88 +97,82 @@ function StudentProfile() {
                     <span className="font-medium text-white">
                       Student Name:
                     </span>
-                    <span className="text-gray-800">{student.studentName}</span>
+                    <span className="text-gray-300">{student.studentName}</span>
                   </p>
                   <p className="flex justify-between">
-                    <span className="font-medium text-white">
-                      Register No:
-                    </span>
-                    <span className="text-gray-800">{student.registerNo}</span>
+                    <span className="font-medium text-white">Register No:</span>
+                    <span className="text-gray-300">{student.registerNo}</span>
                   </p>
                   <p className="flex justify-between">
                     <span className="font-medium text-white">
                       Academic Year:
                     </span>
-                    <span className="text-gray-800">
+                    <span className="text-gray-300">
                       {student?.academicYear?.year}
                     </span>
                   </p>
                   <p className="flex justify-between">
-                    <span className="font-medium text-white">
-                      House Name:
-                    </span>
-                    <span className="text-gray-800">{student.houseName}</span>
+                    <span className="font-medium text-white">House Name:</span>
+                    <span className="text-gray-300">{student.houseName}</span>
                   </p>
                   <p className="flex justify-between">
                     <span className="font-medium text-white">
                       Father's Name:
                     </span>
-                    <span className="text-gray-800">{student.fatherName}</span>
+                    <span className="text-gray-300">{student.fatherName}</span>
                   </p>
                   <p className="flex justify-between">
                     <span className="font-medium text-white">Phone:</span>
-                    <span className="text-gray-800">+91 {student.phone}</span>
+                    <span className="text-gray-300">+91 {student.phone}</span>
                   </p>
                   <p className="flex justify-between">
                     <span className="font-medium text-white">
                       Date of Birth:
                     </span>
-                    <span className="text-gray-800">
+                    <span className="text-gray-300">
                       {moment(student.dob).format("DD-MM-YYYY")}
                     </span>
                   </p>
                   <p className="flex justify-between">
                     <span className="font-medium text-white">Place:</span>
-                    <span className="text-gray-800">{student.place}</span>
+                    <span className="text-gray-300">{student.place}</span>
                   </p>
                 </div>
               </div>
 
               {/* Address Details */}
-              <div className="bg-gray-900 p-4 shadow-sm rounded-md">
-                <h2 className="text-2xl font-semibold text-gray-700 mb-4">
+              <div className=" p-4 shadow-sm rounded-md">
+                <h2 className="text-2xl font-semibold text-gray-300 mb-4">
                   Address
                 </h2>
                 <div className="space-y-3">
-                  <p className="flex justify-between">
-                    <span className="font-medium text-white">
-                      Post Office:
-                    </span>
-                    <span className="text-gray-800">{student.postOffice}</span>
+                  <p className="flex justify-between ">
+                    <span className="font-medium text-white">Post Office:</span>
+                    <span className="text-gray-300">{student.postOffice}</span>
                   </p>
                   <p className="flex justify-between">
                     <span className="font-medium text-white">Pincode:</span>
-                    <span className="text-gray-800">{student.pinCode}</span>
+                    <span className="text-gray-300">{student.pinCode}</span>
                   </p>
                   <p className="flex justify-between">
                     <span className="font-medium text-white">District:</span>
-                    <span className="text-gray-800">{student.district}</span>
+                    <span className="text-gray-300">{student.district}</span>
                   </p>
                   <p className="flex justify-between">
                     <span className="font-medium text-white">State:</span>
-                    <span className="text-gray-800">{student.state}</span>
+                    <span className="text-gray-300">{student.state}</span>
                   </p>
                   <p className="flex justify-between">
                     <span className="font-medium text-white">
                       Study Center:
                     </span>
-                    <span className="text-gray-800">
+                    <span className="text-gray-300">
                       {student?.branch?.studyCentreName}
                     </span>
                   </p>
                   <p className="flex justify-between">
                     <span className="font-medium text-white">Class:</span>
-                    <span className="text-gray-800">
+                    <span className="text-gray-300">
                       {student.class?.className}
                     </span>
                   </p>
@@ -187,13 +181,13 @@ function StudentProfile() {
             </div>
 
             {/* Status and Actions */}
-            <div className="mt-6 bg-gray-900 p-4 shadow-sm rounded-md">
-              <div className="flex items-center justify-between">
-                <span className="text-lg font-medium text-gray-700">
+            <div className="mt-6 p-6 bg-gray-800 shadow-lg rounded-lg">
+              {/* <div className="flex items-center justify-between">
+                <span className="text-lg font-semibold text-gray-300">
                   Status:
                 </span>
                 {student?.verified ? (
-                  <span className="bg-blue-600 text-white px-3 py-1 rounded-md text-sm">
+                  <span className="bg-teal-600 text-white px-4 py-2 rounded-full text-sm font-medium shadow-md">
                     Active
                   </span>
                 ) : (
@@ -202,16 +196,16 @@ function StudentProfile() {
                       e.preventDefault();
                       setShowAlert(true);
                     }}
-                    className="bg-red-500 text-white px-3 py-1 rounded-md text-sm cursor-pointer"
+                    className="bg-red-500 text-white px-4 py-2 rounded-full text-sm font-medium cursor-pointer shadow-md hover:bg-red-600 transition"
                   >
                     Not Verified
                   </span>
                 )}
-              </div>
-              <div className="mt-4 flex justify-end">
+              </div> */}
+              <div className="mt-6 flex justify-end">
                 <button
                   onClick={(e) => handleDelete(e, student._id)}
-                  className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition"
+                  className="bg-red-600 text-white px-6 py-3 rounded-md hover:bg-red-700 transition transform hover:scale-105 shadow-md"
                 >
                   <FontAwesomeIcon icon={faTrash} className="mr-2" />
                   Delete Student
@@ -221,7 +215,7 @@ function StudentProfile() {
 
             {authData?.role === "superAdmin" && (
               <footer className="mt-6 text-center">
-                <h3 className="text-2xl font-bold text-gray-800 mb-4">
+                <h3 className="text-2xl font-bold text-gray-200 mb-4">
                   Transfer Student
                 </h3>
                 <Link to={`/transfer-student/${student._id}`}>
