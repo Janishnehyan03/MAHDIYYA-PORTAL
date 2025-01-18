@@ -29,52 +29,59 @@ function MessageTable({ messages, getMessages }) {
   };
 
   return (
-    <table className="w-2xl mx-auto  text-center bg-gray-900 shadow-md rounded-lg">
-      <thead className="bg-gray-300">
-        <tr>
-          <th className="px-4 py-2 text-sm font-normal">#</th>
-          <th className="px-4 py-2 text-sm font-normal">Title</th>
-          <th className="px-4 py-2 text-sm font-normal">Recipients</th>
-          <th className="px-4 py-2 text-sm font-normal">Link</th>
-          <th className="px-4 py-2 text-sm font-normal">Actions</th>
+    <table className="w-full mx-auto text-center bg-gray-800 shadow-lg rounded-lg text-gray-100">
+    <thead className="bg-gray-700">
+      <tr>
+        <th className="px-4 py-3 text-sm font-semibold uppercase">#</th>
+        <th className="px-4 py-3 text-sm font-semibold uppercase">Title</th>
+        <th className="px-4 py-3 text-sm font-semibold uppercase">Recipients</th>
+        <th className="px-4 py-3 text-sm font-semibold uppercase">Link</th>
+        <th className="px-4 py-3 text-sm font-semibold uppercase">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {messages.map((message, index) => (
+        <tr
+          key={message._id}
+          className="hover:bg-gray-700 transition-colors duration-200"
+        >
+          <td className="px-4 py-3 border-t border-gray-700">{index + 1}</td>
+          <td className="px-4 py-3 border-t border-gray-700">{message.title}</td>
+          <td className="px-4 py-3 border-t border-gray-700">
+            <div className="grid grid-cols-3 gap-2">
+              {message?.recipients?.map((item, idx) => (
+                <p
+                  key={idx}
+                  className="bg-gray-600 text-center px-2 py-1 rounded-md text-sm"
+                >
+                  {item.user.username}
+                </p>
+              ))}
+            </div>
+          </td>
+          <td className="px-4 py-3 border-t border-gray-700">
+            <a
+              href={message.link}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-400 px-3 py-1 uppercase hover:underline"
+            >
+              View
+            </a>
+          </td>
+          <td className="px-4 py-3 border-t border-gray-700">
+            <button
+              onClick={(e) => handleDelete(e, message._id)}
+              className="text-red-500 bg-gray-600 px-3 py-1 rounded-md hover:bg-red-600 transition duration-200"
+            >
+              Delete
+            </button>
+          </td>
         </tr>
-      </thead>
-      <tbody>
-        {messages.map((message, index) => (
-          <tr key={message._id} className="">
-            <td className="px-4 py-2">{index + 1}</td>
-            <td className="px-4 py-2">{message.title}</td>
-            <td className="px-4 py-2">
-              <div className="grid grid-cols-3 gap-1">
-                {message?.recipients?.map((item, idx) => (
-                  <p key={idx} className="bg-gray-200 text-center m-1 p-2 rounded-lg">
-                    {item.user.username}
-                  </p>
-                ))}
-              </div>
-            </td>
-            <td className="px-4 py-2">
-              <a
-                href={message.link}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-gray-100 px-3 py-1 uppercase bg-gray-600  underline"
-              >
-                View
-              </a>
-            </td>
-            <td className="px-4 py-2">
-              <button
-                onClick={(e) => handleDelete(e, message._id)}
-                className="text-red-500  bg-gray-300 px-3 py-1 uppercase"
-              >
-                Delete
-              </button>
-            </td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
+      ))}
+    </tbody>
+  </table>
+  
   );
 }
 

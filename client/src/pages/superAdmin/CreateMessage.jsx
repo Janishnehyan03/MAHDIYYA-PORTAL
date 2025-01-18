@@ -90,40 +90,51 @@ function CreateMessage() {
     getMessages();
   }, []);
   return (
-    <div>
-      <form className="bg-gray-900 shadow-md rounded max-w-2xl mx-auto my-7 px-8 pt-6 pb-8 mb-4">
-        <div className="mb-4">
+    <div className="px-4 py-6 bg-gray-900">
+      <form className="bg-gray-800 shadow-lg rounded-lg max-w-2xl mb-2 mx-auto px-8 pt-6 pb-8">
+        {/* Title Field */}
+        <div className="mb-6">
           <label
-            className="block text-gray-700 text-sm font-bold mb-2"
+            className="block text-gray-300 text-sm font-medium mb-2"
             htmlFor="title"
           >
             Title
           </label>
           <input
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            className="shadow-sm border border-gray-700 rounded-lg w-full py-2 px-3 text-gray-300 bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
             id="title"
-            placeholder="Message Title"
-            defaultValue=""
+            placeholder="Enter message title"
             onChange={(e) => setTitle(e.target.value)}
             value={title}
             required
           />
         </div>
-        <div className="mb-4  flex">
-          <label className="block mb-2 text-sm font-medium mr-4 text-[#eeeeee] dark:text-white">
-            Messages To All Study Centres
+
+        {/* Checkbox */}
+        <div className="mb-6 flex items-center">
+          <label className="block text-sm font-medium text-gray-300 mr-4">
+            Message To All Study Centres
           </label>
-          <input type="checkbox" onClick={() => handleSetAll()} />
+          <input
+            type="checkbox"
+            className="h-4 w-4 text-blue-600 bg-gray-700 border-gray-600 rounded focus:ring focus:ring-blue-500"
+            onClick={() => handleSetAll()}
+          />
         </div>
+
+        {/* Recipient Selector */}
         {!forAll && (
-          <div className="mb-4">
-            <label className="block mb-2 text-sm font-medium text-[#eeeeee] dark:text-white">
-              Select a recipient
+          <div className="mb-6">
+            <label
+              className="block text-sm font-medium text-gray-300 mb-2"
+              htmlFor="recipient"
+            >
+              Select a Recipient
             </label>
             <select
               id="recipient"
               onChange={(e) => handleSelectChange(e)}
-              className="bg-gray-900 border rounded-lg focus:ring focus:border-blue-500 block w-full p-2.5"
+              className="bg-gray-700 border border-gray-600 text-gray-300 rounded-lg focus:ring focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
               required
             >
               <option hidden>Choose one</option>
@@ -137,31 +148,37 @@ function CreateMessage() {
             </select>
           </div>
         )}
-        <div className="mb-4">
+
+        {/* Link Field */}
+        <div className="mb-6">
           <label
-            className="block text-gray-700 text-sm font-bold mb-2"
+            className="block text-gray-300 text-sm font-medium mb-2"
             htmlFor="link"
           >
             Link
           </label>
           <input
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            className="shadow-sm border border-gray-700 rounded-lg w-full py-2 px-3 text-gray-300 bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
             id="link"
-            placeholder="Link here"
-            defaultValue=""
+            placeholder="Enter link here"
             onChange={(e) => setLink(e.target.value)}
             value={link}
             required
           />
         </div>
-        <div className="flex items-center justify-between mb-4">
+
+        {/* Submit Button */}
+        <div className="flex items-center justify-between mb-6">
           {loading ? (
-            <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+            <button
+              className="bg-blue-600 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 opacity-70 cursor-not-allowed"
+              disabled
+            >
               Processing...
             </button>
           ) : (
             <button
-              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+              className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               type="submit"
               onClick={(e) => handleSubmit(e)}
             >
@@ -169,12 +186,14 @@ function CreateMessage() {
             </button>
           )}
         </div>
-        <div>
-          <label className="block mb-2 text-sm font-medium text-[#eeeeee] dark:text-white">
+
+        {/* Selected Recipients */}
+        <div className="mb-6">
+          <label className="block text-sm font-medium text-gray-300 mb-2">
             Selected Recipients
           </label>
           {forAll ? (
-            <h1 className="font-semibold text-red-600 uppercase">
+            <h1 className="font-semibold text-red-500 uppercase">
               Message will be delivered to all
             </h1>
           ) : (
@@ -182,13 +201,13 @@ function CreateMessage() {
               {filteredUsers.map((item) => (
                 <div
                   key={item._id}
-                  className="bg-gray-200 rounded-lg p-2 shadow-md flex flex-col items-center justify-between"
+                  className="bg-gray-700 text-gray-300 rounded-lg p-3 shadow-md flex flex-col items-center justify-between"
                 >
-                  <span className="text-center font-serif">
+                  <span className="text-center font-medium">
                     {item?.branch?.studyCentreName}, {item.username}
                   </span>
                   <span
-                    className="text-red-500 cursor-pointer"
+                    className="text-red-500 hover:underline cursor-pointer mt-2"
                     onClick={() => removeSelected(item._id)}
                   >
                     Remove
@@ -200,8 +219,10 @@ function CreateMessage() {
         </div>
       </form>
 
+      {/* Message Table */}
       <MessageTable messages={messages} getMessages={getMessages} />
     </div>
+
   );
 }
 
