@@ -6,9 +6,7 @@ const Branch = require("../models/studyCentreModel");
 const Class = require("../models/classModel");
 const { deleteOne } = require("../utils/globalFuctions");
 const SpecialHallTicket = require("../models/specialHallTicket");
-const path = require("path");
-const fs = require("fs");
-const archiver = require("archiver");
+const Configuration = require("../models/configurationsModel");
 
 router.post("/", protect, restrictTo("superAdmin"), async (req, res) => {
   try {
@@ -99,7 +97,11 @@ router.post("/bulk-download", protect, async (req, res) => {
   try {
     const branchId = req.user.branch; // Get the user's branch from the authenticated user
     const { class: classId } = req.body; // Get the classId from the request body
-
+    let configuration = await Configuration.find()
+    // Check if hall ticket download is enabled
+    if (!configuration[0].hallTicketDownload) {
+      return res.status(403).json({ message: "Hall ticket download is disabled" });
+    }
     // Validate if classId is provided
     if (!classId) {
       return res.status(400).json({ message: "Class ID is required" });
@@ -115,10 +117,10 @@ router.post("/bulk-download", protect, async (req, res) => {
     // Step 3: Fetch hall ticket data for each student concurrently
     const hallTicketPromises = students.map(async (student) => {
 
-
       let hallTicket = await HallTicket.findOne({ class: classId, })
         .populate("exam")
         .populate("subjects.subjectId");
+
 
       if (!hallTicket) {
         return null; // Skip if no hall ticket found for the student
@@ -130,6 +132,7 @@ router.post("/bulk-download", protect, async (req, res) => {
         hallTicketDetails: hallTicket,
         institution: student.branch.studyCentreName,
         className: student.class.className,
+        examName: hallTicket.exam.examName,
       };
     });
 

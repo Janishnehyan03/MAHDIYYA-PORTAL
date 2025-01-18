@@ -3,6 +3,7 @@ import { saveAs } from "file-saver"; // For saving the ZIP file
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import Axios from "../../../Axios";
+import { toast } from "react-toastify";
 import moment from "moment";
 
 function BulkHallTickets() {
@@ -29,6 +30,7 @@ function BulkHallTickets() {
       const { data } = await Axios.post("/hall-ticket/bulk-download", {
         class: classId,
       });
+
 
       if (data.hallTickets.length > 0) {
         const totalTickets = data.hallTickets.length;
@@ -63,14 +65,14 @@ function BulkHallTickets() {
               // Draw the background image onto the canvas
               ctx.drawImage(backgroundImage, 0, 0);
 
+              const studentDetailsY = canvas.height * 0.3 + 50;
               // Add exam name as header
-              ctx.font = "16px Arial";
+              ctx.font = "bold 30px Arial";
               ctx.fillStyle = "black";
               ctx.textAlign = "center";
-              ctx.fillText(data?.exam?.examName, canvas.width / 2, 30);
+              ctx.fillText(data?.hallTickets[0]?.examName, canvas.width / 2, studentDetailsY - 180);
 
               // Add student details (25% from top)
-              const studentDetailsY = canvas.height * 0.3 + 50;
               ctx.fillStyle = "black";
               ctx.textAlign = "left";
               ctx.font = "25px Arial";
@@ -214,6 +216,10 @@ function BulkHallTickets() {
       }
     } catch (error) {
       console.log("Error downloading bulk hall tickets:", error);
+      toast.error(error.response?.data?.message || "Error downloading hall tickets",{
+        position: "top-center",
+
+      });
       setIsDownloading(false);
     }
   };
