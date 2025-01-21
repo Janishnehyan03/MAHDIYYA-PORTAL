@@ -96,14 +96,14 @@ exports.getResults = async (req, res) => {
         class: mongoose.Types.ObjectId(req.query.classId),
         exam: mongoose.Types.ObjectId(req.query.examId),
       })
-      .populate({
-        path: 'student',
-        populate: [
-          { path: 'branch' }, // Populate branch details
-          { path: 'class' }    // Populate class details
-        ]
-      })
-      .populate('subject');
+        .populate({
+          path: 'student',
+          populate: [
+            { path: 'branch' }, // Populate branch details
+            { path: 'class' }    // Populate class details
+          ]
+        })
+        .populate('subject');
 
       if (results.length === 0) {
         return res.status(404).json({ message: "No results found" });
@@ -258,7 +258,7 @@ exports.createResults = async (req, res) => {
         } = resultData;
 
         // Find existing result by student and subject
-        const existingResult = await CceMark.findOne({ student, subject });
+        const existingResult = await CceMark.findOne({ student, subject, exam });
 
         if (existingResult) {
           // Update existing result
