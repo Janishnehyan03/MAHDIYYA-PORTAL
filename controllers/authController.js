@@ -178,7 +178,7 @@ exports.checkUserLoggedIn = async (req, res, next) => {
     let decoded = jwt.verify(token, process.env.JWT_SECRET);
     let user = await Auth.findById(decoded.userId).populate(
       "branch",
-      "studyCentreName _id role username"
+      "studyCentreName _id role username studyCentreCode"
     );
     res.status(200).json({ user: user });
   }

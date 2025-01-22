@@ -10,7 +10,6 @@ import {
   faFileArchive,
   faGraduationCap,
   faMarker,
-  faPaperPlane,
   faPenAlt,
   faSchool,
   faToolbox,
@@ -122,6 +121,16 @@ function Dashboard() {
       icon: faTools,
       link: "/configurations",
     },
+    {
+      text: "Admission Management",
+      icon: faUserGraduate,
+      link: "/admission-management",
+    },
+    {
+      text: "Previous Results",
+      icon: faCheckDouble,
+      link: "/previous-results",
+    },
   ];
   const AdminItems = [
     {
@@ -164,6 +173,11 @@ function Dashboard() {
       text: "Profile",
       icon: faUser,
       link: "/study-centre-profile/",
+    },
+    {
+      text: "Previous Results",
+      icon: faCheckDouble,
+      link: "/previous-results/admin",
     },
   ];
 

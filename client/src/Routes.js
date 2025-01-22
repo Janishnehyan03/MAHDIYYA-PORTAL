@@ -11,7 +11,10 @@ import ViewTeacher from "./pages/ViewTeacher";
 import FileUpload from "./pages/admin/FileUpload";
 import MyMessages from "./pages/admin/MyMessages";
 import MyUploads from "./pages/admin/MyUploads";
+import AdmissionManagement from "./pages/admin/admission/AdmissionManagement";
 import Admissions from "./pages/admin/admission/Admissions";
+import PreviousExamManagement from "./pages/admin/previous-exam/PreviousExamManagement";
+import PreviousExamTable from "./pages/admin/previous-exam/PreviousExamTable";
 import MarkEntry from "./pages/admin/results/MarkEntry";
 import StudyCentreProfile from "./pages/admin/study-centre/StudyCentreProfile";
 import AdmissionRequests from "./pages/superAdmin/AdmissionRequests";
@@ -167,6 +170,16 @@ export const SuperAdminRoutes = [
     component: <Student.TransferStudent />,
     role: "superAdmin"
   },
+  {
+    route: "/admission-management",
+    component: <AdmissionManagement />,
+    role: "superAdmin"
+  },
+  {
+    route: "/previous-results",
+    component: <PreviousExamManagement />,
+    role: "superAdmin"
+  },
 ];
 
 export const AdminRoutes = [
@@ -247,4 +260,5 @@ export const AdminRoutes = [
     component: <CceMark.AddCceMark />,
   },
   { route: "/add-result", component: <Result.AddResult /> },
+  { route: "/previous-results/admin", component: <PreviousExamTable /> },
 ];
