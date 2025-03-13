@@ -189,9 +189,9 @@ exports.getResults = async (req, res) => {
       .populate("subject")
       .sort({ "student.registerNo": 1 });
 
-    if (results.length === 0) {
-      return res.status(404).json({ message: "No results found" });
-    }
+    // if (results.length === 0) {
+    //   return res.status(404).json({ message: "No results found" });
+    // }
 
     const cceResults = await CceMark.find(resultQuery)
       .populate({
