@@ -1,5 +1,4 @@
 import { useContext, useEffect } from "react";
-import ReactGA from "react-ga";
 import "react-quill/dist/quill.bubble.css";
 import { Route, Routes } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
@@ -27,9 +26,7 @@ export default function App() {
   useEffect(() => {
     checkUserLogin();
   }, []);
-  useEffect(() => {
-    ReactGA.pageview(window.location.pathname + window.location.search);
-  }, []);
+
 
   return (
     <>
