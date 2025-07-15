@@ -1,292 +1,232 @@
-import React from "react";
-import { useState } from "react";
-import Axios from "../../../Axios";
-import { toast } from "react-toastify";
+// src/components/CreateTeacher.jsx
+import React, { useContext, useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { useContext } from "react";
+import { toast } from "react-toastify";
+import Axios from "../../../Axios";
 import { UserAuthContext } from "../../../context/userContext";
-import { useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faTrash } from "@fortawesome/free-solid-svg-icons";
+import { faPlus, faSpinner, faTimes, faUserPlus } from "@fortawesome/free-solid-svg-icons";
 
+// (Place FormField and FormSelect helper components here if not in a separate file)
+const FormField = ({ id, label, type = "text", name, value, onChange, error, required }) => (
+  <div className="flex flex-col">
+    <label htmlFor={id} className="text-sm font-medium text-gray-700 mb-1">
+      {label} {required && <span className="text-red-500">*</span>}
+    </label>
+    <input
+      id={id}
+      type={type}
+      name={name}
+      value={value}
+      onChange={onChange}
+      required={required}
+      className={`border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 ${error ? 'border-red-500' : ''}`}
+    />
+    {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
+  </div>
+);
+const FormSelect = ({ id, label, name, value, onChange, error, options, placeholder }) => (
+  <div className="flex flex-col">
+    <label htmlFor={id} className="text-sm font-medium text-gray-700 mb-1">
+      {label}
+    </label>
+    <select
+      id={id}
+      name={name}
+      value={value}
+      onChange={onChange}
+      className={`border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 ${error ? 'border-red-500' : ''}`}
+    >
+      <option value="" disabled>{placeholder}</option>
+      {options.map((option) => (
+        <option key={option.value} value={option.value}>
+          {option.label}
+        </option>
+      ))}
+    </select>
+    {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
+  </div>
+);
 function CreateTeacher() {
   const navigate = useNavigate();
   const { authData } = useContext(UserAuthContext);
-  const [errors, setErrors] = useState({});
-  const [subjects, setSubjects] = useState([]);
-  const [selectedSubjects, setSelectedSubjects] = useState([]);
-
+  
   const initialState = {
     email: "",
     phone: "",
     teacherName: "",
-    branch: "",
     subjects: [],
     gender: "",
-    mahdiyyaTeacher: false,
+    mahdiyyaTeacher: true,
   };
   const [formData, setFormData] = useState(initialState);
+  const [subjects, setSubjects] = useState([]);
+  const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
 
-  const handleSubjects = (item) => {
-    let array = formData.subjects;
-
-    if (!formData.subjects.includes(item)) {
-      array.push(item);
-      setFormData({ ...formData, subjects: array });
-      let result = subjects.filter((o) =>
-        formData.subjects.some((id) => o._id === id)
-      );
-      setSelectedSubjects(result);
-    }
-  };
-  function removeSubject(value) {
-    var i = formData.subjects.indexOf(value);
-    while (i < formData.subjects.length) {
-      if (formData.subjects[i] === value) {
-        formData.subjects.splice(i, 1);
-        let result = subjects.filter((o) =>
-          formData.subjects.some((id) => o._id === id)
-        );
-        setSelectedSubjects(result);
-      } else {
-        ++i;
+  useEffect(() => {
+    const getSubjects = async () => {
+      try {
+        setInitialLoading(true);
+        const { data } = await Axios.get("/subject");
+        setSubjects(data);
+      } catch (error) {
+        toast.error("Failed to load subjects.");
+      } finally {
+        setInitialLoading(false);
       }
-    }
-  }
+    };
+    getSubjects();
+  }, []);
 
   const onChange = (e) => {
-    const { name, value, type, checked } = e.target;
-
-    setFormData((prevState) => ({
-      ...prevState,
-      [name]: type === "checkbox" ? checked : value,
-    }));
-  };
-
-  const onChangeTeacherType = (type) => {
-    setFormData((prevState) => ({
-      ...prevState,
-      mahdiyyaTeacher: type,
-    }));
-  };
-
-  
-  const getSubjects = async () => {
-    try {
-      let { data } = await Axios.get("/subject");
-      setSubjects(data);
-    } catch (error) {
-      console.log(error.response);
+    const { name, value } = e.target;
+    setFormData((prevState) => ({ ...prevState, [name]: value }));
+    if (errors[name]) {
+      setErrors((prev) => ({ ...prev, [name]: null }));
     }
   };
+
+  const handleSubjectSelect = (e) => {
+    const subjectId = e.target.value;
+    if (subjectId && !formData.subjects.includes(subjectId)) {
+      setFormData((prev) => ({
+        ...prev,
+        subjects: [...prev.subjects, subjectId],
+      }));
+    }
+    e.target.value = ""; // Reset dropdown after selection
+  };
+
+  const removeSubject = (subjectIdToRemove) => {
+    setFormData((prev) => ({
+      ...prev,
+      subjects: prev.subjects.filter((id) => id !== subjectIdToRemove),
+    }));
+  };
+
+  const selectedSubjects = useMemo(() => {
+    return subjects.filter((subject) => formData.subjects.includes(subject._id));
+  }, [formData.subjects, subjects]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setFormData({ ...formData, branch: authData?.branch?._id });
+    setErrors({});
+    
+    // Create payload directly to avoid state update race conditions
+    const payload = {
+      ...formData,
+      branch: authData.branch._id,
+    };
+
     try {
-      let res = await Axios.post("/teacher", {
-        ...formData,
-        branch: authData.branch._id,
-      });
-      if (res.status === 200) {
-        setLoading(false);
-        setFormData(initialState);
-        toast.success("Teacher Added Successfully", {
-          autoClose: 2000,
-          position: toast.POSITION.TOP_CENTER,
-        });
-      }
+      await Axios.post("/teacher", payload);
+      toast.success("Teacher created successfully!");
       navigate("/all-teachers");
     } catch (error) {
-      setErrors(error.response.data);
+      const errorData = error.response?.data;
+      if (errorData?.errors) {
+        setErrors(errorData.errors);
+      }
+      toast.error(errorData?.message || "An error occurred.");
+    } finally {
       setLoading(false);
-      toast.error("Something went wrong", {
-        autoClose: 2000,
-        position: toast.POSITION.TOP_CENTER,
-      });
     }
   };
-  useEffect(() => {
-    getSubjects();
-  }, []);
+
+  if (initialLoading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <FontAwesomeIcon icon={faSpinner} spin size="3x" className="text-blue-500" />
+      </div>
+    );
+  }
+
+  
   return (
-    <div className="w-2/4 mx-auto">
-    <section className="bg-gray-800 p-6 rounded-lg shadow-lg">
-      <div className="max-w-screen-xl mx-auto">
-        <h3 className="text-4xl font-bold text-violet-500 uppercase my-4">
-          Create Teacher
-        </h3>
-  
-        <form className="lg:grid lg:grid-cols-1 lg:gap-8">
-          <div className="lg:col-span-1">
-            <div className="px-4 sm:px-0">
-              <label
-                className="block text-sm font-bold mb-2 text-gray-300"
-                htmlFor="username"
-              >
-                Teacher's Username
-              </label>
-              <input
-                className="focus:ring-violet-500 focus:border-violet-500 shadow appearance-none border border-gray-600 rounded w-full py-4 px-3 text-gray-100 bg-gray-700 leading-tight focus:outline-none"
-                id="username"
-                type="text"
-                required
-                value={formData.username}
-                onChange={(e) => onChange(e)}
-                placeholder="USERNAME"
-                name="teacherName"
-              />
-              <span className="text-red-500">{errors?.teacherName}</span>
+    <div className="bg-gray-50 p-4 sm:p-8">
+      <div className="max-w-3xl mx-auto bg-white rounded-xl shadow-lg">
+        <div className="p-6 border-b border-gray-200">
+          <div className="flex items-center gap-4">
+            <FontAwesomeIcon icon={faUserPlus} className="text-3xl text-blue-500" />
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">Create New Teacher</h1>
+              <p className="mt-1 text-sm text-gray-500">
+                Fill in the details to add a new teacher to the system.
+              </p>
             </div>
           </div>
-  
-          <div className="lg:col-span-1">
-            <div className="px-4 sm:px-0">
-              <label className="block text-sm font-bold mb-2 text-gray-300" htmlFor="email">
-                Email
-              </label>
-              <input
-                className="focus:ring-violet-500 focus:border-violet-500 shadow appearance-none border border-gray-600 rounded w-full py-4 px-3 text-gray-100 bg-gray-700 leading-tight focus:outline-none"
-                id="email"
-                type="email"
-                required
-                value={formData.email}
-                onChange={(e) => onChange(e)}
-                placeholder="EMAIL"
-                name="email"
-              />
-              <span className="text-red-500">{errors?.email}</span>
+        </div>
+
+        <form onSubmit={handleSubmit} className="p-6 space-y-6">
+          {/* --- Basic Information --- */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <FormField id="teacherName" label="Teacher's Name" name="teacherName" value={formData.teacherName} onChange={onChange} error={errors.teacherName} required />
+            <FormField id="email" label="Email Address" type="email" name="email" value={formData.email} onChange={onChange} error={errors.email} required />
+            <FormField id="phone" label="Phone Number" type="tel" name="phone" value={formData.phone} onChange={onChange} error={errors.phone} required />
+            <FormSelect id="gender" label="Gender" name="gender" value={formData.gender} onChange={onChange} error={errors.gender} options={['Male', 'Female']} placeholder="Select Gender" required />
+          </div>
+
+          {/* --- Teacher Type (Segmented Control) --- */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Teacher Type</label>
+            <div className="mt-2 w-full flex p-1 bg-gray-200 rounded-lg">
+              <button type="button" onClick={() => setFormData(p => ({ ...p, mahdiyyaTeacher: true, subjects: [] }))} className={`w-1/2 py-2 text-sm font-medium rounded-md transition-all ${formData.mahdiyyaTeacher ? 'bg-white shadow' : 'text-gray-600'}`}>
+                Mahdiyya Teacher
+              </button>
+              <button type="button" onClick={() => setFormData(p => ({ ...p, mahdiyyaTeacher: false, subjects: [] }))} className={`w-1/2 py-2 text-sm font-medium rounded-md transition-all ${!formData.mahdiyyaTeacher ? 'bg-white shadow' : 'text-gray-600'}`}>
+                Non-Mahdiyya
+              </button>
             </div>
           </div>
-  
-          <div className="lg:col-span-1">
-            <div className="px-4 sm:px-0">
-              <label className="block text-sm font-bold mb-2 text-gray-300" htmlFor="phone">
-                Phone Number
-              </label>
-              <input
-                className="focus:ring-violet-500 focus:border-violet-500 shadow appearance-none border border-gray-600 rounded w-full py-4 px-3 text-gray-100 bg-gray-700 leading-tight focus:outline-none"
-                id="phone"
-                type="text"
-                required
-                value={formData.phone}
-                onChange={(e) => onChange(e)}
-                placeholder="Phone No:"
-                name="phone"
-              />
-              <span className="text-red-500">{errors?.phone}</span>
-            </div>
-          </div>
-  
-          <div className="lg:col-span-1">
-            <div className="px-4 sm:px-0">
-              <label className="block text-sm font-bold mb-2 text-gray-300" htmlFor="gender">
-                Gender
-              </label>
-              <select
-                className="bg-gray-700 border border-gray-600 text-gray-100 text-sm rounded-lg focus:ring-violet-500 focus:border-violet-500 block w-full p-3"
-                name="gender"
-                onChange={(e) => onChange(e)}
-                id="gender"
-              >
-                <option hidden>Select Gender</option>
-                <option value="male">Male</option>
-                <option value="female">Female</option>
-              </select>
-              <span className="text-red-500">{errors?.gender}</span>
-            </div>
-          </div>
-  
-          <div className="px-4 sm:px-0 mt-4">
-            <label className="block text-sm font-bold mb-2 text-gray-300">Mahdiyya Teacher</label>
-            <input
-              type="radio"
-              id="teacher"
-              name="teacher"
-              onChange={() => onChangeTeacherType(true)}
-              className="focus:ring-violet-500 focus:border-violet-500"
-            />
-          </div>
-  
-          <div className="px-4 sm:px-0 mt-4">
-            <label className="block text-sm font-bold mb-2 text-gray-300">
-              Non Mahdiyya Teacher
-            </label>
-            <input
-              type="radio"
-              id="non-teacher"
-              name="teacher"
-              onChange={() => onChangeTeacherType(false)}
-              className="focus:ring-violet-500 focus:border-violet-500"
-            />
-          </div>
-  
+          
+          {/* --- Subjects Section (Conditional) --- */}
           {formData.mahdiyyaTeacher && (
-            <>
-              <div className="lg:col-span-1 mt-4">
-                <div className="px-4 sm:px-0">
-                  <label className="block text-sm font-bold mb-2 text-gray-300">
-                    Subjects
-                  </label>
-                  <select
-                    className="bg-gray-700 border border-gray-600 text-gray-100 text-sm rounded-lg focus:ring-violet-500 focus:border-violet-500 block w-full p-3"
-                    onChange={(e) => handleSubjects(e.target.value)}
-                  >
-                    <option hidden>Select subjects</option>
-                    {subjects.map((subject, index) => (
-                      <option key={index} value={subject._id}>
-                        {subject.subjectName} {subject.subjectCode}
-                      </option>
+            <div className="space-y-4 p-4 border border-gray-200 rounded-lg">
+              <FormSelect
+                id="subjects"
+                label="Assign Subjects"
+                name="subjects"
+                value="" // Keep it empty to act as an action trigger
+                onChange={handleSubjectSelect}
+                options={subjects.map(s => ({ value: s._id, label: `${s.subjectName} (${s.subjectCode})` }))}
+                placeholder="Select subjects to add..."
+              />
+              {selectedSubjects.length > 0 && (
+                <div>
+                  <label className="block text-xs font-medium text-gray-500 mb-2">Assigned:</label>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedSubjects.map((subject) => (
+                      <div key={subject._id} className="flex items-center gap-2 bg-blue-100 text-blue-800 text-sm font-medium px-3 py-1 rounded-full">
+                        <span>{subject.subjectName}</span>
+                        <button type="button" onClick={() => removeSubject(subject._id)} className="text-blue-500 hover:text-blue-700">
+                          <FontAwesomeIcon icon={faTimes} size="sm" />
+                        </button>
+                      </div>
                     ))}
-                  </select>
+                  </div>
                 </div>
-              </div>
-  
-              <div className="lg:col-span-1 mt-4">
-                <div className="px-4 sm:px-0">
-                  <label className="block text-sm font-bold mb-2 text-gray-300">
-                    Selected Subjects
-                  </label>
-                  {selectedSubjects.map((item, key) => (
-                    <div
-                      key={key}
-                      className="flex justify-between items-center bg-violet-500 px-3 py-2 rounded-md mb-2 text-gray-100"
-                    >
-                      <h6>{item.subjectName} {item.subjectCode}</h6>
-                      <FontAwesomeIcon
-                        onClick={() => removeSubject(item._id)}
-                        icon={faTrash}
-                        className="hover:text-red-400 cursor-pointer"
-                      />
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </>
-          )}
-  
-          <div className="lg:col-span-1 mt-4">
-            <div className="px-4 sm:px-0">
-              {!loading ? (
-                <button
-                  onClick={(e) => handleSubmit(e)}
-                  className="w-full lg:w-1/2 bg-violet-600 hover:bg-violet-700 text-gray-100 font-bold py-4 px-4 rounded uppercase focus:outline-none"
-                >
-                  Submit
-                </button>
-              ) : (
-                <h1 className="text-gray-100 text-center w-full lg:w-1/2 bg-violet-600 font-bold py-4 px-4 rounded uppercase">
-                  Processing...
-                </h1>
               )}
             </div>
+          )}
+
+          {/* --- Form Actions --- */}
+          <div className="pt-6 border-t border-gray-200 flex justify-end">
+            <button
+              type="submit"
+              disabled={loading}
+              className="inline-flex justify-center items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-blue-400"
+            >
+              {loading && <FontAwesomeIcon icon={faSpinner} spin className="mr-3" />}
+              <FontAwesomeIcon icon={faPlus} className="mr-2" />
+              {loading ? 'Creating...' : 'Create Teacher'}
+            </button>
           </div>
         </form>
       </div>
-    </section>
-  </div>
-  
+    </div>
   );
 }
 

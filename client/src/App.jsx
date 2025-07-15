@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from "react";
+import { useContext, useEffect } from "react";
 import ReactGA from "react-ga";
 import "react-quill/dist/quill.bubble.css";
 import { Route, Routes } from "react-router-dom";
@@ -9,7 +9,6 @@ import AdmissionCreated from "./components/New Admission/AdmissionCreated";
 import { UserAuthContext } from "./context/userContext";
 import { Auth, Student } from "./pages";
 import About from "./pages/About";
-import AdmissionStarted from "./pages/AdmissionStarted";
 import AllNotifications from "./pages/AllNotifications";
 import CenterRegister from "./pages/CenterRegister";
 import Downloads from "./pages/Downloads";
@@ -20,9 +19,7 @@ import NotificationView from "./pages/NotificationView";
 import Notifications from "./pages/Notifications";
 import SpecialHallTicket from "./pages/SpecialHallticket";
 import StudentResult from "./pages/StudentResult";
-import AllCourses from "./pages/courses/AllCourses";
 import CourseDetails from "./pages/courses/CourseDetails";
-import BulkHallTickets from "./pages/admin/hall-tickets/BulkHallTickets";
 
 export default function App() {
   const { checkUserLogin } = useContext(UserAuthContext);
@@ -36,9 +33,9 @@ export default function App() {
 
   return (
     <>
-      <div className="flex bg-gray-900 min-h-screen text-white">
+      <div className="flex min-h-screen ">
         <div className="w-full">
-          <ToastContainer />
+          <ToastContainer position="top-center" />
           <Routes>
             <Route path="*" element={<Auth.NotFound />} />
             <Route path="/login" element={<Auth.Login />} />
@@ -47,13 +44,10 @@ export default function App() {
               path="/hallticket/download"
               element={<SpecialHallTicket />}
             />
-            <Route path="/hall-tickets" element={<BulkHallTickets />} />
-            <Route path="/admission-started" element={<AdmissionStarted />} />
             <Route path="/result" element={<StudentResult />} />
             <Route path="/notifications" element={<Notifications />} />
             <Route path="/admission-created" element={<AdmissionCreated />} />
             <Route path="/course-details/:id" element={<CourseDetails />} />
-            <Route path="/all-courses" element={<AllCourses />} />
             <Route path="/institution-duty" element={<InstitutionDuty />} />
             <Route path="/email-sent/:email" element={<EmailSent />} />
             <Route path="/profile/:id" element={<Student.Profile />} />

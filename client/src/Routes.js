@@ -13,11 +13,11 @@ import MyMessages from "./pages/admin/MyMessages";
 import MyUploads from "./pages/admin/MyUploads";
 import AdmissionManagement from "./pages/admin/admission/AdmissionManagement";
 import Admissions from "./pages/admin/admission/Admissions";
+import BulkHallTickets from "./pages/admin/hall-tickets/BulkHallTickets";
 import PreviousExamManagement from "./pages/admin/previous-exam/PreviousExamManagement";
 import PreviousExamTable from "./pages/admin/previous-exam/PreviousExamTable";
 import MarkEntry from "./pages/admin/results/MarkEntry";
 import StudyCentreProfile from "./pages/admin/study-centre/StudyCentreProfile";
-import AdmissionRequests from "./pages/superAdmin/AdmissionRequests";
 import AllSubjects from "./pages/superAdmin/AllSubjects";
 import ClassManagment from "./pages/superAdmin/ClassManagment";
 import CreateExam from "./pages/superAdmin/CreateExam";
@@ -42,11 +42,7 @@ export const SuperAdminRoutes = [
     component: <StudyCentre.AllStudyCentres />,
     role: "superAdmin",
   },
-  {
-    route: "/study-centre-section",
-    component: <StudyCentre.StudyCentreHome />,
-    role: "superAdmin",
-  },
+
   {
     route: "/edit-branch/:id",
     component: <StudyCentre.EditStudyCentre />,
@@ -89,13 +85,6 @@ export const SuperAdminRoutes = [
     component: <CreateNotification />,
     role: "superAdmin",
   },
-
-  {
-    route: "/admission-requests",
-    component: <AdmissionRequests />,
-    role: "superAdmin",
-  },
-
   {
     route: "/class-management",
     component: <ClassManagment />,
@@ -261,4 +250,5 @@ export const AdminRoutes = [
   },
   { route: "/add-result", component: <Result.AddResult /> },
   { route: "/previous-results/admin", component: <PreviousExamTable /> },
+  { route: "/hall-tickets", component: <BulkHallTickets /> },
 ];

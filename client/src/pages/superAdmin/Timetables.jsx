@@ -1,47 +1,64 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useState, useRef } from "react";
 import { toast } from "react-toastify";
 import Axios from "../../Axios";
 import moment from "moment";
 import { ClassContext } from "../../context/classContext";
 import { ExamContext } from "../../context/examContext";
-import { faPen, faTrash } from "@fortawesome/free-solid-svg-icons";
+import {
+  faPenToSquare,
+  faTrashAlt,
+  faPlus,
+  faTimes,
+  faExclamationTriangle,
+} from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
-function TimetableForm({ onSubmitSuccess, editingHallTicket }) {
+// --- Form Component ---
+function TimetableForm({ onSubmitSuccess, editingHallTicket, onCancelEdit }) {
   const { classes, getClasses } = useContext(ClassContext);
   const { exams, getExams } = useContext(ExamContext);
+
+  const initialInputs = [{ subjectId: "", time: "", date: "" }];
+  const [inputs, setInputs] = useState(initialInputs);
   const [exam, setExam] = useState("");
   const [selectedClass, setSelectedClass] = useState("");
-  const handleRemoveRow = (index) => {
-    const newInputs = inputs.filter((_, i) => i !== index);
-    setInputs(newInputs);
-  };
-
   const [subjects, setSubjects] = useState([]);
-  const [inputs, setInputs] = useState([
-    { subjectId: null, time: null, date: null },
-  ]);
 
+  // --- Effects for Data Handling ---
   useEffect(() => {
+    // Initial fetch for dropdowns
     getExams(true);
     getClasses();
   }, []);
 
   useEffect(() => {
-    if (selectedClass) {
-      getSubjects();
-    }
+    // Fetch subjects when a class is selected
+    const getSubjects = async () => {
+      if (!selectedClass) {
+        setSubjects([]);
+        return;
+      }
+      try {
+        const { data } = await Axios.get(`/subject?class=${selectedClass}`);
+        setSubjects(data);
+      } catch (error) {
+        console.error("Error fetching subjects:", error);
+        toast.error("Failed to fetch subjects.");
+      }
+    };
+    getSubjects();
   }, [selectedClass]);
 
   useEffect(() => {
+    // Populate form when editingHallTicket prop changes
     if (editingHallTicket) {
-      setExam(editingHallTicket?.exam._id);
-      setSelectedClass(editingHallTicket?.class._id);
+      setExam(editingHallTicket.exam._id);
+      setSelectedClass(editingHallTicket.class._id);
       setInputs(
-        editingHallTicket?.subjects.map((subject) => ({
-          subjectId: subject?.subjectId._id,
-          time: subject?.time,
-          date: moment(subject?.date).format("YYYY-MM-DD"),
+        editingHallTicket.subjects.map((subject) => ({
+          subjectId: subject.subjectId._id,
+          time: subject.time,
+          date: moment(subject.date).format("YYYY-MM-DD"),
         }))
       );
     } else {
@@ -49,60 +66,11 @@ function TimetableForm({ onSubmitSuccess, editingHallTicket }) {
     }
   }, [editingHallTicket]);
 
-  const getSubjects = async () => {
-    try {
-      let { data } = await Axios.get(`/subject?class=${selectedClass}`);
-      setSubjects(data);
-    } catch (error) {
-      console.error("Error fetching subjects:", error);
-      toast.error("Failed to fetch subjects", {
-        position: toast.POSITION.TOP_CENTER,
-        autoClose: 3000,
-      });
-    }
-  };
-
-  const submitHallTicket = async (e) => {
-    e.preventDefault();
-    try {
-      const payload = {
-        subjects: inputs,
-        exam,
-        class: selectedClass,
-      };
-      let res;
-      if (editingHallTicket) {
-        res = await Axios.patch(
-          `/hall-ticket/${editingHallTicket?._id}`,
-          payload
-        );
-      } else {
-        res = await Axios.post("/hall-ticket", payload);
-      }
-      if (res.status === 200) {
-        toast.success(
-          `Hall Ticket ${
-            editingHallTicket ? "Updated" : "Created"
-          } Successfully`,
-          {
-            position: toast.POSITION.TOP_CENTER,
-            autoClose: 3000,
-          }
-        );
-        resetForm();
-        onSubmitSuccess();
-      }
-    } catch (error) {
-      console.error("Error submitting hall ticket:", error);
-      toast.error("Something went wrong", {
-        position: toast.POSITION.TOP_CENTER,
-        autoClose: 3000,
-      });
-    }
-  };
-
-  const handleAddRow = () => {
-    setInputs([...inputs, { subjectId: "", time: "", date: "" }]);
+  // --- Form Handlers ---
+  const resetForm = () => {
+    setExam("");
+    setSelectedClass("");
+    setInputs(initialInputs);
   };
 
   const handleInputChange = (index, event) => {
@@ -112,32 +80,55 @@ function TimetableForm({ onSubmitSuccess, editingHallTicket }) {
     setInputs(newInputs);
   };
 
-  const resetForm = () => {
-    setExam("");
-    setSelectedClass("");
-    setInputs([{ subjectId: null, time: null, date: null }]);
+  const handleAddRow = () => {
+    setInputs([...inputs, { subjectId: "", time: "", date: "" }]);
+  };
+
+  const handleRemoveRow = (index) => {
+    if (inputs.length <= 1) return; // Prevent removing the last row
+    setInputs(inputs.filter((_, i) => i !== index));
+  };
+
+  // --- API Submission ---
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const payload = { subjects: inputs, exam, class: selectedClass };
+    const apiCall = editingHallTicket
+      ? Axios.patch(`/hall-ticket/${editingHallTicket._id}`, payload)
+      : Axios.post("/hall-ticket", payload);
+
+    try {
+      await toast.promise(apiCall, {
+        pending: editingHallTicket
+          ? "Updating time table..."
+          : "Creating time table...",
+        success: `Time Table ${
+          editingHallTicket ? "Updated" : "Created"
+        } Successfully!`,
+        error: "An error occurred.",
+      });
+      resetForm();
+      onSubmitSuccess();
+    } catch (error) {
+      console.error("Submit error:", error);
+    }
   };
 
   return (
-    <form
-      className="mx-auto mt-8 max-w-xl bg-gray-800 p-6 rounded-lg shadow-lg"
-      onSubmit={submitHallTicket}
-    >
-      <h1 className="text-2xl font-bold text-white mb-6 text-center">
-        {editingHallTicket ? "Edit" : "Create"} Exam Time Table
-      </h1>
-      <div className="mb-4">
-        <label className="block text-sm font-bold text-gray-300 mb-2">
-          Exam
-        </label>
+    <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
+      <h2 className="text-2xl font-bold text-gray-800 mb-6">
+        {editingHallTicket ? "Edit Time Table" : "Create Time Table"}
+      </h2>
+      <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Main Selects */}
         <select
-          className="bg-gray-900 border border-gray-600 text-sm rounded-lg w-full p-2 focus:ring-blue-500 focus:border-blue-500"
-          onChange={(e) => setExam(e.target.value)}
           value={exam}
+          onChange={(e) => setExam(e.target.value)}
+          className="input-field"
           required
         >
-          <option value="" hidden>
-            Select Exam
+          <option value="" disabled>
+            -- Select Exam --
           </option>
           {exams.map((examItem) => (
             <option key={examItem._id} value={examItem._id}>
@@ -145,19 +136,14 @@ function TimetableForm({ onSubmitSuccess, editingHallTicket }) {
             </option>
           ))}
         </select>
-      </div>
-      <div className="mb-4">
-        <label className="block text-sm font-bold text-gray-300 mb-2">
-          Class
-        </label>
         <select
-          className="bg-gray-900 border border-gray-600 text-sm rounded-lg w-full p-2 focus:ring-blue-500 focus:border-blue-500"
-          onChange={(e) => setSelectedClass(e.target.value)}
           value={selectedClass}
+          onChange={(e) => setSelectedClass(e.target.value)}
+          className="input-field"
           required
         >
-          <option value="" hidden>
-            Select Class
+          <option value="" disabled>
+            -- Select Class --
           </option>
           {classes.map((classItem) => (
             <option key={classItem._id} value={classItem._id}>
@@ -165,123 +151,201 @@ function TimetableForm({ onSubmitSuccess, editingHallTicket }) {
             </option>
           ))}
         </select>
-      </div>
-      <div className="mb-4">
-        <label className="block text-sm font-bold text-gray-300 mb-2">
-          Subjects
-        </label>
-        {inputs.map((inputItem, key) => (
-          <div key={key} className="flex items-center gap-2 mb-2">
-            <select
-              className="bg-gray-900 border border-gray-600 text-sm rounded-lg w-full p-2 focus:ring-blue-500 focus:border-blue-500"
-              name="subjectId"
-              onChange={(event) => handleInputChange(key, event)}
-              value={inputItem.subjectId}
-              required
-            >
-              <option value="" hidden>
-                Select Subject
-              </option>
-              {subjects.map((subject) => (
-                <option key={subject?._id} value={subject?._id}>
-                  {subject?.subjectCode} - {subject?.subjectName}
-                </option>
-              ))}
-            </select>
-            <input
-              className="bg-gray-900 border border-gray-600 text-sm rounded-lg w-full p-2 focus:ring-blue-500 focus:border-blue-500"
-              name="time"
-              type="time"
-              onChange={(event) => handleInputChange(key, event)}
-              value={inputItem.time}
-              required
-            />
-            <input
-              className="bg-gray-900 border border-gray-600 text-sm rounded-lg w-full p-2 focus:ring-blue-500 focus:border-blue-500"
-              name="date"
-              type="date"
-              onChange={(event) => handleInputChange(key, event)}
-              value={inputItem.date}
-              required
-            />
-            <button
-              type="button"
-              onClick={() => handleRemoveRow(key)}
-              className={`bg-red-600 text-white px-3 py-1 rounded-lg ${
-                inputs.length === 1
-                  ? "opacity-50 cursor-not-allowed"
-                  : "hover:bg-red-500"
-              }`}
-              disabled={inputs.length === 1}
-            >
-              Remove
-            </button>
-          </div>
-        ))}
-      </div>
-      <div className="flex justify-between items-center mt-6">
+
+        <hr />
+
+        {/* Dynamic Subject Rows */}
+        <h3 className="text-lg font-semibold text-gray-700">
+          Subjects Schedule
+        </h3>
+        <div className="space-y-4">
+          {subjects.length > 0 ? (
+            inputs.map((input, index) => (
+              <div
+                key={index}
+                className="p-4 border rounded-md bg-gray-50 space-y-3 relative"
+              >
+                <span className="font-semibold text-gray-600">
+                  Subject #{index + 1}
+                </span>
+                {inputs.length > 1 && (
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveRow(index)}
+                    className="absolute top-3 right-3 text-red-500 hover:text-red-700"
+                  >
+                    <FontAwesomeIcon icon={faTimes} />
+                  </button>
+                )}
+                <select
+                  name="subjectId"
+                  value={input.subjectId}
+                  onChange={(e) => handleInputChange(index, e)}
+                  className="input-field"
+                  required
+                >
+                  <option value="" disabled>
+                    -- Select Subject --
+                  </option>
+                  {subjects.map((subject) => (
+                    <option key={subject._id} value={subject._id}>
+                      {subject.subjectCode} - {subject.subjectName}
+                    </option>
+                  ))}
+                </select>
+                <div className="grid grid-cols-2 gap-3">
+                  <input
+                    type="time"
+                    name="time"
+                    value={input.time}
+                    onChange={(e) => handleInputChange(index, e)}
+                    className="input-field"
+                    required
+                  />
+                  <input
+                    type="date"
+                    name="date"
+                    value={input.date}
+                    onChange={(e) => handleInputChange(index, e)}
+                    className="input-field"
+                    required
+                  />
+                </div>
+              </div>
+            ))
+          ) : (
+            <div className="text-center p-4 border-2 border-dashed rounded-md text-gray-500">
+              {selectedClass
+                ? "No subjects found for this class."
+                : "Please select a class to see subjects."}
+            </div>
+          )}
+        </div>
+
+        {/* Action Buttons */}
         <button
           type="button"
           onClick={handleAddRow}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
+          className="btn-secondary w-full text-sm"
         >
-          Add Subject
+          <FontAwesomeIcon icon={faPlus} className="mr-2" /> Add Another Subject
         </button>
-        <button
-          type="submit"
-          className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition"
-        >
-          {editingHallTicket ? "Update" : "Submit"}
-        </button>
-      </div>
-    </form>
+        <div className="flex items-center gap-4 pt-2">
+          <button type="submit" className="btn-primary w-full">
+            {editingHallTicket ? "Update Time Table" : "Create Time Table"}
+          </button>
+          {editingHallTicket && (
+            <button
+              type="button"
+              onClick={onCancelEdit}
+              className="btn-secondary w-full"
+            >
+              Cancel
+            </button>
+          )}
+        </div>
+      </form>
+    </div>
   );
 }
 
+// --- List/Grid Component ---
+function HallTicketGrid({ hallTickets, onEdit, onDeleteClick }) {
+  return (
+    <div className="bg-white rounded-lg shadow-md border border-gray-200">
+      <h2 className="text-2xl font-bold text-gray-800 p-6 border-b border-gray-200">
+        Existing Time Tables
+      </h2>
+      <div className="p-6 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+        {hallTickets.length > 0 ? (
+          hallTickets.map((ht) => (
+            <div
+              key={ht._id}
+              className="bg-gray-50 border border-gray-200 rounded-lg p-5 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 flex flex-col"
+            >
+              <div className="flex-grow">
+                <div className="flex justify-between items-start mb-4">
+                  <div>
+                    <h3 className="font-bold text-gray-800">
+                      {ht.exam.examName}
+                    </h3>
+                    <p className="text-sm text-gray-500">
+                      {ht.class.className}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => onEdit(ht)}
+                      className="text-blue-500 hover:text-blue-700"
+                      title="Edit"
+                    >
+                      <FontAwesomeIcon icon={faPenToSquare} />
+                    </button>
+                    <button
+                      onClick={() => onDeleteClick(ht)}
+                      className="text-red-500 hover:text-red-700"
+                      title="Delete"
+                    >
+                      <FontAwesomeIcon icon={faTrashAlt} />
+                    </button>
+                  </div>
+                </div>
+                <hr className="mb-4" />
+                <div className="space-y-2">
+                  {ht.subjects.map((subject, index) => (
+                    <div key={index} className="text-sm">
+                      <p className="font-semibold text-gray-700">
+                        {subject.subjectId.subjectName}
+                      </p>
+                      <p className="text-gray-500">
+                        {moment(subject.date).format("dddd, MMMM D, YYYY")} at{" "}
+                        {subject.time}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          ))
+        ) : (
+          <p className="md:col-span-2 xl:col-span-3 text-center py-12 text-gray-500">
+            No time tables found. Create one to get started.
+          </p>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// --- Main Parent Component ---
 function TimeTables() {
   const [hallTickets, setHallTickets] = useState([]);
   const [editingHallTicket, setEditingHallTicket] = useState(null);
-  console.log(hallTickets);
+  const [isDeleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState(null);
+  const formRef = useRef(null);
+
+  const getHallTickets = async () => {
+    try {
+      const { data } = await Axios.get("/hall-ticket");
+      setHallTickets(data);
+    } catch (error) {
+      console.error("Error fetching hall tickets:", error);
+      toast.error("Failed to fetch time tables.");
+    }
+  };
+
   useEffect(() => {
     getHallTickets();
   }, []);
 
-  const getHallTickets = async () => {
-    try {
-      let { data } = await Axios.get("/hall-ticket");
-      setHallTickets(data);
-    } catch (error) {
-      console.error("Error fetching hall tickets:", error);
-      toast.error("Failed to fetch hall tickets", {
-        position: toast.POSITION.TOP_CENTER,
-        autoClose: 3000,
-      });
-    }
-  };
-
-  const deleteHallTicket = async (itemId) => {
-    try {
-      if (window.confirm("Do you want to delete this item?")) {
-        let res = await Axios.delete(`/hall-ticket/${itemId}`);
-        if (res.status === 200) {
-          toast.success("Deleted successfully", {
-            position: toast.POSITION.TOP_CENTER,
-            autoClose: 3000,
-          });
-          getHallTickets();
-        }
-      }
-    } catch (error) {
-      console.error("Error deleting hall ticket:", error);
-      toast.error("Error Occurred", {
-        position: toast.POSITION.TOP_CENTER,
-        autoClose: 3000,
-      });
-    }
-  };
-
   const handleEdit = (hallTicket) => {
     setEditingHallTicket(hallTicket);
+    formRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  const handleCancelEdit = () => {
+    setEditingHallTicket(null);
   };
 
   const handleSubmitSuccess = () => {
@@ -289,78 +353,97 @@ function TimeTables() {
     setEditingHallTicket(null);
   };
 
+  const handleDeleteClick = (hallTicket) => {
+    setItemToDelete(hallTicket);
+    setDeleteModalOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!itemToDelete) return;
+    try {
+      await Axios.delete(`/hall-ticket/${itemToDelete._id}`);
+      toast.success("Time Table deleted successfully.");
+      getHallTickets();
+    } catch (error) {
+      console.error("Delete error:", error);
+      toast.error("Failed to delete time table.");
+    } finally {
+      setDeleteModalOpen(false);
+      setItemToDelete(null);
+    }
+  };
+
   return (
-    <div className="mt-4">
-      <TimetableForm
-        onSubmitSuccess={handleSubmitSuccess}
-        editingHallTicket={editingHallTicket}
-      />
-      <HallTicketTable
-        hallTickets={hallTickets}
-        onDelete={deleteHallTicket}
-        onEdit={handleEdit}
+    <div className="min-h-screen bg-gray-50 p-4 sm:p-6 lg:p-8">
+      <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div ref={formRef} className="lg:col-span-1">
+          <TimetableForm
+            onSubmitSuccess={handleSubmitSuccess}
+            editingHallTicket={editingHallTicket}
+            onCancelEdit={handleCancelEdit}
+          />
+        </div>
+        <div className="lg:col-span-2">
+          <HallTicketGrid
+            hallTickets={hallTickets}
+            onEdit={handleEdit}
+            onDeleteClick={handleDeleteClick}
+          />
+        </div>
+      </div>
+      <DeleteConfirmationModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setDeleteModalOpen(false)}
+        onConfirm={confirmDelete}
+        itemName={`Time Table for ${itemToDelete?.exam?.examName} - ${itemToDelete?.class?.className}`}
       />
     </div>
   );
 }
 
-function HallTicketTable({ hallTickets, onDelete, onEdit }) {
+// --- Reusable Delete Confirmation Modal ---
+function DeleteConfirmationModal({ isOpen, onClose, onConfirm, itemName }) {
+  if (!isOpen) return null;
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 p-6">
-      {hallTickets?.length > 0 &&
-        hallTickets?.map((hallTicket) => (
-          <div
-            key={hallTicket?._id}
-            className="relative bg-gray-900 shadow-md rounded-xl p-6 border border-gray-700 transition-transform transform hover:scale-105 hover:shadow-lg"
-          >
-            {/* Exam and Class Name */}
-            <div className="mb-6 mt-8">
-              <h2 className="text-2xl font-semibold text-white mb-1">
-                {hallTicket?.exam.examName}
-              </h2>
-              <p className="text-gray-400 italic">
-                {hallTicket?.class.className}
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-60">
+      <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md mx-4">
+        <div className="flex items-start">
+          <div className="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
+            <FontAwesomeIcon
+              icon={faExclamationTriangle}
+              className="h-6 w-6 text-red-600"
+            />
+          </div>
+          <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+            <h3 className="text-lg leading-6 font-bold text-gray-900">
+              Delete Time Table
+            </h3>
+            <div className="mt-2">
+              <p className="text-sm text-gray-600">
+                Are you sure you want to delete the time table for{" "}
+                <strong className="font-semibold">"{itemName}"</strong>? This
+                action cannot be undone.
               </p>
             </div>
-
-            {/* Subjects */}
-            <div className="mb-4">
-              <h3 className="text-lg font-medium text-white mb-3">Subjects:</h3>
-              {hallTicket?.subjects?.map((subject, key) => (
-                <div
-                  key={key}
-                  className="bg-gray-800 rounded-lg p-3 mb-2 border border-gray-700 hover:bg-gray-700 transition-colors"
-                >
-                  <div className="flex justify-between items-center">
-                    <p className="text-sm font-bold text-gray-200">
-                      {subject?.subjectId?.subjectName}
-                    </p>
-                    <p className="text-xs text-gray-400">
-                      {subject?.time},{" "}
-                      {moment(subject?.date).format("DD-MM-YYYY")}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* Edit and Delete Buttons */}
-            <div className="absolute top-4 right-4 flex space-x-2">
-              <button
-                className="bg-blue-600 text-white p-2 rounded-lg hover:bg-blue-500 transition-transform transform hover:scale-110"
-                onClick={() => onEdit(hallTicket)}
-              >
-                <FontAwesomeIcon icon={faPen} />
-              </button>
-              <button
-                className="bg-red-600 text-white p-2 rounded-lg hover:bg-red-500 transition-transform transform hover:scale-110"
-                onClick={() => onDelete(hallTicket?._id)}
-              >
-                <FontAwesomeIcon icon={faTrash} />
-              </button>
-            </div>
           </div>
-        ))}
+        </div>
+        <div className="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse gap-3">
+          <button
+            onClick={onConfirm}
+            type="button"
+            className="btn-danger w-full sm:w-auto"
+          >
+            Delete
+          </button>
+          <button
+            onClick={onClose}
+            type="button"
+            className="btn-secondary w-full sm:w-auto"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

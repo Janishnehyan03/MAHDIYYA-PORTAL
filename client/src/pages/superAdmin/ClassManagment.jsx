@@ -1,192 +1,214 @@
-import { faBook, faEdit } from "@fortawesome/free-solid-svg-icons";
+import { faBook, faEdit, faPlus, faXmark } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import React, { useState } from "react";
-import { useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import Axios from "../../Axios";
 
+// Main Component
 function ClassManagment() {
   const [classes, setClasses] = useState([]);
-  const [showModel, setShowModel] = useState(false);
-  const [className, setClassName] = useState("");
-  const [paramsId, setParamsId] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingClass, setEditingClass] = useState(null); // Will hold the class object for editing
 
+  // --- API Calls ---
   const getAllClasses = async () => {
     try {
-      let { data } = await Axios.get("/class");
+      const { data } = await Axios.get("/class");
       setClasses(data);
     } catch (error) {
-      console.log(error.response);
+      console.error("Failed to fetch classes:", error.response || error);
     }
   };
-  const createClass = async (e) => {
-    e.preventDefault();
+
+  const createClass = async (classData) => {
     try {
-      let { data } = await Axios.post(`/class`, {
-        className,
-      });
-      setClassName("");
-      setShowModel(false);
-      getAllClasses();
+      await Axios.post("/class", classData);
+      closeModalAndRefresh();
     } catch (error) {
-      console.log(error.response);
+      console.error("Failed to create class:", error.response || error);
     }
   };
-  const editClass = async (e) => {
-    e.preventDefault();
+
+  const editClass = async (classData) => {
+    if (!editingClass?._id) return;
     try {
-      let { data } = await Axios.patch("/class/" + paramsId, { className });
-      setClassName("");
-      setShowModel(false);
-      getAllClasses();
+      await Axios.patch(`/class/${editingClass._id}`, classData);
+      closeModalAndRefresh();
     } catch (error) {
-      console.log(error.response);
+      console.error("Failed to edit class:", error.response || error);
     }
   };
 
   useEffect(() => {
     getAllClasses();
   }, []);
+
+  // --- Modal Handling ---
+  const handleOpenAddModal = () => {
+    setEditingClass(null); // Ensure we're in "add" mode
+    setIsModalOpen(true);
+  };
+
+  const handleOpenEditModal = (classItem) => {
+    setEditingClass(classItem); // Set the class to edit
+    setIsModalOpen(true);
+  };
+  
+  const closeModalAndRefresh = () => {
+    setIsModalOpen(false);
+    setEditingClass(null);
+    getAllClasses(); // Refresh data after action
+  }
+
   return (
-    <div>
-      {!paramsId && showModel && (
-        <CreateClass
-          handleFunction={createClass}
-          className={className}
-          setClassName={setClassName}
-          setShowModel={setShowModel}
-        />
-      )}
-      {paramsId && showModel && (
-        <CreateClass
-          handleFunction={editClass}
-          className={className}
-          setClassName={setClassName}
-          setShowModel={setShowModel}
-        />
-      )}
+    <div className="min-h-screen bg-gray-50 p-4 sm:p-6 lg:p-8">
+      <div className="max-w-4xl mx-auto">
+        {/* Header and Action Button */}
+        <div className="flex flex-col sm:flex-row justify-between items-center mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">
+            Classroom Management
+          </h1>
+          <button
+            onClick={handleOpenAddModal}
+            className="mt-4 sm:mt-0 flex items-center gap-2 px-5 py-2.5 bg-blue-500 text-white font-semibold rounded-lg shadow-sm hover:bg-blue-600 transition-colors duration-300"
+          >
+            <FontAwesomeIcon icon={faPlus} />
+            Add New Class
+          </button>
+        </div>
 
-      <h1 className="text-center font-bold text-xl capitalize m-4">
-        class management
-      </h1>
-      <div className="flex justify-center items-center">
-        <button
-          onClick={() => setShowModel(true)}
-          className="bg-blue-900 text-center uppercase  px-4 py-2 mr-4 my-3  text-white font-bold rounded-full"
-        >
-          Add New Class
-        </button>
+        {/* Table Container */}
+        <div className="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-full text-left text-sm">
+              <thead className="bg-gray-100 border-b border-gray-200 text-xs text-gray-600 uppercase tracking-wider">
+                <tr>
+                  <th scope="col" className="px-6 py-3 font-semibold">#</th>
+                  <th scope="col" className="px-6 py-3 font-semibold">Class Name</th>
+                  <th scope="col" className="px-6 py-3 font-semibold text-center">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200">
+                {classes.length > 0 ? (
+                  classes.map((classItem, index) => (
+                    <tr key={classItem._id} className="hover:bg-gray-50 transition-colors">
+                      <td className="px-6 py-4 font-medium text-gray-500">{index + 1}</td>
+                      <td className="px-6 py-4 font-semibold text-gray-800">{classItem.className}</td>
+                      <td className="px-6 py-4 text-center">
+                        <button
+                          onClick={() => handleOpenEditModal(classItem)}
+                          className="text-blue-500 hover:text-blue-700 transition-colors"
+                          title="Edit Class"
+                        >
+                          <FontAwesomeIcon icon={faEdit} size="lg" />
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="3" className="text-center py-12 px-6 text-gray-500">
+                      No classes found. Click "Add New Class" to get started.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
-      <table className="w-1/2 mx-auto leading-normal">
-        <thead>
-          <tr>
-            <th
-              scope="col"
-              className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider"
-            >
-              #
-            </th>
-
-            <th
-              scope="col"
-              className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider"
-            >
-              Class Name
-            </th>
-            <th
-              scope="col"
-              className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider"
-            >
-              EDIT
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {classes.map((classItem, index) => (
-            <tr className="border-b">
-              <td className="px-5 py-3 bg-gray-900 text-sm">{index + 1}</td>
-              <td className="px-5 py-3 bg-gray-900 text-sm">
-                {classItem.className}
-              </td>
-
-              <td className="px-5 py-3 bg-gray-900 text-sm">
-                <FontAwesomeIcon
-                  onClick={() => {
-                    setShowModel(true);
-                    setParamsId(classItem._id);
-                  }}
-                  className="text-blue-500 cursor-pointer"
-                  icon={faEdit}
-                />
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      
+      {/* Modal Render */}
+      <ClassModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSubmit={editingClass ? editClass : createClass}
+        isEditing={!!editingClass}
+        initialData={editingClass}
+      />
     </div>
   );
 }
-function CreateClass({
-  handleFunction,
-  className,
-  setClassName,
-  setShowModel,
-}) {
+
+// Modal Component
+function ClassModal({ isOpen, onClose, onSubmit, isEditing, initialData }) {
+  const [className, setClassName] = useState("");
+
+  useEffect(() => {
+    // Pre-fill form when editing, otherwise clear it
+    if (isEditing && initialData) {
+      setClassName(initialData.className);
+    } else {
+      setClassName("");
+    }
+  }, [isEditing, initialData, isOpen]); // Rerun when modal opens
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (className.trim()) {
+      onSubmit({ className });
+    }
+  };
+  
+  if (!isOpen) return null;
+
   return (
-    <div
-      className="relative z-10"
-      aria-labelledby="modal-title"
-      role="dialog"
-      aria-modal="true"
-    >
-      <div className="fixed inset-0 bg-gray-9000 bg-opacity-75 transition-opacity" />
-      <div className="fixed z-10 inset-0 overflow-y-auto">
-        <div className="flex items-end sm:items-center justify-center min-h-full p-4 text-center sm:p-0">
-          <div className="relative bg-gray-900 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:max-w-lg sm:w-full">
-            <div className="bg-gray-900 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-              <div className="sm:flex sm:items-start">
-                <div className="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-blue-600 sm:mx-0 sm:h-10 sm:w-10">
-                  <FontAwesomeIcon icon={faBook} />
-                </div>
-                <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
-                  <h3
-                    className="text-lg leading-6 font-medium text-[#eeeeee]"
-                    id="modal-title"
-                  >
-                    Create New Class
-                  </h3>
-                  <div className="mt-2">
-                    <label
-                      className="block  text-sm capitalize font-bold mb-2"
-                      htmlFor="username"
-                    >
-                      class name
-                    </label>
-                    <input
-                      type="text"
-                      value={className}
-                      onChange={(e) => setClassName(e.target.value)}
-                      className="focus:ring-indigo-500 focus:border-indigo-500 shadow appearance-none border rounded w-full py-4 px-3  leading-tight focus:outline-none focus:shadow-outline uppercase"
-                    />
+    <div className="relative z-50" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+      {/* Overlay */}
+      <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
+      
+      {/* Modal Content */}
+      <div className="fixed inset-0 z-10 w-screen overflow-y-auto">
+        <div className="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
+          <div className="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg">
+            <form onSubmit={handleSubmit}>
+              <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                <div className="sm:flex sm:items-start">
+                  <div className="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-blue-100 sm:mx-0 sm:h-10 sm:w-10">
+                    <FontAwesomeIcon icon={faBook} className="text-blue-600" />
+                  </div>
+                  <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
+                    <h3 className="text-lg font-semibold leading-6 text-gray-900" id="modal-title">
+                      {isEditing ? "Edit Class" : "Create New Class"}
+                    </h3>
+                    <div className="mt-4">
+                      <label htmlFor="className" className="block text-sm font-medium text-gray-700">
+                        Class Name
+                      </label>
+                      <input
+                        type="text"
+                        id="className"
+                        value={className}
+                        onChange={(e) => setClassName(e.target.value)}
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-3"
+                        placeholder="e.g., Grade 10 - Science"
+                        required
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-            <div className="bg-gray-900 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-              <button
-                type="button"
-                onClick={(e) => handleFunction(e)}
-                className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 sm:ml-3 sm:w-auto sm:text-sm"
+              <div className="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
+                <button
+                  type="submit"
+                  className="inline-flex w-full justify-center rounded-md bg-blue-600 px-4 py-2 text-base font-semibold text-white shadow-sm hover:bg-blue-700 sm:ml-3 sm:w-auto"
+                >
+                  {isEditing ? "Save Changes" : "Create Class"}
+                </button>
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="mt-3 inline-flex w-full justify-center rounded-md bg-white px-4 py-2 text-base font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-100 sm:mt-0 sm:w-auto"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+             <button
+                onClick={onClose}
+                className="absolute top-0 right-0 mt-4 mr-4 text-gray-400 hover:text-gray-600"
               >
-                Save
+                <FontAwesomeIcon icon={faXmark} size="lg" />
               </button>
-              <button
-                type="button"
-                onClick={() => setShowModel(false)}
-                className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-gray-900 text-base font-medium text-gray-700 hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
-              >
-                Cancel
-              </button>
-            </div>
           </div>
         </div>
       </div>

@@ -24,6 +24,23 @@ exports.createBranch = async (req, res, next) => {
     next(error);
   }
 };
+exports.getBranch = async (req, res, next) => {
+  let studyCentreId;
+  if (req.user.role === "superAdmin") {
+    studyCentreId = req.params.id;
+  } else if (req.user.role === "admin") {
+    studyCentreId = req.user.branch;
+  }
+  try {
+    let data = await StudyCentre.findById(studyCentreId);
+    let students = await Student.countDocuments({ branch: studyCentreId });
+    let teachers = await Teacher.countDocuments({ branch: studyCentreId });
+    res.status(200).json({ data, students, teachers });
+  } catch (error) {
+    next(error);
+  }
+};
+
 exports.getStudyCentreDetails = async (req, res) => {
   try {
     const { id } = req.params;
@@ -50,7 +67,9 @@ exports.getStudyCentreDetails = async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ message: "An error occurred", error: error.message });
+    res
+      .status(500)
+      .json({ message: "An error occurred", error: error.message });
   }
 };
 exports.editBranch = async (req, res, next) => {
@@ -78,7 +97,6 @@ exports.getStudyCentreDetails = async (req, res, next) => {
   }
 };
 
-exports.getBranch = globalFuctions.getOne(StudyCentre);
 exports.getAllBranches = globalFuctions.getAll(StudyCentre);
 exports.deleteBranch = globalFuctions.deleteOne(StudyCentre);
 

@@ -14,5 +14,5 @@ router
 router
   .route("/:id")
   .get(getNotification)
-  .post(protect, restrictTo("superAdmin"), deleteNotification);
+  .delete(protect, restrictTo("superAdmin"), deleteNotification);
 module.exports = router;

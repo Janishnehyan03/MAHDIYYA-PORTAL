@@ -1,25 +1,44 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faHome } from "@fortawesome/free-solid-svg-icons";
 
-function Not_found() {
+function NotFound() {
   return (
-    <main className="h-screen w-full flex flex-col justify-center items-center bg-[#1A2238]">
-      <h1 className="text-9xl font-extrabold text-white tracking-widest">
-        404
-      </h1>
-      <div className="bg-[#FF6A3D] px-2 text-sm rounded rotate-12 absolute">
-        Page Not Found
-      </div>
-      <Link to={"/"} className="mt-5">
-        <div className="relative inline-block text-sm font-medium text-[#FF6A3D] group active:text-orange-500 focus:outline-none focus:ring">
-          <span className="absolute inset-0 transition-transform translate-x-0.5 translate-y-0.5 bg-[#FF6A3D] group-hover:translate-y-0 group-hover:translate-x-0" />
-          <span className="relative block px-8 py-3 bg-[#1A2238] border border-current">
-            GO HOME
-          </span>
+    <main className="flex items-center justify-center min-h-screen bg-gray-100 p-4">
+      <div className="relative text-center">
+        {/* Background "404" text */}
+        <h1
+          className="absolute -top-20 left-1/2 -translate-x-1/2 text-[15rem] sm:text-[20rem] font-black text-gray-200 -z-10"
+          aria-hidden="true"
+        >
+          404
+        </h1>
+
+        <div className="z-10">
+          <p className="text-2xl md:text-3xl font-bold tracking-tight text-gray-900">
+            Oops! Page Not Found
+          </p>
+          <p className="mt-4 text-base leading-7 text-gray-600">
+            Sorry, we couldn’t find the page you’re looking for. It might have
+            been moved or deleted.
+          </p>
+          <div className="mt-10 flex items-center justify-center gap-x-6">
+            <Link
+              to="/"
+              className="inline-flex items-center rounded-md bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 transition-colors"
+            >
+              <FontAwesomeIcon icon={faHome} className="mr-2" />
+              Go back home
+            </Link>
+            <Link to="/contact" className="text-sm font-semibold text-gray-900 hover:underline">
+              Contact support <span aria-hidden="true">→</span>
+            </Link>
+          </div>
         </div>
-      </Link>
+      </div>
     </main>
   );
 }
 
-export default Not_found;
+export default NotFound;

@@ -1,3 +1,6 @@
+// This component was already improved in the previous request.
+// Here it is again for completeness, ensuring it matches the new theme perfectly.
+
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -6,36 +9,27 @@ import AllNotifications from "../../AllNotifications";
 
 function CreateNotification() {
   const navigate = useNavigate();
-
-  const initialState = {
-    title: "",
-    url: "",
-  };
-  const [formData, setFormData] = useState(initialState);
+  const [title, setTitle] = useState("");
+  const [url, setUrl] = useState("");
   const [loading, setLoading] = useState(false);
-
-  const onChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prevState) => ({ ...prevState, [name]: value }));
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
-      let res = await Axios.post("/notification", formData);
+      const res = await Axios.post("/notification", { title, url });
       if (res.status === 200) {
-        setLoading(false);
-        setFormData(initialState);
-        toast.success("Notification Added Successfully", {
+        toast.success("Notification Added Successfully!", {
           autoClose: 2000,
           position: toast.POSITION.TOP_CENTER,
         });
+        setTimeout(() => {
+          navigate("/all-notifications"); // Navigate to the improved list page
+        }, 1000);
       }
-      navigate("/all-notifications");
     } catch (error) {
       setLoading(false);
-      toast.error("Something went wrong", {
+      toast.error(error.response?.data?.message || "Something went wrong", {
         autoClose: 2000,
         position: toast.POSITION.TOP_CENTER,
       });
@@ -44,74 +38,63 @@ function CreateNotification() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 p-6 flex items-center justify-center">
-      <section className="bg-gray-800 p-6 lg:w-2/4 mx-auto rounded-lg shadow-lg">
-        <div className="max-w-screen-xl mx-auto">
-          <h3 className="text-4xl font-bold text-white uppercase mb-6 text-center">
+    <div className="min-h-screen bg-gray-50 p-4 sm:p-6 lg:p-8 ">
+      <div className="w-full max-w-2xl mx-auto">
+        <form
+          onSubmit={handleSubmit}
+          className="bg-white p-6 sm:p-8 rounded-xl shadow-xl mb-8 mx-auto"
+        >
+          <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center border-b pb-4">
             Create Notification
-          </h3>
+          </h2>
 
-          <form onSubmit={handleSubmit}>
-            <div className="mb-4">
-              <div className="px-4 sm:px-0">
-                <label
-                  className="block text-sm font-bold mb-2 text-[#eeeeee]"
-                  htmlFor="notificationTitle"
-                >
-                  Notification Title
-                </label>
-                <input
-                  className="focus:ring-indigo-500 focus:border-indigo-500 shadow appearance-none border rounded w-full py-4 px-3 leading-tight focus:outline-none focus:shadow-outline uppercase bg-gray-700 text-white"
-                  id="notificationTitle"
-                  type="text"
-                  value={formData.title}
-                  onChange={onChange}
-                  placeholder="Notification Title"
-                  name="title"
-                  required
-                />
-              </div>
-            </div>
-            <div className="mb-4">
-              <div className="px-4 sm:px-0">
-                <label
-                  className="block text-sm font-bold mb-2 text-[#eeeeee]"
-                  htmlFor="notificationLink"
-                >
-                  Notification Link
-                </label>
-                <input
-                  className="focus:ring-indigo-500 focus:border-indigo-500 shadow appearance-none border rounded w-full py-4 px-3 leading-tight focus:outline-none focus:shadow-outline uppercase bg-gray-700 text-white"
-                  id="notificationLink"
-                  type="text"
-                  value={formData.url}
-                  onChange={onChange}
-                  placeholder="Notification Link"
-                  name="url"
-                  required
-                />
-              </div>
-            </div>
-            <div className="mt-4">
-              <div className="px-4 sm:px-0">
-                {!loading ? (
-                  <button
-                    type="submit"
-                    className="w-full  bg-teal-600 hover:bg-teal-700 text-white font-bold py-4 px-4 rounded focus:outline-none focus:shadow-outline uppercase transition"
-                  >
-                    Create Notification
-                  </button>
-                ) : (
-                  <div className="w-full  bg-teal-500 text-center text-white font-bold py-4 px-4 rounded focus:outline-none focus:shadow-outline uppercase">
-                    Processing..
-                  </div>
-                )}
-              </div>
-            </div>
-          </form>
-        </div>
-      </section>
-      <AllNotifications />
+          <div className="mb-6">
+            <label
+              htmlFor="notificationTitle"
+              className="block text-sm font-semibold mb-2 text-gray-600"
+            >
+              Notification Title
+            </label>
+            <input
+              id="notificationTitle"
+              type="text"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="e.g., Important Exam Update"
+              className="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+              required
+            />
+          </div>
+
+          <div className="mb-8">
+            <label
+              htmlFor="notificationLink"
+              className="block text-sm font-semibold mb-2 text-gray-600"
+            >
+              Notification Link
+            </label>
+            <input
+              id="notificationLink"
+              type="url"
+              value={url}
+              onChange={(e) => setUrl(e.target.value)}
+              placeholder="https://example.com/notification"
+              className="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+              required
+            />
+          </div>
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-blue-300 disabled:cursor-not-allowed transition-colors"
+          >
+            {loading ? "Processing..." : "Create Notification"}
+          </button>
+        </form>
+      </div>
+
+      <AllNotifications className="mt-8 w-full max-w-2xl" />
     </div>
   );
 }

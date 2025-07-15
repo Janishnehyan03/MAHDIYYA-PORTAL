@@ -20,18 +20,17 @@ import ResultView from "./superAdmin/result/ResultView";
 import AllStudyCentres from "./superAdmin/study-centre/AllStudyCentres.jsx";
 import CreateStudyCentre from "./superAdmin/study-centre/CreateStudyCentre.jsx";
 import EditStudyCentre from "./superAdmin/study-centre/EditStudyCentre.jsx";
-import StudyCentreHome from "./superAdmin/study-centre/StudyCentreHome.jsx";
 import StudyCentreTeachers from "./superAdmin/study-centre/StudyCentreTeachers.jsx";
 import StudyCentreView from "./superAdmin/study-centre/StudyCentreView.jsx";
 import AllMahdiyyaTeachers from "./superAdmin/teacher/AllMahdiyyaTeachers.jsx";
 
 import EditCceMark from "./admin/cce-mark/EditCceMark.jsx";
 import ViewCceMarks from "./admin/cce-mark/ViewCceMarks.jsx";
+import TransferStudent from "./student/TransferStudent.jsx";
 import AllCourses from "./superAdmin/course/AllCourses.jsx";
 import CreateCourse from "./superAdmin/course/CreateCourse";
 import EditCourse from "./superAdmin/course/EditCourse";
 import AddCceMark from "./superAdmin/result/AddCceMark.jsx";
-import TransferStudent from "./student/TransferStudent.jsx";
 
 export const Teacher = {
   EditTeacher,
@@ -63,7 +62,6 @@ export const StudyCentre = {
   EditStudyCentre,
   CreateStudyCentre,
   AllStudents,
-  StudyCentreHome,
   StudyCentreView,
 };
 export const Result = {

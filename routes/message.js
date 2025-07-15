@@ -82,6 +82,6 @@ router.patch("/:id", protect, async (req, res) => {
     res.status(400).json(error);
   }
 });
-router.post("/delete", protect, deleteOne(Message));
+router.delete("/:id", protect, deleteOne(Message));
 
 module.exports = router;

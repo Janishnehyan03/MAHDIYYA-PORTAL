@@ -1,17 +1,16 @@
-import React, { useEffect } from "react";
 import { useContext } from "react";
-import { UserAuthContext } from "./context/userContext";
-import { useNavigate,Outlet } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
 import Sidebar from "./components/Sidebar";
+import { UserAuthContext } from "./context/userContext";
 
 function ProtectedRoutes({ children }) {
   const { authData } = useContext(UserAuthContext);
   const navigate = useNavigate();
   if (authData) {
     return (
-      <div className="lg:ml-[250px]">
+      <div className="lg:ml-[280px]">
         <Sidebar />
-        {children}
+        <div>{children ? children : <Outlet />}</div>
       </div>
     );
   } else {

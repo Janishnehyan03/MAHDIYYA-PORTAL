@@ -200,22 +200,22 @@ const AddCceMark = () => {
 
   return (
     <div className="mt-8">
-      <div className="max-w-4xl mx-auto bg-gray-900 p-6 rounded-lg shadow-lg">
-        <h2 className="text-2xl font-bold mb-4 text-center text-white">
+      <div className="max-w-4xl mx-auto bg-white p-6 rounded-lg shadow-md">
+        <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">
           Add FA Mark
         </h2>
 
         {/* Row for Study Centre, Class, and Exam */}
-        <div className="flex flex-wrap mb-6">
-          <div className="flex-1 mr-2">
+        <div className="flex flex-wrap -mx-2 mb-6">
+          <div className="flex-1 px-2 mb-4 md:mb-0">
             <label
-              className="block text-gray-300 font-bold mb-2"
+              className="block text-gray-700 font-bold mb-2"
               htmlFor="branch"
             >
               Study Centre
             </label>
             <select
-              className="shadow appearance-none border border-gray-700 rounded w-full py-2 px-3 bg-gray-800 text-gray-300 focus:outline-none focus:ring-2 focus:ring-teal-500"
+              className="shadow-sm appearance-none border border-gray-300 rounded w-full py-2 px-3 bg-white text-gray-800 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500"
               id="branch"
               onChange={(e) => setSelectedBranch(e.target.value)}
             >
@@ -228,15 +228,15 @@ const AddCceMark = () => {
             </select>
           </div>
 
-          <div className="flex-1 mx-2">
+          <div className="flex-1 px-2 mb-4 md:mb-0">
             <label
-              className="block text-gray-300 font-bold mb-2"
+              className="block text-gray-700 font-bold mb-2"
               htmlFor="class"
             >
               Class
             </label>
             <select
-              className="shadow appearance-none border border-gray-700 rounded w-full py-2 px-3 bg-gray-800 text-gray-300 focus:outline-none focus:ring-2 focus:ring-teal-500"
+              className="shadow-sm appearance-none border border-gray-300 rounded w-full py-2 px-3 bg-white text-gray-800 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500"
               id="class"
               onChange={(e) => setSelectedClass(e.target.value)}
             >
@@ -249,15 +249,15 @@ const AddCceMark = () => {
             </select>
           </div>
 
-          <div className="flex-1 ml-2">
+          <div className="flex-1 px-2">
             <label
-              className="block text-gray-300 font-bold mb-2"
+              className="block text-gray-700 font-bold mb-2"
               htmlFor="exam"
             >
               Exam
             </label>
             <select
-              className="shadow appearance-none border border-gray-700 rounded w-full py-2 px-3 bg-gray-800 text-gray-300 focus:outline-none focus:ring-2 focus:ring-teal-500"
+              className="shadow-sm appearance-none border border-gray-300 rounded w-full py-2 px-3 bg-white text-gray-800 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500"
               id="exam"
               onChange={(e) => setExam(e.target.value)}
             >
@@ -274,13 +274,13 @@ const AddCceMark = () => {
         {/* Subject Dropdown */}
         <div className="mb-6">
           <label
-            className="block text-gray-300 font-bold mb-2"
+            className="block text-gray-700 font-bold mb-2"
             htmlFor="subject"
           >
             Subject
           </label>
           <select
-            className="shadow appearance-none border border-gray-700 rounded w-full py-2 px-3 bg-gray-800 text-gray-300 focus:outline-none focus:ring-2 focus:ring-teal-500"
+            className="shadow-sm appearance-none border border-gray-300 rounded w-full py-2 px-3 bg-white text-gray-800 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500"
             id="subject"
             onChange={(e) => setSubject(e.target.value)}
           >
@@ -298,65 +298,67 @@ const AddCceMark = () => {
 
         {/* Student Marks Table */}
         <div>
-          <p className="text-teal-400 my-4 font-semibold">
+          <p className="text-blue-600 my-4 font-semibold">
             Maximum Marks ({maxMark})
           </p>
-          <table className="min-w-full border-collapse">
-            <thead>
-              <tr>
-                <th className="border border-gray-700 px-4 py-2 text-gray-300">
-                  Register No
-                </th>
-                <th className="border border-gray-700 px-4 py-2 text-gray-300">
-                  Student Name
-                </th>
-                <th className="border border-gray-700 px-4 py-2 text-gray-300">
-                  Mark
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {students.map((student) => (
-                <tr key={student._id}>
-                  <td className="border border-gray-700 px-4 py-2 text-gray-400">
-                    {student?.registerNo}
-                  </td>
-                  <td className="border border-gray-700 px-4 py-2 text-gray-400">
-                    {student.studentName}
-                  </td>
-                  <td className="border border-gray-700 px-4 py-2">
-                    <input
-                      type="text"
-                      className="w-full bg-gray-800 text-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-teal-500"
-                      value={studentMarks[student._id] ?? ""}
-                      onChange={(e) => {
-                        const value =
-                          e.target.value === ""
-                            ? ""
-                            : parseFloat(e.target.value);
-
-                        if (isNaN(value) || value <= maxMark) {
-                          handleMarkChange(
-                            student._id,
-                            isNaN(value) ? "" : value
-                          );
-                        }
-                      }}
-                      max={maxMark}
-                    />
-                  </td>
+          <div className="overflow-x-auto border border-gray-200 rounded-lg">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Register No
+                  </th>
+                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Student Name
+                  </th>
+                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Mark
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {students.map((student) => (
+                  <tr key={student._id} className="hover:bg-gray-50">
+                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-700">
+                      {student?.registerNo}
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-700">
+                      {student.studentName}
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap">
+                      <input
+                        type="text"
+                        className="w-full bg-white text-gray-800 rounded px-2 py-1 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        value={studentMarks[student._id] ?? ""}
+                        onChange={(e) => {
+                          const value =
+                            e.target.value === ""
+                              ? ""
+                              : parseFloat(e.target.value);
+
+                          if (isNaN(value) || value <= maxMark) {
+                            handleMarkChange(
+                              student._id,
+                              isNaN(value) ? "" : value
+                            );
+                          }
+                        }}
+                        max={maxMark}
+                      />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
 
           {loading ? (
-            <button className="bg-teal-800 text-gray-300 w-full mt-6 py-3 font-bold rounded shadow-md">
+            <button className="bg-blue-400 text-white w-full mt-6 py-3 font-bold rounded shadow-md cursor-not-allowed" disabled>
               Uploading...
             </button>
           ) : (
             <button
-              className="bg-teal-800 text-gray-300 w-full mt-6 py-3 font-bold rounded shadow-md hover:bg-teal-700 transition"
+              className="bg-blue-600 text-white w-full mt-6 py-3 font-bold rounded shadow-md hover:bg-blue-700 transition-colors"
               onClick={handleSubmit}
             >
               Submit

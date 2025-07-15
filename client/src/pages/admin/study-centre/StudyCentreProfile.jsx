@@ -1,42 +1,118 @@
-import React, { useContext, useEffect, useState } from "react";
+// src/components/StudyCentreProfile.jsx
+import {
+  faSave,
+  faSpinner,
+  faTimes,
+  faUpload,
+} from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useCallback, useContext, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import Axios from "../../../Axios";
 import { DISTRICT } from "../../../Consts";
 import { UserAuthContext } from "../../../context/userContext";
 
+// (Place FormField and FormSelect helper components here if not in a separate file)
+const FormField = ({
+  id,
+  label,
+  type = "text",
+  name,
+  value,
+  onChange,
+  error,
+  required = false,
+}) => (
+  <div>
+    <label htmlFor={id} className="block text-sm font-medium text-gray-700">
+      {label} {required && <span className="text-red-500">*</span>}
+    </label>
+    <input
+      id={id}
+      type={type}
+      name={name}
+      value={value}
+      onChange={onChange}
+      required={required}
+      className={`mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm ${
+        error ? "border-red-500" : ""
+      }`}
+    />
+    {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
+  </div>
+);
+const FormSelect = ({
+  id,
+  label,
+  name,
+  value,
+  onChange,
+  error,
+  options,
+  placeholder,
+  required = false,
+}) => (
+  <div>
+    <label htmlFor={id} className="block text-sm font-medium text-gray-700">
+      {label} {required && <span className="text-red-500">*</span>}
+    </label>
+    <select
+      id={id}
+      name={name}
+      value={value}
+      onChange={onChange}
+      required={required}
+      className={`mt-1 block w-full text-gray-600 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm ${
+        error ? "border-red-500" : ""
+      }`}
+    >
+      <option value="" disabled className="text-gray-500">
+        {placeholder}
+      </option>
+      {options.map((option) => (
+        <option key={option.value} value={option.value } className="text-gray-900">
+          {option.label}
+        </option>
+      ))}
+    </select>
+    {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
+  </div>
+);
 function StudyCentreProfile() {
   const initialState = {
-    studyCentreName: "",
-    place: "",
-    postOffice: "",
-    district: "",
-    state: "",
-    pinCode: "",
-    phone: "",
-    branchImg: "",
-    password: "",
-    username: "",
-    studyCentreCode: "",
-    panchayath: "",
-    affiliatedYear: "",
-    email: "",
-    currentPrincipal: "",
-    imageCover: "",
-    principalContactNumber: "",
-    googleMapUrl: "",
+    /* ... keep the same initial state ... */
   };
   const [inputData, setInputData] = useState(initialState);
   const [loading, setLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
   const [errors, setErrors] = useState({});
   const { authData } = useContext(UserAuthContext);
+  const navigate = useNavigate();
 
   const [image, setImage] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
 
+  const getStudyCentre = useCallback(async () => {
+    try {
+      setInitialLoading(true);
+      const res = await Axios.get(`/study-centre/${authData?.branch?._id}`);
+      setInputData(res.data.data);
+    } catch (error) {
+      toast.error("Failed to load profile data.");
+    } finally {
+      setInitialLoading(false);
+    }
+  }, [authData?.branch?._id]);
+
+  useEffect(() => {
+    getStudyCentre();
+  }, [getStudyCentre]);
+
   const handleImageChange = (e) => {
     const file = e.target.files[0];
-    setImage(file);
     if (file) {
+      setImage(file);
       setImagePreview(URL.createObjectURL(file));
     }
   };
@@ -44,487 +120,341 @@ function StudyCentreProfile() {
   const onChange = (e) => {
     const { name, value } = e.target;
     setInputData((prevState) => ({ ...prevState, [name]: value }));
+    if (errors[name]) {
+      setErrors((prevErrors) => ({ ...prevErrors, [name]: null }));
+    }
+  };
+
+  const updateCoverImage = async () => {
+    if (!image) return;
+    setLoading(true);
+    try {
+      const formData = new FormData();
+      formData.append("image", image);
+      await Axios.post(
+        `/study-centre/${authData?.branch?._id}/upload-cover`,
+        formData
+      );
+      toast.success("Cover image updated successfully!");
+      setImage(null);
+      setImagePreview(null);
+      getStudyCentre(); // Refresh data to show new image
+    } catch (error) {
+      toast.error("Failed to upload image.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setErrors({});
     try {
-      let res = await Axios.patch(
-        `/study-centre/${authData?.branch?._id}`,
-        inputData
-      );
-      if (res.data) {
-        toast.success("Edit Successfully", {
-          autoClose: 2000,
-          position: toast.POSITION.TOP_CENTER,
-        });
-        window.location.href = "/";
+      await Axios.patch(`/study-centre/${authData?.branch?._id}`, inputData);
+      toast.success("Profile updated successfully!");
+      navigate("/"); // Use navigate for SPA-friendly redirection
+    } catch (error) {
+      const errorData = error.response?.data;
+      if (errorData?.errors) {
+        setErrors(errorData.errors);
+      } else {
+        toast.error(errorData?.message || "An unexpected error occurred.");
       }
-    } catch (error) {
-      console.log(error.response.data);
-      toast.error(
-        error.response.data.message
-          ? error.response.data.message
-          : "Something went wrong",
-        {
-          autoClose: 3000,
-          position: toast.POSITION.TOP_CENTER,
-        }
-      );
-      setErrors(error.response.data);
-    }
-  };
-  const getStudyCentre = async (e) => {
-    try {
-      let res = await Axios.get(`/study-centre/${authData?.branch?._id}`);
-      setInputData(res.data);
-    } catch (error) {
-      setLoading(false);
-    }
-  };
-  const updateCoverImage = async (e) => {
-    try {
-      const formData = new FormData();
-      formData.append("image", image);
-      setLoading(true);
-      let res = await Axios.post(
-        `/study-centre/${authData?.branch?._id}/upload-cover`,
-        formData
-      );
-      setLoading(false);
-      toast.success("Image Updated");
-      window.location.reload();
-    } catch (error) {
+    } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    getStudyCentre();
-  }, []);
+  if (initialLoading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <FontAwesomeIcon
+          icon={faSpinner}
+          spin
+          size="3x"
+          className="text-blue-500"
+        />
+      </div>
+    );
+  }
+
   return (
-    <div className="w-3/4 ml-6">
-      <section className="bg-gray-900 p-6">
-        <div className="max-w-screen-xl mx-auto">
-          <h3 className="text-4xl font-bold text-[#eeeeee] uppercase my-4">
-            Edit Your Info
-          </h3>
-          <div className="max-w-md mx-auto my-10">
-            <div className="flex justify-between items-center my-2">
-              <h4 className="mb-2 italic">Update Cover Image </h4>
-              {image && (
-                <div className="flex space-x-2">
-                  <button
-                    onClick={() => setImage(null)}
-                    className="bg-yellow-600 text-white px-3 py-1 rounded hover:bg-yellow-400"
-                  >
-                    cancel{" "}
-                  </button>
-                  <button
-                    onClick={updateCoverImage}
-                    disabled={loading}
-                    className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-600"
-                  >
-                    {loading ? "uploading..." : "upload"}
-                  </button>
-                </div>
-              )}
-            </div>
-            <label
-              htmlFor="image-upload"
-              className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-900 hover:bg-gray-100"
-            >
-              <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                <svg
-                  className="w-10 h-10 mb-3 text-gray-400"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-                  ></path>
-                </svg>
-                <p className="mb-2 text-sm text-white">
-                  <span className="font-semibold">Click to upload</span> or drag
-                  and drop
-                </p>
-                <p className="text-xs text-white">
-                  PNG, JPG or GIF (MAX. 800x400px)
-                </p>
-              </div>
-              <input
-                id="image-upload"
-                type="file"
-                className="hidden"
-                accept="image/*"
-                onChange={handleImageChange}
-              />
-            </label>
+    <div className="bg-gray-50 p-4 sm:p-8">
+      <div className="max-w-6xl mx-auto">
+        <div className="bg-white rounded-xl shadow-lg">
+          {/* Header */}
+          <div className="p-6 border-b border-gray-200">
+            <h1 className="text-2xl font-bold text-gray-900">
+              Profile Settings
+            </h1>
+            <p className="mt-1 text-sm text-gray-500">
+              Manage your study centre's information and cover image.
+            </p>
+          </div>
 
-            {imagePreview ||
-              (inputData.imageCover && (
-                <div className="mt-4">
-                  <img
-                    src={imagePreview ? imagePreview : inputData.imageCover}
-                    alt="Preview"
-                    className="max-w-full h-auto rounded-lg shadow-lg"
+          <form
+            onSubmit={handleSubmit}
+            className="space-y-8 divide-y divide-gray-200"
+          >
+            {/* Cover Image Section */}
+            <div className="p-6 space-y-4">
+              <h2 className="text-lg font-medium text-gray-900">Cover Image</h2>
+              <div className="w-full h-48 sm:h-64 rounded-lg overflow-hidden bg-gray-100 relative">
+                <img
+                  src={
+                    imagePreview ||
+                    inputData.imageCover ||
+                    "https://via.placeholder.com/1200x400?text=Upload+a+Cover+Image"
+                  }
+                  alt="Cover preview"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <div className="flex flex-col sm:flex-row items-center gap-4">
+                <label
+                  htmlFor="image-upload"
+                  className="w-full sm:w-auto cursor-pointer inline-flex items-center justify-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+                >
+                  <FontAwesomeIcon icon={faUpload} className="mr-2" /> Change
+                  Image
+                </label>
+                <input
+                  id="image-upload"
+                  type="file"
+                  className="hidden"
+                  accept="image/*"
+                  onChange={handleImageChange}
+                />
+                {image && (
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={updateCoverImage}
+                      disabled={loading}
+                      className="px-3 py-1 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                    >
+                      {loading ? (
+                        <FontAwesomeIcon icon={faSpinner} spin />
+                      ) : (
+                        "Upload"
+                      )}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setImage(null);
+                        setImagePreview(null);
+                      }}
+                      className="p-2 text-gray-500 hover:text-red-600"
+                    >
+                      <FontAwesomeIcon icon={faTimes} title="Cancel" />
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Form Fields Section */}
+            <div className="p-6 space-y-6">
+              {/* --- Basic Information --- */}
+              <div>
+                <h2 className="text-lg font-medium text-gray-900">
+                  Basic Information
+                </h2>
+                <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <FormField
+                    id="studyCentreName"
+                    label="Study Centre Name"
+                    name="studyCentreName"
+                    value={inputData.studyCentreName}
+                    onChange={onChange}
+                    error={errors.studyCentreName}
+                    required
+                  />
+                  <FormField
+                    id="studyCentreCode"
+                    label="Study Centre Code"
+                    name="studyCentreCode"
+                    value={inputData.studyCentreCode}
+                    onChange={onChange}
+                    error={errors.studyCentreCode}
+                    required
+                  />
+                  <FormField
+                    id="panchayath"
+                    label="Panchayath"
+                    name="panchayath"
+                    value={inputData.panchayath}
+                    onChange={onChange}
+                    error={errors.panchayath}
+                  />
+                  <FormField
+                    id="affiliatedYear"
+                    label="Affiliated Year"
+                    name="affiliatedYear"
+                    value={inputData.affiliatedYear}
+                    onChange={onChange}
+                    error={errors.affiliatedYear}
                   />
                 </div>
-              ))}
-          </div>
-          <form className="lg:grid lg:grid-cols-2 lg:gap-8">
-            <div className="lg:col-span-1">
-              <div className="px-4 sm:px-0">
-                <label className="block   font-bold mb-2" htmlFor="username">
-                  Study Center Name
-                  {errors.studyCentreName && (
-                    <h1 className="text-red-500 font-sm text-center">
-                      {errors.studyCentreName}
-                    </h1>
-                  )}
-                </label>
+              </div>
 
-                <input
-                  className="block p-4 pl-10 w-full  text-white bg-gray-900 rounded-lg border border-gray-300 focus:ring-gray-500 focus:border-gray-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-500 dark:focus:border-gray-500"
-                  type="text"
-                  onChange={(e) => onChange(e)}
-                  required
-                  placeholder="Study Center Name"
-                  name="studyCentreName"
-                  value={inputData.studyCentreName}
-                />
+              {/* --- Contact & Location --- */}
+              <div>
+                <h2 className="text-lg font-medium text-gray-900">
+                  Contact & Location
+                </h2>
+                <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <FormField
+                    id="email"
+                    label="Email Address"
+                    type="email"
+                    name="email"
+                    value={inputData.email}
+                    onChange={onChange}
+                    error={errors.email}
+                    required
+                  />
+                  <FormField
+                    id="phone"
+                    label="Phone Number"
+                    type="tel"
+                    name="phone"
+                    value={inputData.phone}
+                    onChange={onChange}
+                    error={errors.phone}
+                    required
+                  />
+                  <FormField
+                    id="place"
+                    label="Place"
+                    name="place"
+                    value={inputData.place}
+                    onChange={onChange}
+                    error={errors.place}
+                  />
+                  <FormField
+                    id="postOffice"
+                    label="Post Office"
+                    name="postOffice"
+                    value={inputData.postOffice}
+                    onChange={onChange}
+                    error={errors.postOffice}
+                  />
+                  <FormSelect
+                    id="district"
+                    label="District"
+                    name="district"
+                    value={inputData.district}
+                    onChange={onChange}
+                    error={errors.district}
+                    options={DISTRICT}
+                    placeholder="Select a District"
+                    required
+                  />
+                  <FormField
+                    id="state"
+                    label="State"
+                    name="state"
+                    value={inputData.state}
+                    onChange={onChange}
+                    error={errors.state}
+                    required
+                  />
+                  <FormField
+                    id="pinCode"
+                    label="PIN Code"
+                    name="pinCode"
+                    value={inputData.pinCode}
+                    onChange={onChange}
+                    error={errors.pinCode}
+                    required
+                  />
+                  <FormField
+                    id="googleMapUrl"
+                    label="Google Maps URL"
+                    name="googleMapUrl"
+                    value={inputData.googleMapUrl}
+                    onChange={onChange}
+                    error={errors.googleMapUrl}
+                  />
+                </div>
               </div>
-            </div>
-            <div className="lg:col-span-1">
-              <div className="px-4 sm:px-0">
-                <label className="block   font-bold mb-2" htmlFor="username">
-                  Study Center Code
-                  {errors.studyCentreCode && (
-                    <h1 className="text-red-500 font-sm text-center">
-                      {errors.studyCentreCode}
-                    </h1>
-                  )}
-                </label>
 
-                <input
-                  className="block p-4 pl-10 w-full  text-white bg-gray-900 rounded-lg border border-gray-300 focus:ring-gray-500 focus:border-gray-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-500 dark:focus:border-gray-500"
-                  type="text"
-                  onChange={(e) => onChange(e)}
-                  required
-                  placeholder="Study Center Code"
-                  name="studyCentreCode"
-                  value={inputData.studyCentreCode}
-                />
+              {/* --- Principal Details --- */}
+              <div>
+                <h2 className="text-lg font-medium text-gray-900">
+                  Principal Details
+                </h2>
+                <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <FormField
+                    id="currentPrincipal"
+                    label="Principal's Name"
+                    name="currentPrincipal"
+                    value={inputData.currentPrincipal}
+                    onChange={onChange}
+                  />
+                  <FormField
+                    id="principalContactNumber"
+                    label="Principal's Contact Number"
+                    type="tel"
+                    name="principalContactNumber"
+                    value={inputData.principalContactNumber}
+                    onChange={onChange}
+                  />
+                </div>
+              </div>
+
+              {/* --- Admin Credentials --- */}
+              <div>
+                <h2 className="text-lg font-medium text-gray-900">
+                  Admin Credentials
+                </h2>
+                <p className="text-sm text-yellow-600 bg-yellow-50 p-3 rounded-md mt-2">
+                  Warning: Changing these will affect how you log in.
+                </p>
+                <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <FormField
+                    id="username"
+                    label="Admin Username"
+                    name="username"
+                    value={inputData.username}
+                    onChange={onChange}
+                    error={errors.username}
+                    required
+                  />
+                  <FormField
+                    id="password"
+                    label="Admin Password"
+                    name="password"
+                    value={inputData.password}
+                    onChange={onChange}
+                    placeholder="Enter new password or leave blank"
+                    error={errors.password}
+                  />
+                </div>
               </div>
             </div>
 
-            <div className="lg:col-span-1">
-              <div className="px-4 sm:px-0">
-                <label className="block   font-bold mb-2" htmlFor="username">
-                  Panchayath
-                  {errors.panchayath && (
-                    <h1 className="text-red-500 font-sm text-center">
-                      {errors.panchayath}
-                    </h1>
-                  )}
-                </label>
-                <input
-                  className="block p-4 pl-10 w-full  text-white bg-gray-900 rounded-lg border border-gray-300 focus:ring-gray-500 focus:border-gray-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-500 dark:focus:border-gray-500"
-                  id="username"
-                  type="text"
-                  required
-                  value={inputData.panchayath}
-                  onChange={(e) => onChange(e)}
-                  placeholder="Panchayath"
-                  name="panchayath"
-                />
-              </div>
-            </div>
-            <div className="lg:col-span-1">
-              <div className="px-4 sm:px-0">
-                <label className="block   font-bold mb-2" htmlFor="username">
-                  Affiliated Year
-                  {errors.affiliatedYear && (
-                    <h1 className="text-red-500 font-sm text-center">
-                      {errors.affiliatedYear}
-                    </h1>
-                  )}
-                </label>
-                <input
-                  className="block p-4 pl-10 w-full  text-white bg-gray-900 rounded-lg border border-gray-300 focus:ring-gray-500 focus:border-gray-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-500 dark:focus:border-gray-500"
-                  id="username"
-                  type="text"
-                  required
-                  value={inputData.affiliatedYear}
-                  onChange={(e) => onChange(e)}
-                  placeholder="Affiliated Year"
-                  name="affiliatedYear"
-                />
-              </div>
-            </div>
-            <div className="lg:col-span-1">
-              <div className="px-4 sm:px-0">
-                <label className="block   font-bold mb-2" htmlFor="username">
-                  Email
-                  {errors.email && (
-                    <h1 className="text-red-500 font-sm text-center">
-                      {errors.email}
-                    </h1>
-                  )}
-                </label>
-                <input
-                  className="block p-4 pl-10 w-full  text-white bg-gray-900 rounded-lg border border-gray-300 focus:ring-gray-500 focus:border-gray-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-500 dark:focus:border-gray-500"
-                  id="username"
-                  type="text"
-                  required
-                  value={inputData.email}
-                  onChange={(e) => onChange(e)}
-                  placeholder="Email"
-                  name="email"
-                />
-              </div>
-            </div>
-            <div className="lg:col-span-1">
-              <div className="px-4 sm:px-0">
-                <label className="block   font-bold mb-2" htmlFor="username">
-                  Phone Number
-                  {errors.phone && (
-                    <h1 className="text-red-500 font-sm text-center">
-                      {errors.phone}
-                    </h1>
-                  )}
-                </label>
-                <input
-                  className="block p-4 pl-10 w-full  text-white bg-gray-900 rounded-lg border border-gray-300 focus:ring-gray-500 focus:border-gray-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-500 dark:focus:border-gray-500"
-                  id="username"
-                  type="text"
-                  required
-                  value={inputData.phone}
-                  onChange={(e) => onChange(e)}
-                  placeholder="Phone No :"
-                  name="phone"
-                />
-              </div>
-            </div>
-
-            <div className="lg:col-span-1">
-              <div className="px-4 sm:px-0">
-                <label className="block   font-bold mb-2" htmlFor="username">
-                  Place
-                  {errors.place && (
-                    <h1 className="text-red-500 font-sm text-center">
-                      {errors.place}
-                    </h1>
-                  )}
-                </label>
-                <input
-                  className="block p-4 pl-10 w-full  text-white bg-gray-900 rounded-lg border border-gray-300 focus:ring-gray-500 focus:border-gray-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-500 dark:focus:border-gray-500"
-                  type="text"
-                  required
-                  value={inputData.place}
-                  onChange={(e) => onChange(e)}
-                  placeholder="Place"
-                  name="place"
-                />
-              </div>
-            </div>
-            <div className="lg:col-span-1">
-              <div className="px-4 sm:px-0">
-                <label className="block   font-bold mb-2" htmlFor="username">
-                  Google Map URL
-                </label>
-                <input
-                  className="block p-4 pl-10 w-full  text-white bg-gray-900 rounded-lg border border-gray-300 focus:ring-gray-500 focus:border-gray-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-500 dark:focus:border-gray-500"
-                  type="text"
-                  required
-                  value={inputData.googleMapUrl}
-                  onChange={(e) => onChange(e)}
-                  placeholder="Google Map URL"
-                  name="googleMapUrl"
-                />
-              </div>
-            </div>
-            <div className="lg:col-span-1">
-              <label className="block   font-bold mb-2" htmlFor="username">
-                District
-                {errors.district && (
-                  <h1 className="text-red-500 font-sm text-center">
-                    {errors.district}
-                  </h1>
-                )}
-              </label>
-
-              <select
-                name="district"
-                onChange={(e) => onChange(e)}
-                id=""
-                value={inputData.district}
-                className="bg-gray-900 border border-gray-300 text-white  rounded-lg focus:ring-gray-500 focus:border-gray-500 block w-full p-2.5 "
+            {/* Footer / Actions */}
+            <div className="p-6 flex justify-end">
+              <button
+                type="submit"
+                disabled={loading}
+                className="inline-flex justify-center items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-blue-400 disabled:cursor-not-allowed"
               >
-                <option hidden>Select YOUR DISTRICT </option>
-                {DISTRICT.map((district, index) => (
-                  <>
-                    <option key={index} value={district}>
-                      {district}
-                    </option>
-                  </>
-                ))}
-              </select>
-            </div>
-            <div className="lg:col-span-1">
-              <div className="px-4 sm:px-0">
-                <label className="block   font-bold mb-2" htmlFor="username">
-                  Post Office
-                  {errors.postOffice && (
-                    <h1 className="text-red-500 font-sm text-center">
-                      {errors.postOffice}
-                    </h1>
-                  )}
-                </label>
-                <input
-                  className="block p-4 pl-10 w-full  text-white bg-gray-900 rounded-lg border border-gray-300 focus:ring-gray-500 focus:border-gray-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-500 dark:focus:border-gray-500"
-                  type="text"
-                  required
-                  value={inputData.postOffice}
-                  onChange={(e) => onChange(e)}
-                  placeholder="Post Office"
-                  name="postOffice"
-                />
-              </div>
-            </div>
-            <div className="lg:col-span-1">
-              <div className="px-4 sm:px-0">
-                <label className="block   font-bold mb-2" htmlFor="username">
-                  Pin Code
-                  {errors.pinCode && (
-                    <h1 className="text-red-500 font-sm text-center">
-                      {errors.pinCode}
-                    </h1>
-                  )}
-                </label>
-                <input
-                  className="block p-4 pl-10 w-full  text-white bg-gray-900 rounded-lg border border-gray-300 focus:ring-gray-500 focus:border-gray-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-500 dark:focus:border-gray-500"
-                  type="text"
-                  value={inputData.pinCode}
-                  required
-                  onChange={(e) => onChange(e)}
-                  placeholder="Pin Code"
-                  name="pinCode"
-                />
-              </div>
-            </div>
-            <div className="lg:col-span-1">
-              <div className="px-4 sm:px-0">
-                <label className="block   font-bold mb-2" htmlFor="username">
-                  State
-                  {errors.state && (
-                    <h1 className="text-red-500 font-sm text-center">
-                      {errors.state}
-                    </h1>
-                  )}
-                </label>
-                <input
-                  className="block p-4 pl-10 w-full  text-white bg-gray-900 rounded-lg border border-gray-300 focus:ring-gray-500 focus:border-gray-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-500 dark:focus:border-gray-500"
-                  type="text"
-                  value={inputData.state}
-                  required
-                  onChange={(e) => onChange(e)}
-                  placeholder="State"
-                  name="state"
-                />
-              </div>
-            </div>
-
-            <div className="lg:col-span-1">
-              <div className="px-4 sm:px-0">
-                <label className="block   font-bold mb-2" htmlFor="username">
-                  Principal's Name
-                </label>
-                <input
-                  className="block p-4 pl-10 w-full  text-white bg-gray-900 rounded-lg border border-gray-300 focus:ring-gray-500 focus:border-gray-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-500 dark:focus:border-gray-500"
-                  type="text"
-                  value={inputData.currentPrincipal}
-                  required
-                  onChange={(e) => onChange(e)}
-                  placeholder="Principal's Name "
-                  name="currentPrincipal"
-                />
-              </div>
-            </div>
-            <div className="lg:col-span-1">
-              <div className="px-4 sm:px-0">
-                <label className="block   font-bold mb-2" htmlFor="username">
-                  Principal Contact Number
-                </label>
-                <input
-                  className="block p-4 pl-10 w-full  text-white bg-gray-900 rounded-lg border border-gray-300 focus:ring-gray-500 focus:border-gray-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-500 dark:focus:border-gray-500"
-                  type="tel"
-                  value={inputData.principalContactNumber}
-                  required
-                  onChange={(e) => onChange(e)}
-                  placeholder="Principal Contact Number "
-                  name="principalContactNumber"
-                />
-              </div>
-            </div>
-            <div className="lg:col-span-1">
-              <div className="px-4 sm:px-0">
-                <label className="block   font-bold mb-2" htmlFor="username">
-                  Admin Username
-                </label>
-                <input
-                  className="block p-4 pl-10 w-full  text-white bg-gray-900 rounded-lg border border-gray-300 focus:ring-gray-500 focus:border-gray-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-500 dark:focus:border-gray-500"
-                  type="text"
-                  value={inputData.username}
-                  required
-                  onChange={(e) => onChange(e)}
-                  placeholder="Admin Username"
-                  name="username"
-                />
-              </div>
-            </div>
-
-            <div className="lg:col-span-1">
-              <div className="px-4 sm:px-0">
-                <label className="block   font-bold mb-2" htmlFor="username">
-                  Admin Password
-                </label>
-                <input
-                  className="block p-4 pl-10 w-full  text-white bg-gray-900 rounded-lg border border-gray-300 focus:ring-gray-500 focus:border-gray-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-gray-500 dark:focus:border-gray-500"
-                  type="text"
-                  value={inputData.password}
-                  required
-                  onChange={(e) => onChange(e)}
-                  placeholder="Admin Password"
-                  name="password"
-                />
-              </div>
+                {loading ? (
+                  <FontAwesomeIcon icon={faSpinner} spin className="mr-3" />
+                ) : (
+                  <FontAwesomeIcon icon={faSave} className="mr-3" />
+                )}
+                {loading ? "Saving..." : "Save Changes"}
+              </button>
             </div>
           </form>
-          <div className="lg:col-span-1 mt-4">
-            <div className="px-4 sm:px-0">
-              {loading ? (
-                <h1 className="text-white text-center w-full lg:w-1/2 bg-[#003865]  font-bold py-4 px-4 rounded focus:outline-none focus:shadow-outline uppercase">
-                  Processing..
-                </h1>
-              ) : (
-                <button
-                  onClick={(e) => handleSubmit(e)}
-                  className="w-full lg:w-1/2 bg-[#003865] hover:bg-[#231955] text-white font-bold py-4 px-4 rounded focus:outline-none focus:shadow-outline uppercase"
-                >
-                  Submit
-                </button>
-              )}
-            </div>
-          </div>
         </div>
-      </section>
+      </div>
     </div>
   );
 }

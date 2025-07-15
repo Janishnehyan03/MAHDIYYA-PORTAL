@@ -1,190 +1,305 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
+import { toast } from "react-toastify";
 import Axios from "../../../Axios";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faTrash, faSpinner, faPlus } from "@fortawesome/free-solid-svg-icons";
 
+// A modern, reusable Toggle Switch component
+const ToggleSwitch = ({ enabled, onChange, loading }) => (
+  <button
+    type="button"
+    disabled={loading}
+    onClick={onChange}
+    className={`${
+      enabled ? "bg-blue-600" : "bg-gray-200"
+    } relative inline-flex items-center h-6 rounded-full w-11 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed`}
+  >
+    <span
+      className={`${
+        enabled ? "translate-x-6" : "translate-x-1"
+      } inline-block w-4 h-4 transform bg-white rounded-full transition-transform`}
+    />
+  </button>
+);
+
+// Main Component
 const AdminConfigPage = () => {
-  const [settings, setSettings] = useState({
-    academicYear: "",
-    saSubmission: false,
-    faSubmission: false,
-    hallTicketDownload: false,
-    lastRegisterNo: "", // Added lastRegisterNo to state
-  });
-  const [message, setMessage] = useState(null);
+  const [settings, setSettings] = useState(null);
   const [academicYears, setAcademicYears] = useState([]);
-  const [year, setYear] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [newAcademicYear, setNewAcademicYear] = useState("");
+  const [regNoInput, setRegNoInput] = useState("");
 
-  const getConfigurations = async () => {
+  // Granular loading states for better UX
+  const [loading, setLoading] = useState({
+    page: true,
+    toggle: null, // Holds the key of the setting being toggled
+    regNo: false,
+    creatingYear: false,
+    updatingYear: null, // Holds the ID of the year being updated/deleted
+  });
+
+  // Fetch initial data
+  const fetchData = useCallback(async () => {
+    setLoading((prev) => ({ ...prev, page: true }));
     try {
-      let response = await Axios.get("/configurations");
-      setSettings(response.data);
+      const [configRes, yearsRes] = await Promise.all([
+        Axios.get("/configurations"),
+        Axios.get("/academic-year"),
+      ]);
+      setSettings(configRes.data);
+      setRegNoInput(configRes.data.lastRegisterNo || "");
+      setAcademicYears(yearsRes.data);
     } catch (err) {
-      console.log(err.response);
+      toast.error("Failed to load configuration data.");
+      console.error(err);
+    } finally {
+      setLoading((prev) => ({ ...prev, page: false }));
     }
-  };
-
-  const handleToggle = async (setting) => {
-    try {
-      const updatedValue = !settings[setting];
-      await Axios.patch(`/configurations/${settings._id}`, {
-        [setting]: updatedValue,
-      });
-      setSettings((prevSettings) => ({
-        ...prevSettings,
-        [setting]: updatedValue,
-      }));
-    } catch (err) {
-      console.log(err.response);
-    }
-  };
-
-  const updateLastRegisterNo = async (e) => {
-    const newLastRegisterNo = e.target.value;
-    try {
-      await Axios.patch(`/configurations/${settings._id}`, {
-        lastRegisterNo: newLastRegisterNo,
-      });
-      setSettings((prevSettings) => ({
-        ...prevSettings,
-        lastRegisterNo: newLastRegisterNo,
-      }));
-    } catch (err) {
-      console.log(err.response);
-    }
-  };
-
-  const handleInputChange = (e, index) => {
-    const newYears = [...academicYears];
-    newYears[index].year = e.target.value;
-    setAcademicYears(newYears);
-  };
-
-  const createAcademicYear = async () => {
-    try {
-      setLoading(true);
-      await Axios.post(`/academic-year`, { year });
-      getAcademicYears();
-      setYear("");
-      setLoading(false);
-    } catch (err) {
-      setLoading(false);
-      console.log(err.response);
-    }
-  };
-
-  const handleInputBlur = async (yearId, year) => {
-    try {
-      setMessage("updating");
-      await Axios.patch(`/academic-year/${yearId}`, { year });
-      getAcademicYears();
-      setMessage("updated");
-    } catch (err) {
-      console.log(err.response);
-    }
-  };
-
-  const getAcademicYears = async () => {
-    try {
-      let { data } = await Axios.get(`/academic-year`);
-      setAcademicYears(data);
-    } catch (err) {
-      console.log(err.response);
-    }
-  };
-
-  useEffect(() => {
-    getConfigurations();
-    getAcademicYears();
   }, []);
 
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  // Handle toggling of boolean settings with optimistic UI
+  const handleToggle = async (key) => {
+    setLoading((prev) => ({ ...prev, toggle: key }));
+    const originalSettings = { ...settings };
+
+    // Optimistically update the UI
+    setSettings((prev) => ({ ...prev, [key]: !prev[key] }));
+
+    try {
+      await Axios.patch(`/configurations/${settings._id}`, {
+        [key]: !settings[key],
+      });
+    } catch (err) {
+      toast.error(`Failed to update setting. Please try again.`);
+      setSettings(originalSettings); // Revert on error
+      console.error(err);
+    } finally {
+      setLoading((prev) => ({ ...prev, toggle: null }));
+    }
+  };
+
+  // Handle saving the last register number on blur
+  const handleRegNoBlur = async () => {
+    if (regNoInput === settings.lastRegisterNo) return; // No change
+
+    setLoading((prev) => ({ ...prev, regNo: true }));
+    try {
+      await Axios.patch(`/configurations/${settings._id}`, {
+        lastRegisterNo: regNoInput,
+      });
+      setSettings((prev) => ({ ...prev, lastRegisterNo: regNoInput }));
+      toast.success("Last register number updated.");
+    } catch (err) {
+      toast.error("Failed to update register number.");
+      setRegNoInput(settings.lastRegisterNo); // Revert on error
+      console.error(err);
+    } finally {
+      setLoading((prev) => ({ ...prev, regNo: false }));
+    }
+  };
+
+  // Create a new academic year
+  const createAcademicYear = async (e) => {
+    e.preventDefault();
+    if (!newAcademicYear.trim()) {
+      toast.warn("Academic year cannot be empty.");
+      return;
+    }
+    setLoading((prev) => ({ ...prev, creatingYear: true }));
+    try {
+      const { data } = await Axios.post(`/academic-year`, {
+        year: newAcademicYear,
+      });
+      setAcademicYears((prev) => [...prev, data]);
+      setNewAcademicYear("");
+      toast.success("Academic year created.");
+    } catch (err) {
+      toast.error("Failed to create academic year.");
+      console.error(err);
+    } finally {
+      setLoading((prev) => ({ ...prev, creatingYear: false }));
+    }
+  };
+
+  // Delete an academic year
+  const deleteAcademicYear = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this academic year?"))
+      return;
+
+    setLoading((prev) => ({ ...prev, updatingYear: id }));
+    try {
+      await Axios.delete(`/academic-year/${id}`);
+      setAcademicYears((prev) => prev.filter((y) => y._id !== id));
+      toast.success("Academic year deleted.");
+    } catch (err) {
+      toast.error("Failed to delete academic year.");
+      console.error(err);
+    } finally {
+      setLoading((prev) => ({ ...prev, updatingYear: null }));
+    }
+  };
+
+  if (loading.page) {
+    return (
+      <div className="flex justify-center items-center h-screen bg-gray-50">
+        <FontAwesomeIcon
+          icon={faSpinner}
+          spin
+          size="3x"
+          className="text-blue-500"
+        />
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-gray-900 text-white py-6 flex flex-col justify-center sm:py-12">
-      <div className="flex justify-between space-x-3 py-3 sm:max-w-3xl sm:mx-auto">
-        <div className="px-4 py-4 bg-gray-800 shadow-lg sm:rounded-3xl sm:p-20">
-          <div className="max-w-2xl mx-auto">
-            <h1 className="text-2xl font-semibold mb-6">Admin Configuration</h1>
+    <div className="min-h-screen bg-gray-50 p-4 sm:p-6 lg:p-8">
+      <div className="max-w-6xl mx-auto">
+        <h1 className="text-3xl font-bold text-gray-800 mb-8">
+          Admin Dashboard
+        </h1>
 
-            <div className="space-y-6">
-              <div className="flex flex-col space-y-2">
-                <label className="text-sm font-medium">Half Year Exam Result Submission</label>
-                <div className="flex items-center">
-                  <button
-                    className={`${
-                      settings.saSubmission ? "bg-blue-500" : "bg-gray-600"
-                    } relative inline-flex flex-shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer transition-colors duration-200`}
-                    onClick={() => handleToggle("saSubmission")}
-                  >
-                    <span
-                      className={`${
-                        settings.saSubmission
-                          ? "translate-x-5"
-                          : "translate-x-0"
-                      } inline-block h-5 w-5 rounded-full bg-gray-900 transition-transform duration-200`}
-                    />
-                  </button>
-                  <span className="ml-3 text-sm">
-                    {settings.saSubmission ? "Enabled" : "Disabled"}
-                  </span>
-                </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Column 1: Application Settings */}
+          <div className="bg-white p-6 rounded-xl shadow-md space-y-6">
+            <h2 className="text-xl font-bold text-gray-800 border-b pb-4">
+              Application Settings
+            </h2>
+
+            {/* Setting Item */}
+            <div className="flex justify-between items-center">
+              <div>
+                <h3 className="font-medium text-gray-700">
+                  Half Year Exam Result Submission
+                </h3>
+                <p className="text-sm text-gray-500">
+                  Allow or disallow SA result entries.
+                </p>
               </div>
+              <ToggleSwitch
+                enabled={settings?.saSubmission}
+                onChange={() => handleToggle("saSubmission")}
+                loading={loading.toggle === "saSubmission"}
+              />
+            </div>
 
-              <div className="flex flex-col space-y-2">
-                <label className="text-sm font-medium">FA Mark Submission</label>
-                <div className="flex items-center">
-                  <button
-                    className={`${
-                      settings.faSubmission ? "bg-blue-500" : "bg-gray-600"
-                    } relative inline-flex flex-shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer transition-colors duration-200`}
-                    onClick={() => handleToggle("faSubmission")}
-                  >
-                    <span
-                      className={`${
-                        settings.faSubmission
-                          ? "translate-x-5"
-                          : "translate-x-0"
-                      } inline-block h-5 w-5 rounded-full bg-gray-900 transition-transform duration-200`}
-                    />
-                  </button>
-                  <span className="ml-3 text-sm">
-                    {settings.faSubmission ? "Enabled" : "Disabled"}
-                  </span>
-                </div>
+            <div className="flex justify-between items-center">
+              <div>
+                <h3 className="font-medium text-gray-700">
+                  FA Mark Submission
+                </h3>
+                <p className="text-sm text-gray-500">
+                  Allow or disallow FA mark entries.
+                </p>
               </div>
+              <ToggleSwitch
+                enabled={settings?.faSubmission}
+                onChange={() => handleToggle("faSubmission")}
+                loading={loading.toggle === "faSubmission"}
+              />
+            </div>
 
-              <div className="flex flex-col space-y-2">
-                <label className="text-sm font-medium">Hall Ticket Download</label>
-                <div className="flex items-center">
-                  <button
-                    className={`${
-                      settings.hallTicketDownload
-                        ? "bg-blue-500"
-                        : "bg-gray-600"
-                    } relative inline-flex flex-shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer transition-colors duration-200`}
-                    onClick={() => handleToggle("hallTicketDownload")}
-                  >
-                    <span
-                      className={`${
-                        settings.hallTicketDownload
-                          ? "translate-x-5"
-                          : "translate-x-0"
-                      } inline-block h-5 w-5 rounded-full bg-gray-900 transition-transform duration-200`}
-                    />
-                  </button>
-                  <span className="ml-3 text-sm">
-                    {settings.hallTicketDownload ? "Enabled" : "Disabled"}
-                  </span>
-                </div>
+            <div className="flex justify-between items-center">
+              <div>
+                <h3 className="font-medium text-gray-700">
+                  Hall Ticket Download
+                </h3>
+                <p className="text-sm text-gray-500">
+                  Enable or disable hall ticket downloads for students.
+                </p>
               </div>
+              <ToggleSwitch
+                enabled={settings?.hallTicketDownload}
+                onChange={() => handleToggle("hallTicketDownload")}
+                loading={loading.toggle === "hallTicketDownload"}
+              />
+            </div>
 
-              <div className="flex flex-col space-y-2">
-                <label className="text-sm font-medium">Last Register Number</label>
+            {/* Last Register Number */}
+            <div>
+              <label
+                htmlFor="lastRegisterNo"
+                className="block font-medium text-gray-700"
+              >
+                Last Used Register Number
+              </label>
+              <p className="text-sm text-gray-500 mb-2">
+                Set the last successfully assigned register number.
+              </p>
+              <div className="relative">
                 <input
+                  id="lastRegisterNo"
                   type="text"
-                  value={settings.lastRegisterNo}
-                  onChange={updateLastRegisterNo}
-                  className="mt-1 block w-full bg-gray-700 text-white border border-gray-600 rounded-md py-2 px-3 focus:ring-blue-500 focus:border-blue-500"
+                  value={regNoInput}
+                  onChange={(e) => setRegNoInput(e.target.value)}
+                  onBlur={handleRegNoBlur}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="e.g., 2023001"
                 />
+                {loading.regNo && (
+                  <FontAwesomeIcon
+                    icon={faSpinner}
+                    spin
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
+                  />
+                )}
               </div>
+            </div>
+          </div>
+
+          {/* Column 2: Academic Year Management */}
+          <div className="bg-white p-6 rounded-xl shadow-md space-y-4">
+            <h2 className="text-xl font-bold text-gray-800 border-b pb-4">
+              Academic Years
+            </h2>
+
+            <form onSubmit={createAcademicYear} className="flex gap-2">
+              <input
+                type="text"
+                value={newAcademicYear}
+                onChange={(e) => setNewAcademicYear(e.target.value)}
+                className="flex-grow px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                placeholder="e.g., 2024-2025"
+              />
+              <button
+                type="submit"
+                disabled={loading.creatingYear}
+                className="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-blue-400"
+              >
+                <FontAwesomeIcon
+                  icon={loading.creatingYear ? faSpinner : faPlus}
+                  spin={loading.creatingYear}
+                />
+                <span className="ml-2">Add</span>
+              </button>
+            </form>
+
+            <div className="space-y-2 max-h-60 overflow-y-auto pr-2">
+              {academicYears.map((year) => (
+                <div
+                  key={year._id}
+                  className="flex items-center justify-between bg-gray-50 p-2 rounded-md"
+                >
+                  <p className="font-medium text-gray-700">{year.year}</p>
+                  <button
+                    onClick={() => deleteAcademicYear(year._id)}
+                    disabled={loading.updatingYear === year._id}
+                    className="text-gray-400 hover:text-red-600 disabled:text-gray-300"
+                    aria-label="Delete year"
+                  >
+                    <FontAwesomeIcon
+                      icon={
+                        loading.updatingYear === year._id ? faSpinner : faTrash
+                      }
+                      spin={loading.updatingYear === year._id}
+                    />
+                  </button>
+                </div>
+              ))}
             </div>
           </div>
         </div>
