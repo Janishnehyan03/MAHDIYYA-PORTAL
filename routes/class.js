@@ -12,7 +12,7 @@ router.post(
 router.get(
   "/",
   catchAsync(async (req, res, next) => {
-    let data = await Class.find()
+    let data = await Class.find().sort({ classOrder: 1 });
     res.status(200).json(data);
   })
 );
@@ -21,6 +21,7 @@ router.patch(
   catchAsync(async (req, res, next) => {
     let data = await Class.findByIdAndUpdate(req.params.id, {
       className: req.body.className,
+      classOrder: req.body.classOrder,
     });
     res.status(200).json(data);
   })

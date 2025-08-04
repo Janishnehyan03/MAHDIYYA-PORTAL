@@ -173,20 +173,20 @@ router.get("/special-hallticket/:registerNumber", async (req, res) => {
     const semesters = {
       secondSem: "",
       forthSem: "",
-      mahdiyyaSecondSem: "",
-      mahdiyyaForthSem: "",
-      mahdiyyaSixthSem: "",
+      MAHDIYYAHSecondSem: "",
+      MAHDIYYAHForthSem: "",
+      MAHDIYYAHSixthSem: "",
     };
 
     students.forEach((record) => {
       if (record?.secondSem) semesters.secondSem = record?.secondSem;
       if (record?.forthSem) semesters.forthSem = record?.forthSem;
-      if (record?.mahdiyyaSecondSem)
-        semesters.mahdiyyaSecondSem = record?.mahdiyyaSecondSem;
-      if (record?.mahdiyyaForthSem)
-        semesters.mahdiyyaForthSem = record?.mahdiyyaForthSem;
-      if (record?.mahdiyyaSixthSem)
-        semesters.mahdiyyaSixthSem = record?.mahdiyyaSixthSem;
+      if (record?.MAHDIYYAHSecondSem)
+        semesters.MAHDIYYAHSecondSem = record?.MAHDIYYAHSecondSem;
+      if (record?.MAHDIYYAHForthSem)
+        semesters.MAHDIYYAHForthSem = record?.MAHDIYYAHForthSem;
+      if (record?.MAHDIYYAHSixthSem)
+        semesters.MAHDIYYAHSixthSem = record?.MAHDIYYAHSixthSem;
     });
 
     const response = {

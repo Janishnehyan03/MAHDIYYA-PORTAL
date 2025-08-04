@@ -55,8 +55,8 @@ export const SuperAdminRoutes = [
     role: "superAdmin",
   },
   {
-    route: "/all-mahdiyya-teachers",
-    component: <Teacher.AllMahdiyyaTeachers />,
+    route: "/all-MAHDIYYAH-teachers",
+    component: <Teacher.AllMAHDIYYAHTeachers />,
     role: "superAdmin",
   },
   {

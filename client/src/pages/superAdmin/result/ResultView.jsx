@@ -32,14 +32,21 @@ const StyledSelect = ({ value, onChange, options, placeholder, ...props }) => (
   </select>
 );
 
-const FilterBar = ({ filters, setFilters, classes, branches, exams, authData }) => (
+const FilterBar = ({ filters, setFilters, classes, branches, exams, authData, onFetch }) => (
   <div className="p-6 bg-white border border-slate-200 rounded-2xl shadow-sm">
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <form
+      className="grid grid-cols-1 md:grid-cols-3 gap-4"
+      onSubmit={e => {
+        e.preventDefault();
+        onFetch();
+      }}
+    >
       <StyledSelect
         value={filters.classId}
         onChange={(e) => setFilters({ ...filters, classId: e.target.value })}
         options={classes.map(c => ({ value: c._id, label: c.className }))}
         placeholder="-- Select Class --"
+        required
       />
       {authData.role === "superAdmin" && (
         <StyledSelect
@@ -47,6 +54,7 @@ const FilterBar = ({ filters, setFilters, classes, branches, exams, authData }) 
           onChange={(e) => setFilters({ ...filters, studyCentreId: e.target.value })}
           options={branches.map(b => ({ value: b._id, label: b.studyCentreName }))}
           placeholder="-- Select Study Centre --"
+          required
         />
       )}
       <StyledSelect
@@ -54,8 +62,15 @@ const FilterBar = ({ filters, setFilters, classes, branches, exams, authData }) 
         onChange={(e) => setFilters({ ...filters, examId: e.target.value })}
         options={exams.map(e => ({ value: e._id, label: e.examName }))}
         placeholder="-- Select Exam --"
+        required
       />
-    </div>
+      <button
+        type="submit"
+        className="md:col-span-3 w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg py-2.5 mt-2 md:mt-0"
+      >
+        <FontAwesomeIcon icon={faSearch} className="mr-2" /> Fetch Results
+      </button>
+    </form>
   </div>
 );
 
@@ -99,26 +114,39 @@ const ResultTableRow = ({ result, index, subjectNames }) => {
     const rowClass = index % 2 === 0 ? 'bg-white' : 'bg-slate-50/70';
 
     return (
-        <tr className={rowClass}>
-            <td className="p-3 text-slate-500">{index + 1}</td>
-            <td className="p-3 font-mono text-slate-600">{result.student?.registerNo || "N/A"}</td>
-            <td className="p-3 font-semibold text-slate-800">{result.student?.studentName || "N/A"}</td>
-            {Array.from(subjectNames).flatMap((subjectName) => {
-                const examResult = result.subjectResults.find(sr => sr.subject.subjectName === subjectName && sr.type === "exam");
-                const cceResult = result.subjectResults.find(sr => sr.subject.subjectName === subjectName && sr.type === "cce");
+      <tr className={rowClass}>
+        <td className="p-3 text-slate-500">{index + 1}</td>
+        <td className="p-3 font-mono text-slate-600">{result.student?.registerNo || "N/A"}</td>
+        <td className="p-3 font-semibold text-slate-800">{result.student?.studentName || "N/A"}</td>
+        {Array.from(subjectNames).flatMap((subjectName) => {
+          const examResult = result.subjectResults.find(sr => sr.subject.subjectName === subjectName && sr.type === "exam");
+          const cceResult = result.subjectResults.find(sr => sr.subject.subjectName === subjectName && sr.type === "cce");
 
-                const cceMarks = cceResult?.marksObtained ?? "-";
-                const saMarks = examResult?.marksObtained ?? "-";
-                const totalMarks = (cceResult?.marksObtained ?? 0) + (examResult?.marksObtained ?? 0);
-                const hasMarks = cceResult || examResult;
+          const cceMarks = cceResult?.marksObtained;
+          const saMarks = examResult?.marksObtained;
 
-                return [
-                    <td key={`${subjectName}-cce`} className="p-3 text-center text-slate-600">{cceMarks}</td>,
-                    <td key={`${subjectName}-sa`} className="p-3 text-center text-slate-600">{saMarks}</td>,
-                    <td key={`${subjectName}-total`} className="p-3 text-center font-bold text-indigo-600">{hasMarks ? totalMarks : "-"}</td>
-                ];
-            })}
-        </tr>
+          let totalMarks;
+          if (cceMarks === "A" && saMarks === "A") {
+            totalMarks = "A";
+          } else if (cceMarks === "A") {
+            totalMarks = saMarks ?? "-";
+          } else if (saMarks === "A") {
+            totalMarks = cceMarks ?? "-";
+          } else if (cceMarks == null && saMarks == null) {
+            totalMarks = "-";
+          } else {
+            totalMarks = (Number(cceMarks) || 0) + (Number(saMarks) || 0);
+          }
+
+          const hasMarks = cceResult || examResult;
+
+          return [
+            <td key={`${subjectName}-cce`} className="p-3 text-center text-slate-600">{cceMarks ?? "-"}</td>,
+            <td key={`${subjectName}-sa`} className="p-3 text-center text-slate-600">{saMarks ?? "-"}</td>,
+            <td key={`${subjectName}-total`} className="p-3 text-center font-bold text-indigo-600">{hasMarks ? totalMarks : "-"}</td>
+          ];
+        })}
+      </tr>
     );
 };
 
@@ -135,159 +163,221 @@ function ResultView() {
   const { authData } = useContext(UserAuthContext);
 
   const [filters, setFilters] = useState({
-    classId: null,
-    examId: null,
-    studyCentreId: null,
+    classId: "",
+    examId: "",
+    studyCentreId: "",
   });
 
-  const areFiltersSet = filters.classId && filters.examId && (authData.role !== 'superAdmin' || filters.studyCentreId);
+  const areFiltersSet =
+    filters.classId &&
+    filters.examId &&
+    (authData.role !== "superAdmin" || filters.studyCentreId);
 
   // --- Data Fetching ---
   useEffect(() => {
     const fetchInitialData = async () => {
-        getClasses();
-        try {
-            const [examsRes, branchesRes] = await Promise.all([
-                Axios.get('/exam?isActive=true'),
-                authData.role === 'superAdmin' ? Axios.get('/study-centre?sort=studyCentreName') : Promise.resolve({ data: { docs: [] } })
-            ]);
-            setExams(examsRes.data);
-            setBranches(branchesRes.data.docs);
-        } catch (error) {
-            console.error("Failed to fetch initial data:", error);
-        }
+      getClasses();
+      try {
+        const [examsRes, branchesRes] = await Promise.all([
+          Axios.get("/exam?isActive=true"),
+          authData.role === "superAdmin"
+            ? Axios.get("/study-centre?sort=studyCentreName")
+            : Promise.resolve({ data: { docs: [] } }),
+        ]);
+        setExams(examsRes.data);
+        setBranches(branchesRes.data.docs);
+      } catch (error) {
+        console.error("Failed to fetch initial data:", error);
+      }
     };
     fetchInitialData();
-  }, [getClasses, authData.role]);
+    // eslint-disable-next-line
+  }, [authData.role]);
 
-
+  // --- Only fetch results on filter submit ---
   const getResults = useCallback(async () => {
     if (!areFiltersSet) return;
     setLoading(true);
-    setResults([]); // Clear previous results
+    setResults([]);
     try {
-        const studyCentreParam = authData.role === "superAdmin" ? `&studyCentreId=${filters.studyCentreId}` : `&studyCentreId=${authData.branch._id}`;
-        const { data } = await Axios.get(`/result?examId=${filters.examId}&classId=${filters.classId}${studyCentreParam}`);
-        setResults(data);
+      const studyCentreParam =
+        authData.role === "superAdmin"
+          ? `&studyCentreId=${filters.studyCentreId}`
+          : `&studyCentreId=${authData.branch._id}`;
+      const { data } = await Axios.get(
+        `/result?examId=${filters.examId}&classId=${filters.classId}${studyCentreParam}`
+      );
+      setResults(data);
     } catch (error) {
-        console.error("Failed to fetch results:", error.response);
-        setResults([]);
+      console.error("Failed to fetch results:", error.response || error);
+      setResults([]);
     } finally {
-        setLoading(false);
+      setLoading(false);
     }
+    // eslint-disable-next-line
   }, [filters, areFiltersSet, authData]);
-
-  // Trigger fetch when filters are ready
-  useEffect(() => {
-    getResults();
-  }, [getResults]);
-
 
   // --- Memoized Derived State for Performance ---
   const filteredResults = useMemo(() => {
     if (!searchTerm) return results;
     return results.filter(
       (result) =>
-        result.student?.studentName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        result.student?.registerNo.toLowerCase().includes(searchTerm.toLowerCase())
+        result.student?.studentName
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase()) ||
+        result.student?.registerNo
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase())
     );
   }, [results, searchTerm]);
 
   const subjectNames = useMemo(() => {
     const names = new Set();
-    results.forEach(r => r.subjectResults.forEach(sr => names.add(sr.subject.subjectName)));
+    results.forEach((r) =>
+      (r.subjectResults || []).forEach((sr) =>
+        sr.subject?.subjectName && names.add(sr.subject.subjectName)
+      )
+    );
     return names;
   }, [results]);
 
-
   // --- Excel Download Handler ---
   const downloadExcel = () => {
-    const selectedClass = classes.find(c => c._id === filters.classId);
-    const selectedExam = exams.find(e => e._id === filters.examId);
-    const fileName = `${selectedClass?.className}_${selectedExam?.examName}.xlsx`;
-    
+    const selectedClass = classes.find((c) => c._id === filters.classId);
+    const selectedExam = exams.find((e) => e._id === filters.examId);
+    const fileName = `${selectedClass?.className || "Class"}_${
+      selectedExam?.examName || "Exam"
+    }.xlsx`;
+
     const worksheetData = filteredResults.map((result, index) => {
       const row = {
-        '#': index + 1,
-        'Register No': result.student?.registerNo || 'N/A',
-        'Student Name': result.student?.studentName || 'N/A',
-        'Study Centre': result.student?.branch?.studyCentreCode || 'N/A',
+        "#": index + 1,
+        "Register No": result.student?.registerNo || "N/A",
+        "Student Name": result.student?.studentName || "N/A",
+        "Study Centre": result.student?.branch?.studyCentreCode || "N/A",
       };
-      subjectNames.forEach(subjectName => {
-        const examResult = result.subjectResults.find(sr => sr.subject.subjectName === subjectName && sr.type === "exam");
-        const cceResult = result.subjectResults.find(sr => sr.subject.subjectName === subjectName && sr.type === "cce");
-        const totalMarks = (cceResult?.marksObtained ?? 0) + (examResult?.marksObtained ?? 0);
-        
-        row[`${subjectName} FA`] = cceResult?.marksObtained ?? '-';
-        row[`${subjectName} SA`] = examResult?.marksObtained ?? '-';
-        row[`${subjectName} Total`] = (examResult || cceResult) ? totalMarks : '-';
+      subjectNames.forEach((subjectName) => {
+        const examResult = (result.subjectResults || []).find(
+          (sr) => sr.subject?.subjectName === subjectName && sr.type === "exam"
+        );
+        const cceResult = (result.subjectResults || []).find(
+          (sr) => sr.subject?.subjectName === subjectName && sr.type === "cce"
+        );
+
+        // Handle "A" (absent) in marks
+        const cceMarks = cceResult?.marksObtained;
+        const saMarks = examResult?.marksObtained;
+
+        let totalMarks;
+        if (cceMarks === "A" && saMarks === "A") {
+          totalMarks = "A";
+        } else if (cceMarks === "A") {
+          totalMarks = saMarks ?? "-";
+        } else if (saMarks === "A") {
+          totalMarks = cceMarks ?? "-";
+        } else if (cceMarks == null && saMarks == null) {
+          totalMarks = "-";
+        } else {
+          totalMarks = (Number(cceMarks) || 0) + (Number(saMarks) || 0);
+        }
+
+        row[`${subjectName} FA`] = cceMarks ?? "-";
+        row[`${subjectName} SA`] = saMarks ?? "-";
+        row[`${subjectName} Total`] =
+          examResult || cceResult ? totalMarks : "-";
       });
       return row;
     });
 
     const worksheet = XLSX.utils.json_to_sheet(worksheetData);
     const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Results');
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Results");
     XLSX.writeFile(workbook, fileName);
   };
-
 
   return (
     <main className="w-full bg-slate-50 min-h-screen p-4 sm:p-6 lg:p-8">
       <div className="max-w-screen-2xl mx-auto">
-        <PageHeader title="View Exam Results" subtitle="Filter by class, exam, and study centre to view and download student results." />
-        
-        <FilterBar {...{ filters, setFilters, classes, branches, exams, authData }} />
+        <PageHeader
+          title="View Exam Results"
+          subtitle="Filter by class, exam, and study centre to view and download student results."
+        />
+
+        <FilterBar
+          filters={filters}
+          setFilters={setFilters}
+          classes={classes}
+          branches={branches}
+          exams={exams}
+          authData={authData}
+          onFetch={getResults}
+        />
 
         <div className="mt-8 bg-white border border-slate-200 rounded-2xl shadow-sm">
-            {areFiltersSet ? (
-                <>
-                    {/* --- Toolbar: Search and Download --- */}
-                    <div className="p-4 flex flex-col md:flex-row justify-between items-center gap-4 border-b border-slate-200">
-                        <div className="relative w-full md:w-80">
-                            <FontAwesomeIcon icon={faSearch} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                            <input 
-                                type="text" 
-                                placeholder="Search by name or reg no..."
-                                value={searchTerm}
-                                onChange={e => setSearchTerm(e.target.value)}
-                                className="w-full pl-10 pr-4 py-2 bg-slate-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400"
-                            />
-                        </div>
-                        <button
-                            onClick={downloadExcel}
-                            disabled={filteredResults.length === 0 || loading}
-                            className="w-full md:w-auto flex items-center justify-center gap-2 px-4 py-2 bg-green-600 text-white font-semibold rounded-lg shadow-sm transition hover:bg-green-700 disabled:bg-slate-300 disabled:cursor-not-allowed"
-                        >
-                            <FontAwesomeIcon icon={faFileExcel} />
-                            <span>Download Excel</span>
-                        </button>
-                    </div>
-
-                    {/* --- Content Area: Loading, No Results, or Table --- */}
-                    <div className="p-4">
-                        {loading ? (
-                            <div className="h-64 flex flex-col justify-center items-center text-slate-500">
-                                <FontAwesomeIcon icon={faSpinner} spin size="2x" className="text-indigo-500"/>
-                                <p className="mt-3 font-medium">Fetching results...</p>
-                            </div>
-                        ) : filteredResults.length > 0 ? (
-                            <>
-                                <p className="text-sm text-slate-600 mb-4 px-2">
-                                    Showing <span className="font-bold">{filteredResults.length}</span> results.
-                                </p>
-                                <ResultsTable results={filteredResults} subjectNames={subjectNames} />
-                            </>
-                        ) : (
-                            <EmptyState icon={faTableList} title="No Results Found" message="There are no results matching your search term or filter criteria." />
-                        )}
-                    </div>
-                </>
-            ) : (
-                <div className="p-8">
-                    <EmptyState icon={faWandMagicSparkles} title="Let's Find Some Results" message="Please select a class, exam, and study centre from the filters above to get started." />
+          {areFiltersSet ? (
+            <>
+              {/* --- Toolbar: Search and Download --- */}
+              <div className="p-4 flex flex-col md:flex-row justify-between items-center gap-4 border-b border-slate-200">
+                <div className="relative w-full md:w-80">
+                  <FontAwesomeIcon
+                    icon={faSearch}
+                    className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                  />
+                  <input
+                    type="text"
+                    placeholder="Search by name or reg no..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2 bg-slate-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                  />
                 </div>
-            )}
+                <button
+                  onClick={downloadExcel}
+                  disabled={filteredResults.length === 0 || loading}
+                  className="w-full md:w-auto flex items-center justify-center gap-2 px-4 py-2 bg-green-600 text-white font-semibold rounded-lg shadow-sm transition hover:bg-green-700 disabled:bg-slate-300 disabled:cursor-not-allowed"
+                >
+                  <FontAwesomeIcon icon={faFileExcel} />
+                  <span>Download Excel</span>
+                </button>
+              </div>
+
+              {/* --- Content Area: Loading, No Results, or Table --- */}
+              <div className="p-4">
+                {loading ? (
+                  <div className="h-64 flex flex-col justify-center items-center text-slate-500">
+                    <FontAwesomeIcon
+                      icon={faSpinner}
+                      spin
+                      size="2x"
+                      className="text-indigo-500"
+                    />
+                    <p className="mt-3 font-medium">Fetching results...</p>
+                  </div>
+                ) : filteredResults.length > 0 ? (
+                  <>
+                    <p className="text-sm text-slate-600 mb-4 px-2">
+                      Showing <span className="font-bold">{filteredResults.length}</span> results.
+                    </p>
+                    <ResultsTable results={filteredResults} subjectNames={subjectNames} />
+                  </>
+                ) : (
+                  <EmptyState
+                    icon={faTableList}
+                    title="No Results Found"
+                    message="There are no results matching your search term or filter criteria."
+                  />
+                )}
+              </div>
+            </>
+          ) : (
+            <div className="p-8">
+              <EmptyState
+                icon={faWandMagicSparkles}
+                title="Let's Find Some Results"
+                message="Please select a class, exam, and study centre from the filters above to get started."
+              />
+            </div>
+          )}
         </div>
       </div>
     </main>

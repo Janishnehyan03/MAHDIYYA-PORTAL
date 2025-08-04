@@ -1,19 +1,14 @@
-import React, { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
+import { toast } from "react-toastify";
 import Axios from "../../../Axios";
 import { UserAuthContext } from "../../../context/userContext";
-import { toast } from "react-toastify";
 
 const AddStudent = () => {
   const { authData } = useContext(UserAuthContext);
 
-  let currentYear = new Date().getFullYear().toString();
-  let nextYear = (new Date().getFullYear() + 1).toString();
+  const currentYear = new Date().getFullYear().toString();
+  const nextYear = (new Date().getFullYear() + 1).toString();
 
-  const onChange = (e) => {
-    e.preventDefault();
-    const { name, value } = e.target;
-    setFormData((prevState) => ({ ...prevState, [name]: value }));
-  };
   const [formData, setFormData] = useState({
     studentName: "",
     registerNo: "",
@@ -24,7 +19,6 @@ const AddStudent = () => {
     postOffice: "",
     pinCode: "",
     state: "",
-    registerNo: "",
     dateOfBirth: "",
     phone: "",
     branch: "",
@@ -36,6 +30,7 @@ const AddStudent = () => {
   const [classes, setClasses] = useState([]);
   const [loading, setLoading] = useState(false);
 
+  // Define form fields for dynamic rendering
   const forms = [
     {
       labelName: "Student Name",
@@ -69,24 +64,22 @@ const AddStudent = () => {
       required: true,
       value: formData.fatherName,
     },
-
     {
       labelName: "Phone Number",
-      type: "number",
+      type: "tel",
       name: "phone",
       placeholder: "Enter Phone Number",
       required: true,
       value: formData.phone,
     },
     {
-      labelName: "Date Of Birth (DD-MM-YYYY)",
+      labelName: "Date Of Birth",
       type: "date",
       name: "dateOfBirth",
       placeholder: "DD-MM-YYYY",
       required: true,
       value: formData.dateOfBirth,
     },
-
     {
       labelName: "Place",
       type: "text",
@@ -105,7 +98,7 @@ const AddStudent = () => {
     },
     {
       labelName: "Pin Code",
-      type: "number",
+      type: "text",
       name: "pinCode",
       placeholder: "Enter Your Pincode",
       required: true,
@@ -129,105 +122,132 @@ const AddStudent = () => {
     },
   ];
 
+  // Handle form field changes
+  const onChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prevState) => ({ ...prevState, [name]: value }));
+  };
+
+  // Handle form submission
   const handleSubmit = async (e) => {
-    setLoading(true);
     e.preventDefault();
+    setLoading(true);
     try {
-      // Send form data to backend API endpoint
-      const response = await Axios.post("/student/add", {
+      await Axios.post("/student/add", {
         ...formData,
-        academicYear: currentYear + "-" + nextYear,
+        academicYear: `${currentYear}-${nextYear}`,
         branch: authData.branch._id,
       });
-
-      setLoading(false);
       toast.success("Student Added", {
         position: toast.POSITION.TOP_CENTER,
-        autoClose: 5000,
+        autoClose: 4000,
       });
-      window.location.reload();
+      setLoading(false);
+      setFormData({
+        studentName: "",
+        registerNo: "",
+        houseName: "",
+        fatherName: "",
+        place: "",
+        district: "",
+        postOffice: "",
+        pinCode: "",
+        state: "",
+        dateOfBirth: "",
+        phone: "",
+        branch: "",
+        studyCentreCode: "",
+        className: "",
+        class: "",
+      });
     } catch (error) {
       setLoading(false);
-      console.error("Error submitting form:", error);
+      toast.error(
+        error.response?.data?.error || "Error submitting form. Please try again.",
+        {
+          position: toast.POSITION.TOP_CENTER,
+          autoClose: 4000,
+        }
+      );
     }
   };
-  const getAllClasses = async (e) => {
-    try {
-      // Send form data to backend API endpoint
-      const response = await Axios.get("/class");
-      setClasses(response.data);
-    } catch (error) {
-      console.error("Error submitting form:", error);
-    }
-  };
+
+  // Fetch classes on mount
   useEffect(() => {
+    const getAllClasses = async () => {
+      try {
+        const response = await Axios.get("/class");
+        setClasses(response.data);
+      } catch (error) {
+        setClasses([]);
+      }
+    };
     getAllClasses();
   }, []);
+
   return (
-    <div className="max-w-lg mx-auto mt-8 bg-gray-800 p-6 rounded-lg shadow-lg">
-  <h1 className="text-2xl font-bold text-teal-300 mb-6 text-center">Student Form</h1>
-  <form onSubmit={handleSubmit}>
-    {/* Select Class */}
-    <div className="mb-6">
-      <label htmlFor="state" className="block text-sm font-semibold text-teal-200 mb-2">
-        Select Class
-      </label>
-      <select
-        id="state"
-        name="class"
-        onChange={onChange}
-        className="block w-full px-3 py-2 border border-gray-600 bg-gray-700 text-teal-100 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 sm:text-sm"
-      >
-        <option hidden>Select a class</option>
-        {classes.map((item, key) => (
-          <option value={item._id} key={key}>
-            {item.className}
-          </option>
-        ))}
-      </select>
+    <div className="max-w-3xl mx-auto mt-10 bg-white p-8 rounded-2xl shadow-xl border border-gray-100">
+      <h1 className="text-3xl font-bold text-blue-700 mb-8 text-center tracking-wide">Add New Student</h1>
+      <form onSubmit={handleSubmit} autoComplete="off">
+        {/* Select Class */}
+        <div className="mb-8">
+          <label htmlFor="class" className="block text-sm font-semibold text-blue-800 mb-2">
+            Select Class
+          </label>
+          <select
+            id="class"
+            name="class"
+            value={formData.class}
+            onChange={onChange}
+            required
+            className="block w-full px-4 py-2 border border-gray-300 bg-white text-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 sm:text-base"
+          >
+            <option value="" disabled>
+              Select a class
+            </option>
+            {classes.map((item) => (
+              <option value={item._id} key={item._id}>
+                {item.className}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Dynamic Form Fields in Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
+          {forms.map((form, key) => (
+            <div key={key}>
+              <label htmlFor={form.name} className="block text-sm font-semibold text-blue-800 mb-1">
+                {form.labelName}
+              </label>
+              <input
+                id={form.name}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 sm:text-base"
+                type={form.type}
+                onChange={onChange}
+                required={form.required}
+                placeholder={form.placeholder}
+                name={form.name}
+                value={form.value}
+                autoComplete="off"
+              />
+            </div>
+          ))}
+        </div>
+
+        {/* Submit Button */}
+        <div className="mt-8">
+          <button
+            type="submit"
+            className={`w-full px-5 py-2.5 text-white font-semibold rounded-lg shadow-md transition-all duration-200 
+            ${loading ? "bg-blue-300 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700 focus:ring-2 focus:ring-blue-400"}`}
+            disabled={loading}
+          >
+            {loading ? "Submitting..." : "Submit"}
+          </button>
+        </div>
+      </form>
     </div>
-
-    {/* Dynamic Form Fields */}
-    {forms.map((form, key) => (
-      <div key={key} className="mb-6">
-        <label htmlFor={form.name} className="block text-sm font-semibold text-teal-200 mb-2">
-          {form.labelName}
-        </label>
-        <input
-          id={form.name}
-          className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-teal-100 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 sm:text-sm uppercase"
-          type={form.type}
-          onChange={(e) => onChange(e)}
-          required={form.required}
-          placeholder={form.placeholder}
-          name={form.name}
-          value={form.value}
-        />
-        {form.error && <p className="text-red-500 text-sm mt-1">{form.error}</p>}
-      </div>
-    ))}
-
-    {/* Submit Button */}
-    <div className="mt-6">
-      {loading ? (
-        <button
-          className="w-full px-4 py-2 bg-teal-700 text-teal-100 font-semibold rounded-md shadow-lg flex items-center justify-center cursor-not-allowed"
-          disabled
-        >
-          Loading...
-        </button>
-      ) : (
-        <button
-          type="submit"
-          className="w-full px-4 py-2 bg-teal-600 hover:bg-teal-500 text-white font-semibold rounded-md shadow-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2"
-        >
-          Submit
-        </button>
-      )}
-    </div>
-  </form>
-</div>
-
   );
 };
 

@@ -71,7 +71,7 @@ function AllTeachers() {
   
   // States for new features
   const [searchTerm, setSearchTerm] = useState("");
-  const [filters, setFilters] = useState({ gender: 'all', mahdiyyaTeacher: 'all' });
+  const [filters, setFilters] = useState({ gender: 'all', MAHDIYYAHTeacher: 'all' });
   const [sortConfig, setSortConfig] = useState({ key: 'teacherName', direction: 'ascending' });
 
   // Fetch initial data
@@ -100,8 +100,8 @@ function AllTeachers() {
     // 1. Apply Filters
     computableTeachers = computableTeachers.filter(teacher => {
         const genderMatch = filters.gender === 'all' || teacher.gender.toLowerCase() === filters.gender;
-        const mahdiyyaMatch = filters.mahdiyyaTeacher === 'all' || String(teacher.mahdiyyaTeacher) === filters.mahdiyyaTeacher;
-        return genderMatch && mahdiyyaMatch;
+        const MAHDIYYAHMatch = filters.MAHDIYYAHTeacher === 'all' || String(teacher.MAHDIYYAHTeacher) === filters.MAHDIYYAHTeacher;
+        return genderMatch && MAHDIYYAHMatch;
     });
 
     // 2. Apply Search
@@ -142,7 +142,7 @@ function AllTeachers() {
 
   const clearAll = () => {
       setSearchTerm("");
-      setFilters({ gender: 'all', mahdiyyaTeacher: 'all' });
+      setFilters({ gender: 'all', MAHDIYYAHTeacher: 'all' });
       setSortConfig({ key: 'teacherName', direction: 'ascending' });
   };
   
@@ -188,9 +188,9 @@ function AllTeachers() {
                 <option value="male">Male</option>
                 <option value="female">Female</option>
             </select>
-            <select value={filters.mahdiyyaTeacher} onChange={e => setFilters({...filters, mahdiyyaTeacher: e.target.value})} className="w-full border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+            <select value={filters.MAHDIYYAHTeacher} onChange={e => setFilters({...filters, MAHDIYYAHTeacher: e.target.value})} className="w-full border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
                 <option value="all">All Types</option>
-                <option value="true">Mahdiyya Teacher</option>
+                <option value="true">MAHDIYYAH Teacher</option>
                 <option value="false">Regular Teacher</option>
             </select>
           </div>
@@ -210,7 +210,7 @@ function AllTeachers() {
                                 Contact <FontAwesomeIcon icon={getSortIcon('email')} className="ml-2" />
                             </th>
                             <th className="p-4 font-semibold text-slate-600">Gender</th>
-                            <th className="p-4 font-semibold text-slate-600">Mahdiyya Teacher</th>
+                            <th className="p-4 font-semibold text-slate-600">MAHDIYYAH Teacher</th>
                             <th className="p-4 font-semibold text-slate-600 text-center">Actions</th>
                         </tr>
                     </thead>
@@ -236,7 +236,7 @@ function AllTeachers() {
                             </td>
                             <td className="p-4 text-slate-600 capitalize">{teacher.gender}</td>
                             <td className="p-4">
-                                <StatusBadge isTrue={teacher.mahdiyyaTeacher} text={teacher.mahdiyyaTeacher ? "Yes" : "No"} />
+                                <StatusBadge isTrue={teacher.MAHDIYYAHTeacher} text={teacher.MAHDIYYAHTeacher ? "Yes" : "No"} />
                             </td>
                             <td className="p-4 text-center">
                                 <Link to={`/edit-teacher/${teacher._id}`} className="text-slate-500 hover:text-blue-600 p-2">

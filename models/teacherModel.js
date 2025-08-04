@@ -23,7 +23,7 @@ const teacherSchema = new mongoose.Schema({
     // required: [true, "branch is required"],
     ref: "Branch",
   },
-  mahdiyyaTeacher: {
+  MAHDIYYAHTeacher: {
     type: Boolean,
     default:false
   },

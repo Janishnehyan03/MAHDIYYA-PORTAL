@@ -8,9 +8,9 @@ const specialHallTicketSchame = new mongoose.Schema({
   semester: String,
   secondSem: String,
   forthSem: String,
-  mahdiyyaSecondSem: String,
-  mahdiyyaForthSem: String,
-  mahdiyyaSixthSem: String,
+  MAHDIYYAHSecondSem: String,
+  MAHDIYYAHForthSem: String,
+  MAHDIYYAHSixthSem: String,
   examCentre: String,
 });
 

@@ -89,7 +89,7 @@ function EditTeacher() {
   const onChangeTeacherType = (type) => {
     setFormData((prevState) => ({
       ...prevState,
-      mahdiyyaTeacher: type,
+      MAHDIYYAHTeacher: type,
     }));
   };
 
@@ -191,9 +191,9 @@ function EditTeacher() {
             <div className="px-4 sm:px-0 mt-4">
               <label
                 className="block text-sm font-bold mb-2"
-                htmlFor="mahdiyyaTeacher"
+                htmlFor="MAHDIYYAHTeacher"
               >
-                Mahdiyya Teacher
+                MAHDIYYAH Teacher
               </label>
               <input
                 type="radio"
@@ -206,9 +206,9 @@ function EditTeacher() {
             <div className="px-4 sm:px-0 mt-4">
               <label
                 className="block text-sm font-bold mb-2"
-                htmlFor="mahdiyyaTeacher"
+                htmlFor="MAHDIYYAHTeacher"
               >
-                Non Mahdiyya Teacher
+                Non MAHDIYYAH Teacher
               </label>
               <input
                 type="radio"
@@ -219,7 +219,7 @@ function EditTeacher() {
               />
             </div>
 
-            {formData?.mahdiyyaTeacher && (
+            {formData?.MAHDIYYAHTeacher && (
               <div className="lg:col-span-1">
                 <div className="px-4 sm:px-0">
                   <label className="block  text-sm font-bold mb-2 text-[#eeeeee]">
@@ -241,7 +241,7 @@ function EditTeacher() {
               </div>
             )}
 
-            {formData?.mahdiyyaTeacher && (
+            {formData?.MAHDIYYAHTeacher && (
               <div className="lg:col-span-1 mt-4">
                 <div className="px-4 sm:px-0">
                   <label className="block  text-sm font-bold mb-2 text-[#eeeeee]">

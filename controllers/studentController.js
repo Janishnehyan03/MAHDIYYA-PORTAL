@@ -20,18 +20,18 @@ exports.getAllStudents = async (req, res, next) => {
     // Check query parameters and set conditions accordingly
     if (req.query.all) {
       // Fetch all students if 'all' is true
-      data = await Student.find().populate("branch").populate("class");
+      data = await Student.find().populate("branch").populate("class").sort({ registerNo: 1 });
     } else {
       // Set query conditions based on provided parameters
       if (req.query.studyCentre) {
-        query.branch = req.query.studyCentre; // Add branch condition if studyCentre is provided
+      query.branch = req.query.studyCentre; // Add branch condition if studyCentre is provided
       }
       if (req.query.classId) {
-        query.class = req.query.classId; // Add class condition if classId is provided
+      query.class = req.query.classId; // Add class condition if classId is provided
       }
 
       // Fetch students based on the constructed query
-      data = await Student.find(query).populate("branch").populate("class");
+      data = await Student.find(query).populate("branch").populate("class").sort({ registerNo: 1 });
     }
 
     res.status(200).json(data);

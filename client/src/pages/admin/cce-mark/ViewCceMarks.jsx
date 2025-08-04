@@ -97,11 +97,12 @@ function FilterPanel({
             <option value="" disabled>
               Select a class
             </option>
-            {classes.map((item) => (
-              <option key={item._id} value={item._id}>
-                {item.className}
-              </option>
-            ))}
+            {classes &&
+              classes.map((item) => (
+                <option key={item._id} value={item._id}>
+                  {item.className}
+                </option>
+              ))}
           </select>
         </div>
 
@@ -128,11 +129,12 @@ function FilterPanel({
               <option value="" disabled>
                 Select a centre
               </option>
-              {branches.map((item) => (
-                <option key={item._id} value={item._id}>
-                  {item.studyCentreName}
-                </option>
-              ))}
+              {branches &&
+                branches.map((item) => (
+                  <option key={item._id} value={item._id}>
+                    {item.studyCentreName}
+                  </option>
+                ))}
             </select>
           </div>
         )}
@@ -156,11 +158,12 @@ function FilterPanel({
             <option value="" disabled>
               Select an exam
             </option>
-            {exams.map((item) => (
-              <option key={item._id} value={item._id}>
-                {item.examName}
-              </option>
-            ))}
+            {exams &&
+              exams.map((item) => (
+                <option key={item._id} value={item._id}>
+                  {item.examName}
+                </option>
+              ))}
           </select>
         </div>
 
@@ -221,7 +224,7 @@ function ResultsTable({ results, subjectNames, onDownload }) {
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {results.map((result, index) => (
-              <tr key={result._id} className="hover:bg-gray-50">
+              <tr key={result._id || index} className="hover:bg-gray-50">
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   {index + 1}
                 </td>
@@ -261,9 +264,9 @@ function ResultsTable({ results, subjectNames, onDownload }) {
 // --- Main View Component ---
 
 function ResultView() {
-  const { exams, getExams } = useContext(ExamContext);
-  const { classes, getClasses } = useContext(ClassContext);
-  const { authData } = useContext(UserAuthContext);
+  const { exams = [], getExams } = useContext(ExamContext);
+  const { classes = [], getClasses } = useContext(ClassContext);
+  const { authData = {} } = useContext(UserAuthContext);
 
   const [branches, setBranches] = useState([]);
   const [results, setResults] = useState([]);
@@ -274,15 +277,15 @@ function ResultView() {
   const [hasSearched, setHasSearched] = useState(false);
 
   const [filters, setFilters] = useState({
-    classId: null,
-    examId: null,
-    studyCentreId: null,
+    classId: "",
+    examId: "",
+    studyCentreId: "",
   });
 
   // Fetch initial dropdown data
   useEffect(() => {
-    getClasses();
-    getExams(true);
+    getClasses && getClasses();
+    getExams && getExams(true);
     if (authData.role === "superAdmin") {
       const getBranches = async () => {
         try {
@@ -296,6 +299,7 @@ function ResultView() {
       };
       getBranches();
     }
+    // eslint-disable-next-line
   }, [authData.role]);
 
   const handleFetchResults = useCallback(async () => {
@@ -305,21 +309,29 @@ function ResultView() {
     setResults([]); // Clear previous results
 
     try {
-      const studyCentre =
-        authData.role === "superAdmin"
-          ? filters.studyCentreId
-          : authData.branch._id;
+      let studyCentre = "";
+      if (authData.role === "superAdmin") {
+        studyCentre = filters.studyCentreId;
+      } else if (authData.branch && authData.branch._id) {
+        studyCentre = authData.branch._id;
+      }
+
       const { data } = await Axios.get(
         `/cce?examId=${filters.examId}&classId=${filters.classId}&studyCentreId=${studyCentre}`
       );
 
       setResults(data);
+
       // Derive subject names from the fetched results
       const newSubjectNames = new Set();
       data.forEach((result) => {
-        result.subjectResults.forEach((sr) =>
-          newSubjectNames.add(sr.subject.subjectName)
-        );
+        if (Array.isArray(result.subjectResults)) {
+          result.subjectResults.forEach((sr) => {
+            if (sr.subject && sr.subject.subjectName) {
+              newSubjectNames.add(sr.subject.subjectName);
+            }
+          });
+        }
       });
       setSubjectNames(newSubjectNames);
     } catch (err) {
@@ -333,7 +345,7 @@ function ResultView() {
   }, [filters, authData]);
 
   const downloadExcel = () => {
-    if (results.length === 0) return;
+    if (!results.length) return;
 
     const dataToExport = results.map((result) => {
       const row = {

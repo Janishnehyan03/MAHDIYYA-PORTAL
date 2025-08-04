@@ -34,7 +34,7 @@ function CenterRegister() {
             </div>
           </div>
         </div>
-                <iframe src="/images/CPET MAHDIYYA BYLAW, 2022-23_compressed (1).pdf" width="100%" height="500px"></iframe>
+                <iframe src="/images/CPET MAHDIYYAH BYLAW, 2022-23_compressed (1).pdf" width="100%" height="500px"></iframe>
       </main>
     </div>
   );

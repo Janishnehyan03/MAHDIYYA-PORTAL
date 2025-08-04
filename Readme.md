@@ -1,5 +1,5 @@
 
-# CPET Mahdiyya Course
+# CPET MAHDIYYAH Course
 
 
 `view the homepage`

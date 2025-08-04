@@ -19,6 +19,7 @@ const AddCceMark = () => {
   const [selectedBranch, setSelectedBranch] = useState(null);
   const [exams, setExams] = useState([]);
   const [studentMarks, setStudentMarks] = useState({});
+
   const selectedExam = exams.find((examObj) => {
     return examObj._id.toString() === exam; // Compare as string
   });
@@ -30,87 +31,78 @@ const AddCceMark = () => {
       [studentId]: newMarks,
     }));
   };
+const handleSubmit = async (e) => {
+  if (window.confirm("Are you sure to submit this result?")) {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      // Fetch existing results for the specified class, subject, and exam
+      const response = await Axios.get(
+        `/cce/fetch?classId=${selectedClass}&subjectId=${subject}&examId=${exam}`
+      );
+      const results = response.data;
 
-  const handleSubmit = async (e) => {
-    if (window.confirm("Are you sure to submit this result?")) {
-      e.preventDefault();
-      setLoading(true);
-      try {
-        // Construct the results array with necessary data
-        const response = await Axios.get(
-          `/cce/fetch?classId=${selectedClass}&subjectId=${subject}&examId=${exam}`
+      const resultsData = students.map((student) => {
+        const existingResult = results.find(
+          (result) => result?.student?._id === student._id
         );
-        const results = response.data;
-        const resultsData = students.map((student) => {
-          // Find the result for the current student from fetched results
-          const existingResult = results.find(
-            (result) => result?.student?._id === student._id
-          );
+        return {
+          student: student._id,
+          exam,
+          cceMark: studentMarks[student._id] || "0",
+          class: selectedClass,
+          subject,
+          _id: existingResult ? existingResult._id : null,
+        };
+      });
 
-          // Create an entry for this student
-          return {
-            student: student._id,
-            exam: exam,
-            cceMark: studentMarks[student._id] || "0", // Default to "0" if no mark
-            class: selectedClass,
-            subject,
-            _id: existingResult ? existingResult._id : null, // Use fetched result._id if it exists
-          };
-        });
-
-        // Determine whether to PATCH or POST based on results length
-        const requests = results.length > 0 ? [] : []; // Initialize an empty array for requests
-
-        resultsData.forEach((result) => {
-          if (result.cceMark !== undefined && result.cceMark !== "0") {
-            if (result._id) {
-              // Prepare PATCH request if result already exists
-              const patchData = [
-                { _id: result._id, cceMark: parseInt(result.cceMark) },
-              ];
-              console.log("Sending PATCH request with data:", patchData);
-              requests.push(Axios.patch("/cce", patchData)); // Send as an array
-            } else {
-              // Prepare POST request if it's a new entry
-              const postData = {
-                student: result.student,
-                exam: result.exam,
-                cceMark: parseInt(result.cceMark), // Ensure it's an integer
-                class: result.class,
-                subject: result.subject,
-              };
-              console.log("Sending POST request with data:", postData);
-              requests.push(Axios.post("/cce", postData));
-            }
+      // Split into new entries and updates
+      const newEntries = [];
+      const updates = [];
+      resultsData.forEach((result) => {
+        if (result.cceMark !== undefined && result.cceMark !== "") {
+          const mark =
+            result.cceMark === "A" ? "A" : parseInt(result.cceMark, 10) || 0;
+          if (result._id) {
+            updates.push({ _id: result._id, cceMark: mark });
+          } else {
+            newEntries.push({
+              student: result.student,
+              exam: result.exam,
+              cceMark: mark,
+              class: result.class,
+              subject: result.subject,
+            });
           }
-        });
+        }
+      });
 
-        // Wait for all requests to complete
-        const responses = await Promise.all(requests);
-
-        // Log responses from the server (optional)
-        responses.forEach((response) => {
-          console.log("Response from server:", response.data);
-        });
-
-        // Notify user of success
-        toast.success("Marks submitted successfully", {
-          position: toast.POSITION.TOP_CENTER,
-          autoClose: 3000,
-        });
-      } catch (error) {
-        // Handle any errors that occur during submission
-        console.error("Error submitting marks:", error);
-        toast.error(error.response?.data?.error || "An error occurred", {
-          position: toast.POSITION.TOP_CENTER,
-          autoClose: 3000,
-        });
-      } finally {
-        // Reset loading state
-        setLoading(false);
+      // Send batch requests for new entries and updates
+      const requests = [];
+      if (newEntries.length > 0) {
+        requests.push(Axios.post("/cce", newEntries));
       }
+      if (updates.length > 0) {
+        requests.push(Axios.patch("/cce", updates));
+      }
+
+      await Promise.all(requests);
+
+      toast.success("Marks submitted successfully", {
+        position: toast.POSITION.TOP_CENTER,
+        autoClose: 3000,
+      });
+    } catch (error) {
+      console.error("Error submitting marks:", error);
+      toast.error(error.response?.data?.error || "An error occurred", {
+        position: toast.POSITION.TOP_CENTER,
+        autoClose: 3000,
+      });
+    } finally {
+      setLoading(false);
     }
-  };
+  }
+};
 
   const fetchResults = async () => {
     if (subject && selectedClass && selectedBranch && exam) {
@@ -305,13 +297,22 @@ const AddCceMark = () => {
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th
+                    scope="col"
+                    className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
                     Register No
                   </th>
-                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th
+                    scope="col"
+                    className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
                     Student Name
                   </th>
-                  <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th
+                    scope="col"
+                    className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
                     Mark
                   </th>
                 </tr>
@@ -329,21 +330,30 @@ const AddCceMark = () => {
                       <input
                         type="text"
                         className="w-full bg-white text-gray-800 rounded px-2 py-1 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        value={studentMarks[student._id] ?? ""}
+                        value={
+                          studentMarks[student._id]?.toUpperCase?.() === "A"
+                            ? "A"
+                            : studentMarks[student._id] ?? ""
+                        }
                         onChange={(e) => {
-                          const value =
-                            e.target.value === ""
-                              ? ""
-                              : parseFloat(e.target.value);
-
-                          if (isNaN(value) || value <= maxMark) {
+                          const input = e.target.value.trim();
+                          // Allow empty, "A", "a", or numeric values within maxMark
+                          if (
+                            input === "" ||
+                            input.toUpperCase() === "A" ||
+                            (!isNaN(input) &&
+                              input !== "" &&
+                              Number(input) <= maxMark &&
+                              Number(input) >= 0)
+                          ) {
                             handleMarkChange(
                               student._id,
-                              isNaN(value) ? "" : value
+                              input.toUpperCase() === "A" ? "A" : input
                             );
                           }
                         }}
                         max={maxMark}
+                        placeholder={`0 - ${maxMark} or A`}
                       />
                     </td>
                   </tr>
@@ -353,7 +363,10 @@ const AddCceMark = () => {
           </div>
 
           {loading ? (
-            <button className="bg-blue-400 text-white w-full mt-6 py-3 font-bold rounded shadow-md cursor-not-allowed" disabled>
+            <button
+              className="bg-blue-400 text-white w-full mt-6 py-3 font-bold rounded shadow-md cursor-not-allowed"
+              disabled
+            >
               Uploading...
             </button>
           ) : (

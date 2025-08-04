@@ -30,7 +30,7 @@ const superAdminDashboardConfig = {
   "Core Management": [
     { text: "STUDY CENTERS", icon: faSchool, link: "/study-centres", description: "Manage all branches" },
     { text: "STUDENTS", icon: faUsers, link: "/all-centre-students", description: "View all students" },
-    { text: "ALL TEACHERS", icon: faChalkboardTeacher, link: "/all-mahdiyya-teachers", description: "Oversee all educators" },
+    { text: "ALL TEACHERS", icon: faChalkboardTeacher, link: "/all-MAHDIYYAH-teachers", description: "Oversee all educators" },
   ],
   "Academic Operations": [
     { text: "SUBJECTS", icon: faBookOpenReader, link: "/all-subjects", description: "Define course subjects" },

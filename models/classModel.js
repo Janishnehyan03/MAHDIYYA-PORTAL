@@ -6,10 +6,15 @@ const classSchema = new mongoose.Schema({
     required: [true, "Class Name is required field"],
     uppercase: true,
   },
+  classOrder: {
+    type: Number,
+    required: [true, "Class Order is required field"],
+    unique: true,
+  },
   deleted: { type: Boolean, default: false },
 });
 
-classSchema.pre(/^find/, function(next) {
+classSchema.pre(/^find/, function (next) {
   // Only include documents where the deleted field is not true
   this.find({ deleted: { $ne: true } });
   next();

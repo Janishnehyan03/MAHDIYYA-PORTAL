@@ -18,7 +18,7 @@ const cceSchema = new mongoose.Schema({
     ref: "Subject",
     required: true,
   },
-  cceMark: { type: Number, required: true },
+  cceMark: { type: String, required: true },
   yearAndMonth: { type: String },
 });
 

@@ -97,13 +97,13 @@ exports.getResults = async (req, res) => {
         exam: mongoose.Types.ObjectId(req.query.examId),
       })
         .populate({
-          path: 'student',
+          path: "student",
           populate: [
-            { path: 'branch' }, // Populate branch details
-            { path: 'class' }    // Populate class details
-          ]
+            { path: "branch" }, // Populate branch details
+            { path: "class" }, // Populate class details
+          ],
         })
-        .populate('subject');
+        .populate("subject");
 
       if (results.length === 0) {
         return res.status(404).json({ message: "No results found" });
@@ -126,18 +126,21 @@ exports.getResults = async (req, res) => {
         });
       });
 
-      // Sort the students based on the total marks obtained
-      const sortedStudents = Object.values(studentResults).sort(
-        (a, b) => b.totalMarks - a.totalMarks
-      );
+      // Sort the students by registerNo (ascending)
+      const sortedStudents = Object.values(studentResults)
+        .filter(
+          (studentResult) =>
+            studentResult?.student?.branch?._id.toString() ===
+            req.query.studyCentreId
+        )
+        .sort((a, b) => {
+          // Assuming registerNo is a string, sort lexicographically
+          if (a.student.registerNo < b.student.registerNo) return -1;
+          if (a.student.registerNo > b.student.registerNo) return 1;
+          return 0;
+        });
 
-      const filteredStudents = sortedStudents.filter(
-        (studentResult) =>
-          studentResult?.student?.branch?._id.toString() ===
-          req.query.studyCentreId
-      );
-
-      const modifiedResults = filteredStudents.map((studentResult, index) => {
+      const modifiedResults = sortedStudents.map((studentResult, index) => {
         const totalMarks = studentResult.subjectResults.reduce(
           (sum, subjectResult) => sum + subjectResult.subject.totalMarks,
           0
@@ -169,7 +172,6 @@ exports.getResults = async (req, res) => {
     return res.status(500).json({ error: "Internal Server Error" });
   }
 };
-
 
 exports.getGlobalResults = async (req, res) => {
   try {
@@ -258,19 +260,35 @@ exports.createResults = async (req, res) => {
         } = resultData;
 
         // Find existing result by student and subject
-        const existingResult = await CceMark.findOne({ student, subject, exam });
+        const existingResult = await CceMark.findOne({
+          student,
+          subject,
+          exam,
+        });
 
         if (existingResult) {
           // Update existing result
-          existingResult.cceMark = cceMark;
+          if (cceMark === "A") {
+            existingResult.cceMark = "A";
+          } else {
+            const mark = Number(cceMark);
+            existingResult.cceMark = isNaN(mark) ? 0 : mark;
+          }
           await existingResult.save();
           return existingResult; // Return updated result
         } else {
           // Create a new result
+          let markValue;
+          if (cceMark === "A") {
+            markValue = "A";
+          } else {
+            const mark = Number(cceMark);
+            markValue = isNaN(mark) ? 0 : mark;
+          }
           const newResult = new CceMark({
             student,
             exam,
-            cceMark,
+            cceMark: markValue,
             class: studentClass,
             subject,
           });
@@ -290,7 +308,9 @@ exports.createResults = async (req, res) => {
       err.name === "ValidationError" &&
       err.message.includes("Duplicate mark entry for the subject")
     ) {
-      return res.status(400).json({ error: "Duplicate mark entry for the subject." });
+      return res
+        .status(400)
+        .json({ error: "Duplicate mark entry for the subject." });
     }
 
     // General error response
@@ -298,10 +318,9 @@ exports.createResults = async (req, res) => {
   }
 };
 
-
-
 exports.updateResult = async (req, res) => {
   try {
+    console.log("Updating results:", req.body);
     const results = await Promise.all(
       req.body.map(async (resultData) => {
         const { _id, cceMark } = resultData;
@@ -310,7 +329,7 @@ exports.updateResult = async (req, res) => {
         if (_id && cceMark !== undefined) {
           return await CceMark.findByIdAndUpdate(
             _id,
-            { cceMark: parseInt(cceMark) },
+            { cceMark: cceMark },
             { new: true }
           );
         }
@@ -325,7 +344,6 @@ exports.updateResult = async (req, res) => {
     res.status(400).json({ message: err.message });
   }
 };
-
 
 exports.fetchToUpdate = async (req, res) => {
   try {

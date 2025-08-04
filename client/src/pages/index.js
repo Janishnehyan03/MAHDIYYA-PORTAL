@@ -22,7 +22,7 @@ import CreateStudyCentre from "./superAdmin/study-centre/CreateStudyCentre.jsx";
 import EditStudyCentre from "./superAdmin/study-centre/EditStudyCentre.jsx";
 import StudyCentreTeachers from "./superAdmin/study-centre/StudyCentreTeachers.jsx";
 import StudyCentreView from "./superAdmin/study-centre/StudyCentreView.jsx";
-import AllMahdiyyaTeachers from "./superAdmin/teacher/AllMahdiyyaTeachers.jsx";
+import AllMAHDIYYAHTeachers from "./superAdmin/teacher/AllMahdiyyaTeachers.jsx";
 
 import EditCceMark from "./admin/cce-mark/EditCceMark.jsx";
 import ViewCceMarks from "./admin/cce-mark/ViewCceMarks.jsx";
@@ -37,7 +37,7 @@ export const Teacher = {
   AllTeachers,
   CreateTeacher,
   StudyCentreTeachers,
-  AllMahdiyyaTeachers
+  AllMAHDIYYAHTeachers
 
 };
 export const Auth = {

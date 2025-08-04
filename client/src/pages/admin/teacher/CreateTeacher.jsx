@@ -57,7 +57,7 @@ function CreateTeacher() {
     teacherName: "",
     subjects: [],
     gender: "",
-    mahdiyyaTeacher: true,
+    MAHDIYYAHTeacher: true,
   };
   const [formData, setFormData] = useState(initialState);
   const [subjects, setSubjects] = useState([]);
@@ -173,17 +173,17 @@ function CreateTeacher() {
           <div>
             <label className="block text-sm font-medium text-gray-700">Teacher Type</label>
             <div className="mt-2 w-full flex p-1 bg-gray-200 rounded-lg">
-              <button type="button" onClick={() => setFormData(p => ({ ...p, mahdiyyaTeacher: true, subjects: [] }))} className={`w-1/2 py-2 text-sm font-medium rounded-md transition-all ${formData.mahdiyyaTeacher ? 'bg-white shadow' : 'text-gray-600'}`}>
-                Mahdiyya Teacher
+              <button type="button" onClick={() => setFormData(p => ({ ...p, MAHDIYYAHTeacher: true, subjects: [] }))} className={`w-1/2 py-2 text-sm font-medium rounded-md transition-all ${formData.MAHDIYYAHTeacher ? 'bg-white shadow' : 'text-gray-600'}`}>
+                MAHDIYYAH Teacher
               </button>
-              <button type="button" onClick={() => setFormData(p => ({ ...p, mahdiyyaTeacher: false, subjects: [] }))} className={`w-1/2 py-2 text-sm font-medium rounded-md transition-all ${!formData.mahdiyyaTeacher ? 'bg-white shadow' : 'text-gray-600'}`}>
-                Non-Mahdiyya
+              <button type="button" onClick={() => setFormData(p => ({ ...p, MAHDIYYAHTeacher: false, subjects: [] }))} className={`w-1/2 py-2 text-sm font-medium rounded-md transition-all ${!formData.MAHDIYYAHTeacher ? 'bg-white shadow' : 'text-gray-600'}`}>
+                Non-MAHDIYYAH
               </button>
             </div>
           </div>
           
           {/* --- Subjects Section (Conditional) --- */}
-          {formData.mahdiyyaTeacher && (
+          {formData.MAHDIYYAHTeacher && (
             <div className="space-y-4 p-4 border border-gray-200 rounded-lg">
               <FormSelect
                 id="subjects"

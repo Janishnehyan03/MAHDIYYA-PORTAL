@@ -102,8 +102,8 @@ function NewAdmission() {
           autoClose: 2000,
           position: toast.POSITION.TOP_CENTER,
         });
-        // if (selectedClass === "MAHDIYYA THIRD YEAR") {
-        //   navigate("/mahdiyya-third-year");
+        // if (selectedClass === "MAHDIYYAH THIRD YEAR") {
+        //   navigate("/MAHDIYYAH-third-year");
         // } else {
         //   navigate("/admission-created");
         // }

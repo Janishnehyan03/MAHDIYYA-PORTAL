@@ -4,6 +4,8 @@ import {
   faEdit,
   faExclamationTriangle,
   faTrash,
+  faPercent,
+  faTrophy,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useContext, useEffect, useMemo, useState } from "react";
@@ -104,6 +106,9 @@ const ConfirmationModal = ({
 
 // --- Main Student Profile Component ---
 
+// ...all your imports and component code above remain unchanged...
+
+// --- Main Student Profile Component ---
 function StudentProfile() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -116,6 +121,13 @@ function StudentProfile() {
     type: null,
     studentId: null,
   });
+
+  // --- Exam Results State ---
+  const [examList, setExamList] = useState([]);
+  const [selectedExamId, setSelectedExamId] = useState("");
+  const [examResults, setExamResults] = useState(null);
+  const [resultsLoading, setResultsLoading] = useState(false);
+  const [resultsError, setResultsError] = useState("");
 
   // --- Data Fetching ---
   useEffect(() => {
@@ -135,6 +147,44 @@ function StudentProfile() {
     getStudent();
   }, [id, navigate]);
 
+  // Fetch exam list
+  useEffect(() => {
+    const fetchExams = async () => {
+      try {
+        const { data } = await Axios.get("/exam");
+        setExamList(data);
+      } catch {
+        setExamList([]);
+      }
+    };
+    fetchExams();
+  }, []);
+
+  // Fetch selected exam results
+  useEffect(() => {
+    if (!selectedExamId || !student?.registerNo) {
+      setExamResults(null);
+      setResultsError("");
+      return;
+    }
+    setResultsLoading(true);
+    setExamResults(null);
+    setResultsError("");
+
+    Axios.get(`/result/${selectedExamId}/${student.registerNo}`)
+      .then(({ data }) => {
+        if (data && (data.results || data.cceResults)) {
+          setExamResults(data);
+        } else if (data && data.message === "Result Not Found") {
+          setResultsError("No results found for this exam.");
+        } else {
+          setResultsError("Result not available.");
+        }
+      })
+      .catch(() => setResultsError("Failed to fetch results."))
+      .finally(() => setResultsLoading(false));
+  }, [selectedExamId, student?.registerNo]);
+
   // --- Derived Data using useMemo for performance ---
   const studentAge = useMemo(() => {
     if (!student?.dob) return "N/A";
@@ -147,6 +197,28 @@ function StudentProfile() {
     }
     return age;
   }, [student]);
+
+  // --- Group results by subject (for Exam) ---
+  const groupedResults = useMemo(() => {
+    if (!examResults?.results) return [];
+    const map = {};
+    examResults.results.forEach((res) => {
+      if (!map[res.subject.subjectName]) map[res.subject.subjectName] = [];
+      map[res.subject.subjectName].push(res);
+    });
+    return Object.entries(map);
+  }, [examResults]);
+
+  // --- Group CCE results by subject ---
+  const groupedCCEResults = useMemo(() => {
+    if (!examResults?.cceResults) return [];
+    const map = {};
+    examResults.cceResults.forEach((res) => {
+      if (!map[res.subject.subjectName]) map[res.subject.subjectName] = [];
+      map[res.subject.subjectName].push(res);
+    });
+    return Object.entries(map);
+  }, [examResults]);
 
   // --- Handlers for Actions ---
   const handleVerify = async () => {
@@ -309,6 +381,150 @@ function StudentProfile() {
                   value={student.branch?.studyCentreName}
                 />
               </dl>
+            </section>
+
+            {/* Exam Results Selection and Table */}
+            <section className="mt-8">
+              <h3 className="text-lg font-bold text-slate-700 mb-4">
+                Exam Results
+              </h3>
+              <div className="mb-4">
+                <label className="block mb-2 text-sm font-semibold text-slate-600">
+                  Select Exam
+                </label>
+                <select
+                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-indigo-400"
+                  value={selectedExamId}
+                  onChange={(e) => setSelectedExamId(e.target.value)}
+                >
+                  <option value="" disabled>
+                    Select an exam
+                  </option>
+                  {examList.map((exam) => (
+                    <option key={exam._id} value={exam._id}>
+                      {exam.examName}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              {/* Results Loading/Error/Empty State */}
+              {resultsLoading ? (
+                <div className="flex flex-col items-center gap-4 py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-4 border-indigo-400"></div>
+                  <div className="text-slate-600">Loading results...</div>
+                </div>
+              ) : resultsError ? (
+                <div className="text-center py-6 bg-slate-100 rounded-lg text-slate-500">
+                  {resultsError}
+                </div>
+              ) : examResults &&
+                (groupedResults.length > 0 || groupedCCEResults.length > 0) ? (
+                <>
+                  <h4 className="font-semibold text-slate-700 mb-2">
+                    Exam & CCE Marks
+                  </h4>
+                  <table className="min-w-full text-sm border rounded-xl mb-8">
+                    <thead className="bg-slate-50">
+                      <tr>
+                        <th className="py-2 px-3 text-left font-semibold text-slate-600">
+                          Subject
+                        </th>
+                        <th className="py-2 px-3 text-center font-semibold text-slate-600">
+                          Exam Marks
+                        </th>
+                        <th className="py-2 px-3 text-center font-semibold text-slate-600">
+                          CCE Marks
+                        </th>
+                        <th className="py-2 px-3 text-center font-semibold text-slate-600">
+                          Total
+                        </th>
+                        <th className="py-2 px-3 text-center font-semibold text-slate-600">
+                          Max Marks
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {/* Get all unique subjects from both exam and CCE */}
+                      {Array.from(
+                        new Set([
+                          ...groupedResults.map(([subject]) => subject),
+                          ...groupedCCEResults.map(([subject]) => subject),
+                        ])
+                      ).map((subject) => {
+                        // Exam marks for this subject
+                        const examResArr =
+                          groupedResults.find(([s]) => s === subject)?.[1] ||
+                          [];
+                        const examRes = examResArr[0];
+                        const examMark =
+                          examRes?.marksObtained !== undefined
+                            ? examRes.marksObtained
+                            : "-";
+                        // CCE marks for this subject
+                        const cceResArr =
+                          groupedCCEResults.find(([s]) => s === subject)?.[1] ||
+                          [];
+                        const cceRes = cceResArr[0];
+                        const cceMark =
+                          cceRes?.cceMark !== undefined ? cceRes.cceMark : "-";
+                        // Max marks: prefer exam, then cce, then 100
+                        const maxMarks =
+                          examRes?.maxMarks || cceRes?.maxMarks || 100;
+                        // Total
+                        let total = "-";
+                        if (
+                          examMark !== "-" &&
+                          cceMark !== "-" &&
+                          examMark !== "A" &&
+                          cceMark !== "A"
+                        ) {
+                          total = Number(examMark) + Number(cceMark);
+                        } else if (examMark === "A" || cceMark === "A") {
+                          total = "A";
+                        } else if (examMark !== "-" && cceMark === "-") {
+                          total = examMark;
+                        } else if (examMark === "-" && cceMark !== "-") {
+                          total = cceMark;
+                        }
+                        return (
+                          <tr key={subject} className="even:bg-slate-50/70">
+                            <td className="py-2 px-3 font-medium text-slate-700">
+                              {subject}
+                            </td>
+                            <td className="py-2 px-3 text-center font-bold text-slate-800">
+                              {examMark}
+                            </td>
+                            <td className="py-2 px-3 text-center font-bold text-indigo-700">
+                              {cceMark}
+                            </td>
+                            <td className="py-2 px-3 text-center font-bold text-green-700">
+                              {total}
+                            </td>
+                            <td className="py-2 px-3 text-center text-slate-600">
+                              {maxMarks}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                  <div className="flex flex-wrap gap-4 text-sm">
+                    {examResults.grandTotal !== undefined && (
+                      <span className="flex items-center gap-2 bg-indigo-50 text-indigo-700 px-3 py-1 rounded-full font-semibold">
+                        <FontAwesomeIcon icon={faTrophy} />
+                        Grand Total: {examResults.grandTotal} /{" "}
+                        {examResults.totalPossibleMarks}
+                      </span>
+                    )}
+                    {examResults.percentage !== undefined && (
+                      <span className="flex items-center gap-2 bg-green-50 text-green-700 px-3 py-1 rounded-full font-semibold">
+                        <FontAwesomeIcon icon={faPercent} />
+                        Percentage: {examResults.percentage}%
+                      </span>
+                    )}
+                  </div>
+                </>
+              ) : null}
             </section>
           </div>
 

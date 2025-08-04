@@ -50,7 +50,7 @@ function Homepage() {
                   Result Published
                 </p>
                 <p className="w-full text-sm pb-4 font-semibold text-gray-100">
-                  MAHDIYYA Result Published
+                  MAHDIYYAH Result Published
                 </p>
                 <div className="lg:flex justify-between items-center">
                   <p className="text-white text-center w-full animate-pulse hover:bg-[#48909c] bg-[#31626b] rounded-full px-3 py-1 font-semibold cursor-pointer transition border border-white  hover:bg-transparent ">
@@ -71,7 +71,7 @@ function Homepage() {
                   registration started
                 </p>
                 <p className="w-full text-sm pb-4 font-semibold text-gray-100">
-                  MAHDIYYA study centre registration started
+                  MAHDIYYAH study centre registration started
                 </p>
                 <div className="lg:flex justify-between items-center">
                   <p className="text-white text-center w-full animate-pulse hover:bg-[#48909c] bg-[#31626b] rounded-full px-3 py-1 font-semibold cursor-pointer transition border border-white  hover:bg-transparent ">
@@ -144,7 +144,7 @@ function Homepage() {
           />
           <div className="flex flex-col justify-between p-4 leading-normal">
             <h5 className="mb-2 text-2xl font-bold tracking-tight capitalize text-white dark:text-white">
-              MAHDIYYA COURSE ADMISSION STARTED
+              MAHDIYYAH COURSE ADMISSION STARTED
             </h5>
             <p className="mb-3 font-normal text-gray-700 dark:text-gray-400">
               ദാറുൽഹുദാ ഇസ്‌ലാമിക് യൂനിവേഴ്സിറ്റി പൊതു വിദ്യാഭ്യാസ വിഭാഗം

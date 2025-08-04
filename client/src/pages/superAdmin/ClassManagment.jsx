@@ -52,12 +52,12 @@ function ClassManagment() {
     setEditingClass(classItem); // Set the class to edit
     setIsModalOpen(true);
   };
-  
+
   const closeModalAndRefresh = () => {
     setIsModalOpen(false);
     setEditingClass(null);
     getAllClasses(); // Refresh data after action
-  }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 p-4 sm:p-6 lg:p-8">
@@ -84,6 +84,7 @@ function ClassManagment() {
                 <tr>
                   <th scope="col" className="px-6 py-3 font-semibold">#</th>
                   <th scope="col" className="px-6 py-3 font-semibold">Class Name</th>
+                  <th scope="col" className="px-6 py-3 font-semibold">Order</th>
                   <th scope="col" className="px-6 py-3 font-semibold text-center">Actions</th>
                 </tr>
               </thead>
@@ -93,6 +94,9 @@ function ClassManagment() {
                     <tr key={classItem._id} className="hover:bg-gray-50 transition-colors">
                       <td className="px-6 py-4 font-medium text-gray-500">{index + 1}</td>
                       <td className="px-6 py-4 font-semibold text-gray-800">{classItem.className}</td>
+                      <td className="px-6 py-4 text-gray-800">
+                        {typeof classItem.classOrder !== "undefined" ? classItem.classOrder : "-"}
+                      </td>
                       <td className="px-6 py-4 text-center">
                         <button
                           onClick={() => handleOpenEditModal(classItem)}
@@ -106,7 +110,7 @@ function ClassManagment() {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan="3" className="text-center py-12 px-6 text-gray-500">
+                    <td colSpan="4" className="text-center py-12 px-6 text-gray-500">
                       No classes found. Click "Add New Class" to get started.
                     </td>
                   </tr>
@@ -132,23 +136,33 @@ function ClassManagment() {
 // Modal Component
 function ClassModal({ isOpen, onClose, onSubmit, isEditing, initialData }) {
   const [className, setClassName] = useState("");
+  const [classOrder, setClassOrder] = useState("");
 
   useEffect(() => {
     // Pre-fill form when editing, otherwise clear it
     if (isEditing && initialData) {
-      setClassName(initialData.className);
+      setClassName(initialData.className || "");
+      setClassOrder(
+        typeof initialData.classOrder !== "undefined" && initialData.classOrder !== null
+          ? initialData.classOrder
+          : ""
+      );
     } else {
       setClassName("");
+      setClassOrder("");
     }
   }, [isEditing, initialData, isOpen]); // Rerun when modal opens
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (className.trim()) {
-      onSubmit({ className });
+      // Parse classOrder to number, fallback to 0 if empty or invalid
+      const parsedOrder =
+        classOrder === "" || isNaN(Number(classOrder)) ? 0 : Number(classOrder);
+      onSubmit({ className, classOrder: parsedOrder });
     }
   };
-  
+
   if (!isOpen) return null;
 
   return (
@@ -184,6 +198,20 @@ function ClassModal({ isOpen, onClose, onSubmit, isEditing, initialData }) {
                         required
                       />
                     </div>
+                    <div className="mt-4">
+                      <label htmlFor="classOrder" className="block text-sm font-medium text-gray-700">
+                        Class Order
+                      </label>
+                      <input
+                        type="number"
+                        id="classOrder"
+                        value={classOrder}
+                        onChange={(e) => setClassOrder(e.target.value.replace(/[^0-9]/g, ""))}
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-3"
+                        placeholder="e.g., 1"
+                        min="0"
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
@@ -203,12 +231,12 @@ function ClassModal({ isOpen, onClose, onSubmit, isEditing, initialData }) {
                 </button>
               </div>
             </form>
-             <button
-                onClick={onClose}
-                className="absolute top-0 right-0 mt-4 mr-4 text-gray-400 hover:text-gray-600"
-              >
-                <FontAwesomeIcon icon={faXmark} size="lg" />
-              </button>
+            <button
+              onClick={onClose}
+              className="absolute top-0 right-0 mt-4 mr-4 text-gray-400 hover:text-gray-600"
+            >
+              <FontAwesomeIcon icon={faXmark} size="lg" />
+            </button>
           </div>
         </div>
       </div>

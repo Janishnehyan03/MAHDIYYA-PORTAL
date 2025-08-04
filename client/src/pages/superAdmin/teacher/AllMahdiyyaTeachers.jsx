@@ -123,9 +123,9 @@ const Pagination = ({
   );
 };
 
-// --- Main Component: AllMahdiyyaTeachers ---
+// --- Main Component: AllMAHDIYYAHTeachers ---
 
-function AllMahdiyyaTeachers() {
+function AllMAHDIYYAHTeachers() {
   const [loading, setLoading] = useState(true);
   const [allTeachers, setAllTeachers] = useState([]);
   const [studyCentres, setStudyCentres] = useState([]);
@@ -146,7 +146,7 @@ function AllMahdiyyaTeachers() {
       try {
         const [centresRes, teachersRes] = await Promise.all([
           Axios.get("/study-centre?sort=studyCentreName"),
-          Axios.get("/teacher?mahdiyyaTeacher=true&limit=1000"), // Fetch all Mahdiyya teachers at once
+          Axios.get("/teacher?MAHDIYYAHTeacher=true&limit=1000"), // Fetch all MAHDIYYAH teachers at once
         ]);
         setStudyCentres(centresRes.data.docs);
         setAllTeachers(teachersRes.data);
@@ -238,7 +238,7 @@ function AllMahdiyyaTeachers() {
       [headers.join(","), ...rows.map((e) => e.join(","))].join("\n");
     const link = document.createElement("a");
     link.setAttribute("href", encodeURI(csvContent));
-    link.setAttribute("download", "mahdiyya_teachers_report.csv");
+    link.setAttribute("download", "MAHDIYYAH_teachers_report.csv");
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -249,10 +249,10 @@ function AllMahdiyyaTeachers() {
       <div className="max-w-7xl mx-auto bg-white shadow-lg rounded-xl overflow-hidden">
         <div className="p-6 border-b border-slate-200">
           <h1 className="text-2xl font-bold text-slate-800">
-            Mahdiyya Teachers Report
+            MAHDIYYAH Teachers Report
           </h1>
           <p className="mt-1 text-sm text-slate-500">
-            View, filter, and export a list of all Mahdiyya-qualified teachers.
+            View, filter, and export a list of all MAHDIYYAH-qualified teachers.
           </p>
         </div>
 
@@ -394,7 +394,7 @@ function AllMahdiyyaTeachers() {
                       {teacher.branch?.studyCentreName || "N/A"}
                     </td>
                     <td className="p-4">
-                      <StatusBadge isTrue={teacher.mahdiyyaTeacher} />
+                      <StatusBadge isTrue={teacher.MAHDIYYAHTeacher} />
                     </td>
                   </tr>
                 ))}
@@ -444,4 +444,4 @@ function AllMahdiyyaTeachers() {
   );
 }
 
-export default AllMahdiyyaTeachers;
+export default AllMAHDIYYAHTeachers;

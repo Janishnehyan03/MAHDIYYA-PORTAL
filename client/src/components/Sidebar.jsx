@@ -25,7 +25,7 @@ import { UserAuthContext } from "./../context/userContext"; // Assuming path is 
 const Logo = () => (
   <Link to="/" className="flex items-center gap-2 px-4">
  
-    <h1 className="text-2xl font-bold text-slate-800">Mahdiyya Portal</h1>
+    <h1 className="text-xl font-bold text-slate-800">MAHDIYYAH Portal</h1>
   </Link>
 );
 
@@ -91,7 +91,7 @@ function Sidebar() {
     { name: "Dashboard", route: "/", icon: faHome },
     { name: "Study Centers", route: "/study-centres", icon: faBuildingCircleArrowRight },
     { name: "Students", route: "/all-centre-students", icon: faBookOpenReader },
-    { name: "Teachers", route: "/all-mahdiyya-teachers", icon: faUserCheck },
+    { name: "Teachers", route: "/all-MAHDIYYAH-teachers", icon: faUserCheck },
     { name: "Notifications", route: "/create-notification", icon: faBell },
     { name: "Messages", route: "/create-messages", icon: faMessage },
     { name: "Results", route: "/result-section", icon: faMarker },

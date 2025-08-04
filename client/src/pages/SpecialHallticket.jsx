@@ -45,9 +45,9 @@ const PdfCustomizer = () => {
       
       const yStartSecondSem = height - 470;
       const yStartForthSem = height - 525;
-      const yStartMahdiyyaSecondSem = height - 580;
-      const yStartMahdiyyaForthSem = height - 645;
-      const yStartMahdiyyaSixthSem = height - 698;
+      const yStartMAHDIYYAHSecondSem = height - 580;
+      const yStartMAHDIYYAHForthSem = height - 645;
+      const yStartMAHDIYYAHSixthSem = height - 698;
       const yIncrement = 15;  // Adjust this value as needed
 
       firstPage.drawText(data.name, {
@@ -103,25 +103,25 @@ drawColumnText(
 );
 
 drawColumnText(
-  data?.semesters?.mahdiyyaSecondSem || "_____________________",
+  data?.semesters?.MAHDIYYAHSecondSem || "_____________________",
   240,
-  yStartMahdiyyaSecondSem,
+  yStartMAHDIYYAHSecondSem,
   yIncrement,
   9
 );
 
 drawColumnText(
-  data?.semesters?.mahdiyyaForthSem || "_____________________",
+  data?.semesters?.MAHDIYYAHForthSem || "_____________________",
   240,
-  yStartMahdiyyaForthSem,
+  yStartMAHDIYYAHForthSem,
   yIncrement,
   9
 );
 
 drawColumnText(
-  data?.semesters?.mahdiyyaSixthSem || "_____________________",
+  data?.semesters?.MAHDIYYAHSixthSem || "_____________________",
   240,
-  yStartMahdiyyaSixthSem,
+  yStartMAHDIYYAHSixthSem,
   yIncrement,
   9
 );

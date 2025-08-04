@@ -173,7 +173,7 @@ function SelectedBranch({
                 </div>
               ))}
             </div>
-            {formData.class === "mahdiyya-third-year" && !imageUploaded && (
+            {formData.class === "MAHDIYYAH-third-year" && !imageUploaded && (
               <>
                 <div className="lg:col-span-1">
                   <label
@@ -255,7 +255,7 @@ function SelectedBranch({
             >
               GO BACK
             </button>
-            {formData.class !== "mahdiyya-third-year" && (
+            {formData.class !== "MAHDIYYAH-third-year" && (
               <button
                 onClick={nextPage}
                 className="w-1/2 mt-3 lg:mt-7 bg-indigo-900 mx-2 hover:bg-indigo-800 text-white font-bold py-4 px-4 rounded focus:outline-none focus:shadow-outline uppercase"
