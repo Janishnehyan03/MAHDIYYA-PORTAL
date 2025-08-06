@@ -1,15 +1,23 @@
 const { google } = require("googleapis");
-const appConfig = require("../config/appConfig.js");
 
-const { GOOGLE_SHEET_CLIENT_EMAIL, GOOGLE_SHEET_PRIVATE_KEY } = appConfig;
+async function getGoogleSheetClient() {
+  const clientEmail = process.env.GOOGLE_SHEET_CLIENT_EMAIL;
+  const privateKey = process.env.GOOGLE_SHEET_PRIVATE_KEY;
 
-const scopes = ['https://www.googleapis.com/auth/spreadsheets'];
+  if (!clientEmail || !privateKey) {
+    throw new Error("Missing GOOGLE_SHEET_CLIENT_EMAIL or GOOGLE_SHEET_PRIVATE_KEY environment variables.");
+  }
 
-const sheetClient = new google.auth.JWT(GOOGLE_SHEET_CLIENT_EMAIL, null, GOOGLE_SHEET_PRIVATE_KEY, scopes);
+  const auth = new google.auth.GoogleAuth({
+    credentials: {
+      client_email: clientEmail,
+      private_key: privateKey.replace(/\\n/g, '\n'),
+    },
+    scopes: ['https://www.googleapis.com/auth/spreadsheets'],
+  });
 
-const sheets = google.sheets({
-    version: 'v4',
-    auth: sheetClient
-});
+  const authClient = await auth.getClient();
+  return google.sheets({ version: 'v4', auth: authClient });
+}
 
-module.exports = { sheets };
+module.exports = { getGoogleSheetClient };

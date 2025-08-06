@@ -1,8 +1,12 @@
 const mongoose = require("mongoose");
 const express = require("express");
 const { protect, restrictTo } = require("../controllers/authController");
+const {
+  getSheetValues,
+  getGoogleSheetClient,
+} = require("../utils/googleSheets");
+const { readGoogleSheet } = require("../utils/sheetCrud");
 const router = express.Router();
-const { sheets } = require("../utils/googleSheets");
 
 // Define the PreviousExam schema
 const previousExamSchema = new mongoose.Schema({
@@ -41,41 +45,97 @@ router.get("/", async (req, res) => {
   }
 });
 
-/**
- * Read a single PreviousExam by ID
- * Additionally, fetch and return Google Sheets data in the response
- */
+// A more robust way to get the sheet ID from a URL
+function getSheetIdFromUrl(url) {
+  const match = url.match(/\/d\/(.*?)\//);
+  return match ? match[1] : null;
+}
+
 router.get("/:id", async (req, res) => {
   try {
-    const previousExam = await PreviousExam.findById(req.params.id).populate("admission");
+    // 1. Fetch data from your database
+    const previousExam = await PreviousExam.findById(req.params.id).populate(
+      "admission"
+    );
     if (!previousExam) {
       return res.status(404).send({ error: "PreviousExam not found" });
     }
 
-    // Google Sheets integration
-    const spreadsheetId = "1SLjUSlV6hTxYpwJXWyj51CAUsS1jFHai";
-    // Change to your actual sheet/tab name or use the default "Sheet1"
-    const range = "Sheet1"; // Replace with the correct sheet name if different
-
-    let sheetData = [];
-    try {
-      const response = await sheets.spreadsheets.values.get({
-        spreadsheetId,
-        range,
-      });
-      sheetData = response.data.values || [];
-      
-    } catch (sheetsErr) {
-      // If the sheet fetch fails, don't crash the endpoint, just include an error
-      sheetData = { error: "Failed to fetch Google Sheets data", details: sheetsErr.message };
+    // 2. Robustly extract the Google Sheet ID
+    const googleSheetId = getSheetIdFromUrl(previousExam.fileUrl);
+    if (!googleSheetId) {
+      return res.status(400).send({ error: "Invalid Google Sheet URL format" });
     }
-console.log("Google Sheets Data:", sheetData);
+
+    // 3. Get the specific sheet name from the query parameter
+    const { sheetName } = req.query;
+
+    let googleSheetData = {};
+
+    try {
+      const googleSheetClient = await getGoogleSheetClient();
+
+      // --- NEW LOGIC ---
+      if (sheetName) {
+        // --- FAST PATH: Fetch only the requested sheet ---
+        console.log(`Fetching specific sheet: "${sheetName}"`);
+        const values = await readGoogleSheet(
+          googleSheetClient,
+          googleSheetId,
+          sheetName, // Use the sheet name from the query
+          "A:Z" // or your desired range
+        );
+        googleSheetData[sheetName] = values;
+      } else {
+        // --- FALLBACK: Fetch all sheets (your original logic) ---
+        console.log("No sheetName provided, fetching all sheets.");
+        const metaRes = await googleSheetClient.spreadsheets.get({
+          spreadsheetId: googleSheetId,
+        });
+
+        const sheetNames = metaRes.data.sheets.map((s) => s.properties.title);
+
+        const sheetValuePromises = sheetNames.map((name) =>
+          readGoogleSheet(googleSheetClient, googleSheetId, name, "A:Z")
+            .then((values) => ({ name, values }))
+            .catch((err) => ({
+              name,
+              values: { error: `Failed to fetch sheet: ${err.message}` },
+            }))
+        );
+
+        const results = await Promise.all(sheetValuePromises);
+        results.forEach((r) => {
+          googleSheetData[r.name] = r.values;
+        });
+      }
+    } catch (err) {
+      // This catch block will handle errors from both paths (e.g., sheet not found, API auth failure)
+      console.error("Error fetching Google Sheet data:", err);
+      // Check for common Google API errors
+      if (err.code === 404) {
+        return res.status(404).send({
+          error: "Google Sheet not found or you do not have permission.",
+        });
+      }
+      if (err.message.includes("Unable to parse range")) {
+        return res.status(400).send({
+          error: `The sheet name "${sheetName}" was not found in the document.`,
+        });
+      }
+      // Generic error for other issues
+      return res.status(500).send({
+        error: "A problem occurred while fetching data from Google Sheets.",
+      });
+    }
+
+    // 4. Send the final response
     res.status(200).send({
       previousExam,
-      googleSheetData: sheetData,
+      googleSheetData,
     });
   } catch (error) {
-    res.status(500).send(error);
+    res.status(500).send({ error: error.message });
   }
 });
 
