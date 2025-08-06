@@ -47,7 +47,7 @@ router.delete(
 router.patch(
   "/:id",
   protect,
-  restrictTo("admin",'superAdmin'),
+  restrictTo("admin", "superAdmin"),
   studentController.updateStudent
 );
 
@@ -57,4 +57,19 @@ router.post(
   uploads.single("file"),
   studentController.excelUpload
 );
+
+router.post(
+  "/drop-out/:id",
+  protect,
+  restrictTo("admin", "superAdmin"),
+  studentController.dropOutStudent
+);
+
+router.get(
+  "/list/dropout",
+  protect,
+  restrictTo("admin", "superAdmin"),
+  studentController.getDropoutList
+);
+
 module.exports = router;

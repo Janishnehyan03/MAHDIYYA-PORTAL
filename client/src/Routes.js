@@ -185,6 +185,10 @@ export const AdminRoutes = [
     component: <Student.AllClasses />,
   },
   {
+    route: "/dropout-list",
+    component: <Student.DropoutList />,
+  },
+  {
     route: "/all-teachers",
     component: <Teacher.AllTeachers />,
   },

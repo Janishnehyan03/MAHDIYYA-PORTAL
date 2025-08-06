@@ -92,6 +92,27 @@ function AllClasses() {
                 </div>
               </Link>
             ))}
+            <Link
+              to="/dropout-list"
+              className="group focus:outline-none"
+              tabIndex={0}
+            >
+              <div
+                className="bg-white rounded-2xl shadow-lg border border-gray-100 p-7 flex flex-col items-center text-center transition-all duration-300 h-full group-hover:shadow-2xl group-hover:-translate-y-1 group-focus:shadow-2xl group-focus:-translate-y-1"
+              >
+                <div
+                  className="mb-5 w-16 h-16 flex items-center justify-center rounded-full bg-gradient-to-br from-red-500 to-red-400 text-white text-3xl shadow group-hover:scale-105 transform transition"
+                >
+                  <FontAwesomeIcon icon={faFileArrowDown} />
+                </div>
+                <h3 className="text-lg font-bold text-gray-800">
+                  Drop Out List
+                </h3>
+                <p className="mt-2 text-sm text-gray-500">
+                  View Students Who Dropped Out
+                </p>
+              </div>
+            </Link>
         </div>
 
         {/* Empty / Loading State */}

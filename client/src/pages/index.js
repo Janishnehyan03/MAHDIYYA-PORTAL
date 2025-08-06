@@ -31,6 +31,7 @@ import AllCourses from "./superAdmin/course/AllCourses.jsx";
 import CreateCourse from "./superAdmin/course/CreateCourse";
 import EditCourse from "./superAdmin/course/EditCourse";
 import AddCceMark from "./superAdmin/result/AddCceMark.jsx";
+import DropoutList from "./student/DropoutList.jsx";
 
 export const Teacher = {
   EditTeacher,
@@ -55,7 +56,8 @@ export const Student = {
   Profile,
   AllClasses,
   AddStudent,
-  TransferStudent
+  TransferStudent,
+  DropoutList
 };
 export const StudyCentre = {
   AllStudyCentres,

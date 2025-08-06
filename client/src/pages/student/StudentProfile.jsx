@@ -6,6 +6,7 @@ import {
   faTrash,
   faPercent,
   faTrophy,
+  faUserSlash,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useContext, useEffect, useMemo, useState } from "react";
@@ -106,9 +107,6 @@ const ConfirmationModal = ({
 
 // --- Main Student Profile Component ---
 
-// ...all your imports and component code above remain unchanged...
-
-// --- Main Student Profile Component ---
 function StudentProfile() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -251,6 +249,27 @@ function StudentProfile() {
     }
   };
 
+  const handleDropOut = async (studentId) => {
+    try {
+      if (
+        window.confirm(
+          "Are you sure you want to mark this student as dropped out? This action cannot be undone."
+        )
+      ) {
+        setLoading(true);
+        await Axios.post(`/student/drop-out/${studentId}`);
+        toast.success("Student marked as dropped out successfully.");
+        setStudent((prev) => ({ ...prev, droppedOut: true })); // Optimistic UI update
+      }
+    } catch (error) {
+      toast.error("Failed to mark student as dropped out.");
+      console.error(error.response);
+    } finally {
+      setLoading(false);
+      setModalState({ isOpen: false });
+    }
+  };
+
   const handleConfirmAction = () => {
     if (modalState.type === "verify") handleVerify();
     if (modalState.type === "delete") handleDelete();
@@ -269,16 +288,64 @@ function StudentProfile() {
     return (
       <div className="text-center p-10">
         <h2 className="text-2xl font-bold text-slate-700">Student Not Found</h2>
-        <Link
-          to="/all-centre-students"
-          className="mt-4 inline-block text-indigo-600 hover:underline"
-        >
-          Go back to student list
-        </Link>
+       
       </div>
     );
   }
 
+  // --- DROPPED OUT UI + Logic Handling ---
+  if (student.droppedOut) {
+    return (
+      <div className="w-full min-h-screen bg-slate-50 p-4 md:p-8">
+        <div className="max-w-2xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden border border-red-200">
+          <div className="flex flex-col items-center gap-6 p-10">
+            <FontAwesomeIcon
+              icon={faUserSlash}
+              className="text-red-500"
+              style={{ fontSize: 60 }}
+            />
+            <h1 className="text-3xl font-bold text-red-800 mb-2">
+              Student Dropped Out
+            </h1>
+            <p className="text-slate-700 text-center">
+              This student (<span className="font-semibold">{student.studentName}</span>) has been marked as <span className="font-semibold text-red-600">Dropped Out</span>.<br />
+              No further academic actions (exam results, edit, transfer, verification) are available for dropped out students.
+            </p>
+            <div className="flex flex-col md:flex-row gap-3 mt-8">
+            
+              {/* Optionally: allow delete if superAdmin */}
+              {authData?.role === "superAdmin" && (
+                <button
+                  onClick={() =>
+                    setModalState({
+                      isOpen: true,
+                      type: "delete",
+                      studentId: student._id,
+                    })
+                  }
+                  className="px-6 py-2 bg-red-600 text-white rounded-md font-semibold hover:bg-red-700 transition"
+                  disabled={loading}
+                >
+                  <FontAwesomeIcon icon={faTrash} className="mr-2" /> Delete
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+        <ConfirmationModal
+          isOpen={modalState.isOpen}
+          onClose={() => setModalState({ isOpen: false })}
+          onConfirm={handleConfirmAction}
+          title="Confirm Deletion"
+          message={`This action is irreversible. Are you sure you want to delete ${student.studentName}?`}
+          confirmText="Yes, Delete"
+          type="danger"
+        />
+      </div>
+    );
+  }
+
+  // --- NORMAL (Active) UI ---
   return (
     <>
       <ConfirmationModal
@@ -564,6 +631,16 @@ function StudentProfile() {
                 </Link>
               )}
             </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => handleDropOut(student._id)}
+                className="px-5 py-2.5 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 transition shadow-sm disabled:opacity-50"
+                disabled={loading}
+              >
+                <FontAwesomeIcon icon={faUserSlash} className="mr-2" /> Drop Out
+              </button>
+            </div>
             <button
               onClick={() =>
                 setModalState({
@@ -572,10 +649,10 @@ function StudentProfile() {
                   studentId: student._id,
                 })
               }
-              className="px-5 py-2.5 bg-red-50 text-red-600 font-semibold rounded-lg hover:bg-red-100 transition disabled:opacity-50"
+              className="px-5 py-2.5 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 transition shadow-sm disabled:opacity-50"
               disabled={loading}
             >
-              <FontAwesomeIcon icon={faTrash} className="mr-2" /> Delete Student
+              <FontAwesomeIcon icon={faTrash} className="mr-2" /> Delete
             </button>
           </div>
         </div>

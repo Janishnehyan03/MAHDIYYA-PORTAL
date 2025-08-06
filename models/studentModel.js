@@ -53,7 +53,7 @@ const studentSchema = new mongoose.Schema(
       type: String,
       uppercase: true,
       maxLength: [50, "50 characters are allowed"],
-      required: false
+      required: false,
     },
 
     dateOfBirth: {
@@ -91,6 +91,14 @@ const studentSchema = new mongoose.Schema(
       type: mongoose.Types.ObjectId,
       required: [true, "Please select a class"],
       ref: "Class",
+    },
+    completed: {
+      type: Boolean,
+      default: false,
+    },
+    droppedOut: {
+      type: Boolean,
+      default: false,
     },
 
     deleted: { type: Boolean, default: false },

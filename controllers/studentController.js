@@ -20,18 +20,24 @@ exports.getAllStudents = async (req, res, next) => {
     // Check query parameters and set conditions accordingly
     if (req.query.all) {
       // Fetch all students if 'all' is true
-      data = await Student.find().populate("branch").populate("class").sort({ registerNo: 1 });
+      data = await Student.find()
+        .populate("branch")
+        .populate("class")
+        .sort({ registerNo: 1 });
     } else {
       // Set query conditions based on provided parameters
       if (req.query.studyCentre) {
-      query.branch = req.query.studyCentre; // Add branch condition if studyCentre is provided
+        query.branch = req.query.studyCentre; // Add branch condition if studyCentre is provided
       }
       if (req.query.classId) {
-      query.class = req.query.classId; // Add class condition if classId is provided
+        query.class = req.query.classId; // Add class condition if classId is provided
       }
 
       // Fetch students based on the constructed query
-      data = await Student.find(query).populate("branch").populate("class").sort({ registerNo: 1 });
+      data = await Student.find(query)
+        .populate("branch")
+        .populate("class")
+        .sort({ registerNo: 1 });
     }
 
     res.status(200).json(data);
@@ -77,6 +83,7 @@ exports.getMyStudents = async (req, res, next) => {
           branch: req.user.branch,
           verified: { $ne: false },
           deleted: { $ne: true },
+          droppedOut: { $ne: true },
           class: mongoose.Types.ObjectId(req.params.classId),
         },
       },
@@ -199,5 +206,38 @@ exports.excelUpload = async (req, res) => {
   } catch (error) {
     console.error("Upload error:", error);
     res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+// drop out
+exports.dropOutStudent = async (req, res, next) => {
+  console.log("Drop out student called");
+  try {
+    const studentId = req.params.id;
+    const student = await Student.findByIdAndUpdate(studentId, {
+      droppedOut: true,
+    });
+    if (!student) {
+      return res.status(404).json({ message: "Student not found" });
+    }
+    res.status(200).json({ message: "Student has been marked as dropped out" });
+  } catch (error) {
+    console.error("Error dropping out student:", error);
+    next(error);
+  }
+};
+
+// get dropout list
+exports.getDropoutList = async (req, res, next) => {
+  try {
+    const students = await Student.find({ droppedOut: true })
+      .populate("branch", "studyCentreName")
+      .populate("class", "className")
+      .sort({ updatedAt: -1 }); // Sort by most recent dropouts first
+
+    res.status(200).json(students);
+  } catch (error) {
+    console.error("Error fetching dropout list:", error);
+    next(error);
   }
 };
