@@ -78,7 +78,7 @@ const studentSchema = new mongoose.Schema(
     },
     transferredFrom: {
       type: mongoose.Types.ObjectId,
-      required: [true, "Please select study centre"],
+      // required: [true, "Please select study centre"],
       maxLength: [100, "100 characters are allowed"],
       ref: "Branch",
     },

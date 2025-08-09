@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import Axios from "../Axios";
 
 function ViewTeacher() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [teacher, setTeacher] = useState({});
 
   const getTeacher = async () => {
@@ -15,48 +16,62 @@ function ViewTeacher() {
     }
   };
 
+  const deleteTeacher = async () => {
+    const confirmDelete = window.confirm(
+      `Are you sure you want to delete ${teacher.teacherName}?`
+    );
+    if (!confirmDelete) return;
+
+    try {
+      await Axios.delete(`/teacher/${id}`);
+      alert("Teacher deleted successfully");
+      navigate("/all-teachers"); // redirect to teachers list page
+    } catch (error) {
+      console.error(error);
+      alert("Failed to delete teacher");
+    }
+  };
+
   useEffect(() => {
     getTeacher();
   }, [id]);
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-800">
-      <div className="md:w-3/12 lg:w-1/3 p-4">
+    <div className="flex justify-center items-center min-h-screen bg-gray-100">
+      <div className="w-full max-w-md p-4">
         {/* Profile Card */}
-        <div className="bg-gray-900 p-6 rounded-lg shadow-lg text-center border-t-4 border-green-400">
-          <h1 className="text-[#eeeeee] font-bold text-2xl mb-2">
+        <div className="bg-white p-6 rounded-xl shadow-md text-center border border-gray-200">
+          <h1 className="text-gray-800 font-bold text-2xl mb-1">
             {teacher.teacherName}
           </h1>
-          <h3 className="text-white text-lg mb-4">
-            {teacher?.email}
-          </h3>
+          <h3 className="text-gray-600 text-base mb-4">{teacher?.email}</h3>
 
-          <ul className="bg-gray-800 text-white py-4 px-6 rounded shadow-sm">
-            <li className="flex items-center justify-between py-3 border-b border-gray-700">
-              <span className="font-medium">Phone</span>
-              <span className="py-1 px-2 rounded text-gray-300 text-sm">
+          <ul className="bg-gray-50 py-4 px-6 rounded-lg shadow-sm border border-gray-200">
+            <li className="flex items-center justify-between py-3 border-b border-gray-200">
+              <span className="font-medium text-gray-700">Phone</span>
+              <span className="py-1 px-2 rounded bg-gray-100 text-gray-600 text-sm">
                 {teacher.phone}
               </span>
             </li>
-            <li className="flex items-center justify-between py-3 border-b border-gray-700">
-              <span className="font-medium">Gender</span>
-              <span className="py-1 px-2 rounded text-gray-300 text-sm">
+            <li className="flex items-center justify-between py-3 border-b border-gray-200">
+              <span className="font-medium text-gray-700">Gender</span>
+              <span className="py-1 px-2 rounded bg-gray-100 text-gray-600 text-sm">
                 {teacher.gender}
               </span>
             </li>
-            <li className="flex items-center justify-between py-3 border-b border-gray-700">
-              <span className="font-medium">Branch</span>
-              <span className="py-1 px-2 rounded text-gray-300 text-sm">
+            <li className="flex items-center justify-between py-3 border-b border-gray-200">
+              <span className="font-medium text-gray-700">Centre</span>
+              <span className="py-1 px-2 rounded bg-gray-100 text-gray-600 text-sm">
                 {teacher?.branch?.studyCentreName}
               </span>
             </li>
             <li className="py-3">
-              <span className="font-medium">Subjects</span>
+              <span className="font-medium text-gray-700">Subjects</span>
               <div className="mt-2">
                 {teacher.subjects?.map((subject, key) => (
                   <div
                     key={key}
-                    className="bg-teal-700 py-2 my-2 px-3 rounded text-white text-sm"
+                    className="bg-blue-100 text-blue-800 py-2 my-1 px-3 rounded text-sm border border-blue-200"
                   >
                     {subject.subjectName} ({subject.subjectCode})
                   </div>
@@ -64,6 +79,14 @@ function ViewTeacher() {
               </div>
             </li>
           </ul>
+
+          {/* Delete Button */}
+          <button
+            onClick={deleteTeacher}
+            className="mt-6 bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded-lg shadow-md transition duration-200"
+          >
+            Delete Teacher
+          </button>
         </div>
       </div>
     </div>
