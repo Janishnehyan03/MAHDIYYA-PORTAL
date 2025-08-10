@@ -166,7 +166,20 @@ function CreateTeacher() {
             <FormField id="teacherName" label="Teacher's Name" name="teacherName" value={formData.teacherName} onChange={onChange} error={errors.teacherName} required />
             <FormField id="email" label="Email Address" type="email" name="email" value={formData.email} onChange={onChange} error={errors.email} required />
             <FormField id="phone" label="Phone Number" type="tel" name="phone" value={formData.phone} onChange={onChange} error={errors.phone} required />
-            <FormSelect id="gender" label="Gender" name="gender" value={formData.gender} onChange={onChange} error={errors.gender} options={['Male', 'Female']} placeholder="Select Gender" required />
+            <FormSelect
+              id="gender"
+              label="Gender"
+              name="gender"
+              value={formData.gender}
+              onChange={onChange}
+              error={errors.gender}
+              options={[
+                { value: "Male", label: "Male" },
+                { value: "Female", label: "Female" }
+              ]}
+              placeholder="Select Gender"
+              required
+            />
           </div>
 
           {/* --- Teacher Type (Segmented Control) --- */}
