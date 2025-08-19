@@ -11,36 +11,30 @@ const studentSchema = new mongoose.Schema(
     houseName: {
       type: String,
       uppercase: true,
-      required: [true, "house name is required"],
       maxLength: [100, "100 characters are allowed"],
     },
     fatherName: {
       type: String,
       uppercase: true,
-      required: [true, "father name is required"],
       maxLength: [100, "100 characters are allowed"],
     },
     place: {
       type: String,
       uppercase: true,
-      required: [true, "place is required"],
       maxLength: [100, "100 characters are allowed"],
     },
     district: {
       type: String,
       uppercase: true,
-      required: [true, "district is required"],
       maxLength: [30, "30 characters are allowed"],
     },
     postOffice: {
       type: String,
       uppercase: true,
-      required: [true, "post office is required"],
       maxLength: [100, "100 characters are allowed"],
     },
     pinCode: {
       type: String,
-      required: [true, "pincode is required"],
       maxLength: [10, "10 characters are allowed"],
     },
     state: {
@@ -58,7 +52,6 @@ const studentSchema = new mongoose.Schema(
 
     dateOfBirth: {
       type: String,
-      required: [true, "DOB year is required"],
       maxLength: [45, "15 characters are allowed"],
     },
     phone: {
@@ -68,7 +61,6 @@ const studentSchema = new mongoose.Schema(
     academicYear: {
       type: mongoose.Types.ObjectId,
       ref: "AcademicYear",
-      required: true,
     },
     branch: {
       type: mongoose.Types.ObjectId,

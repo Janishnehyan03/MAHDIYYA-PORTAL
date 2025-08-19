@@ -59,10 +59,10 @@ router.post(
 );
 
 router.post(
-  "/drop-out/:id",
+  "/drop-out",
   protect,
   restrictTo("admin", "superAdmin"),
-  studentController.dropOutStudent
+  studentController.dropOutStudents
 );
 
 router.get(
@@ -70,6 +70,18 @@ router.get(
   protect,
   restrictTo("admin", "superAdmin"),
   studentController.getDropoutList
+);
+router.post(
+  "/promote",
+  protect,
+  restrictTo("admin", "superAdmin"),
+  studentController.promoteStudents
+);
+router.post(
+  "/recover",
+  protect,
+  restrictTo("admin", "superAdmin"),
+  studentController.recoverDroppedOutStudents
 );
 
 module.exports = router;

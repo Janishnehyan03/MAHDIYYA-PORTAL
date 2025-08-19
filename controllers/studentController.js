@@ -210,19 +210,25 @@ exports.excelUpload = async (req, res) => {
 };
 
 // drop out
-exports.dropOutStudent = async (req, res, next) => {
-  console.log("Drop out student called");
+exports.dropOutStudents = async (req, res, next) => {
   try {
-    const studentId = req.params.id;
-    const student = await Student.findByIdAndUpdate(studentId, {
-      droppedOut: true,
-    });
-    if (!student) {
-      return res.status(404).json({ message: "Student not found" });
+    const studentIds = req.body.studentIds;
+    if (!studentIds || !Array.isArray(studentIds) || studentIds.length === 0) {
+      return res.status(400).json({
+        message: "studentIds is required and must be a non-empty array.",
+      });
     }
-    res.status(200).json({ message: "Student has been marked as dropped out" });
+
+    const updatePromises = studentIds.map((id) => {
+      return Student.findByIdAndUpdate(id, { droppedOut: true });
+    });
+
+    await Promise.all(updatePromises);
+    res
+      .status(200)
+      .json({ message: "Selected students have been marked as dropped out" });
   } catch (error) {
-    console.error("Error dropping out student:", error);
+    console.error("Error dropping out students:", error);
     next(error);
   }
 };
@@ -238,6 +244,68 @@ exports.getDropoutList = async (req, res, next) => {
     res.status(200).json(students);
   } catch (error) {
     console.error("Error fetching dropout list:", error);
+    next(error);
+  }
+};
+
+// promote students to next class
+exports.promoteStudents = async (req, res, next) => {
+  try {
+    const { studentIds } = req.body;
+
+    if (!studentIds || !Array.isArray(studentIds) || studentIds.length === 0) {
+      return res.status(400).json({
+        message: "studentIds is required and must be a non-empty array.",
+      });
+    }
+
+    // Find the selected students
+    const students = await Student.find({ _id: { $in: studentIds } });
+
+    console.log("Students to promote:", students);
+    console.log("Target class ID:", req.body.classId);
+
+    if (!students.length) {
+      return res.status(404).json({ message: "No students found to promote" });
+    }
+
+    // Promote each student to the  given class
+    const updatePromises = students.map((student) => {
+      return Student.updateOne(
+        { _id: student._id },
+        { class: req.body.classId }
+      );
+    });
+
+    await Promise.all(updatePromises);
+
+    res
+      .status(200)
+      .json({ message: "Selected students promoted successfully" });
+  } catch (error) {
+    console.error("Error promoting students:", error);
+    next(error);
+  }
+};
+
+// recover dropped out students
+exports.recoverDroppedOutStudents = async (req, res, next) => {
+  try {
+    const studentIds = req.body.studentIds;
+    if (!studentIds || !Array.isArray(studentIds) || studentIds.length === 0) {
+      return res.status(400).json({
+        message: "studentIds is required and must be a non-empty array.",
+      });
+    }
+
+    const updatePromises = studentIds.map((id) => {
+      return Student.findByIdAndUpdate(id, { droppedOut: false });
+    });
+
+    await Promise.all(updatePromises);
+    res.status(200).json({ message: "Selected students have been recovered" });
+  } catch (error) {
+    console.error("Error recovering students:", error);
     next(error);
   }
 };
