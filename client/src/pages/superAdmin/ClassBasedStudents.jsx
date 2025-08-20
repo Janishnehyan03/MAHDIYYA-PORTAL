@@ -121,6 +121,7 @@ function UploadModal({ isOpen, onClose, classId, onUploadSuccess }) {
   if (!isOpen) return null;
 
   const handleFileChange = (e) => {
+    if (isUploading) return; // Prevent file change during upload
     const selectedFile = e.target.files[0];
     if (selectedFile) {
       setFile(selectedFile);
@@ -137,11 +138,7 @@ function UploadModal({ isOpen, onClose, classId, onUploadSuccess }) {
   };
 
   const handleUpload = async () => {
-    if (!file) {
-      setError("Please select a file to upload.");
-      return;
-    }
-
+    if (!file || isUploading) return; // Prevent double upload
     const formData = new FormData();
     formData.append("file", file);
     formData.append("class", classId);
@@ -151,7 +148,8 @@ function UploadModal({ isOpen, onClose, classId, onUploadSuccess }) {
     try {
       const res = await Axios.post("/student/excel", formData);
       if (res.status === 200) {
-        onUploadSuccess(); // Call success callback
+        onUploadSuccess();
+        window.location.reload();
       }
     } catch (err) {
       setError(err.response?.data?.message || "An unexpected error occurred.");
@@ -174,6 +172,7 @@ function UploadModal({ isOpen, onClose, classId, onUploadSuccess }) {
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600"
+            disabled={isUploading}
           >
             ×
           </button>
@@ -194,6 +193,7 @@ function UploadModal({ isOpen, onClose, classId, onUploadSuccess }) {
               type="file"
               accept=".xlsx, .xls"
               onChange={handleFileChange}
+              disabled={isUploading} // disable input while uploading
             />
             <p className="mt-1 text-xs text-gray-500">
               Supported formats: .xlsx, .xls
@@ -230,6 +230,34 @@ function UploadModal({ isOpen, onClose, classId, onUploadSuccess }) {
               </div>
             </div>
           )}
+
+          {isUploading && (
+            <div className="flex items-center justify-center mt-4">
+              <svg
+                className="animate-spin h-6 w-6 text-blue-600 mr-2"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                ></circle>
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8v8z"
+                ></path>
+              </svg>
+              <span className="text-blue-600 font-medium">
+                Uploading data, please wait...
+              </span>
+            </div>
+          )}
         </div>
 
         {/* Modal Footer */}
@@ -238,16 +266,25 @@ function UploadModal({ isOpen, onClose, classId, onUploadSuccess }) {
           <button
             onClick={onClose}
             className="px-4 py-2 bg-white border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
+            disabled={isUploading}
           >
             Cancel
           </button>
-          <button
-            onClick={handleUpload}
-            disabled={isUploading || !file}
-            className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 disabled:bg-blue-300 disabled:cursor-not-allowed"
-          >
-            {isUploading ? "Uploading..." : "Upload & Save"}
-          </button>
+          {!isUploading && (
+            <button
+              onClick={handleUpload}
+              disabled={isUploading || !file}
+              className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 disabled:bg-blue-300 disabled:cursor-not-allowed"
+            >
+              Upload & Save
+            </button>
+          )}
+          {isUploading && (
+            <span className="px-4 py-2 bg-blue-300 text-white rounded-md text-sm font-medium flex items-center">
+              <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2 align-middle"></span>
+              Uploading...
+            </span>
+          )}
         </div>
       </div>
     </div>
