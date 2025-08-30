@@ -14,13 +14,16 @@ exports.getStudent = globalFunctions.getOne(
 
 exports.getAllStudents = async (req, res, next) => {
   try {
-    let query = {}; // Initialize an empty query object
+    let query = { deleted: { $ne: true }, completed: { $ne: true } }; // Initialize an empty query object
     let data = [];
 
     // Check query parameters and set conditions accordingly
     if (req.query.all) {
       // Fetch all students if 'all' is true
-      data = await Student.find()
+      data = await Student.find({
+        deleted: { $ne: true },
+        completed: { $ne: true },
+      })
         .populate("branch")
         .populate("class")
         .sort({ registerNo: 1 });
@@ -85,6 +88,7 @@ exports.getMyStudents = async (req, res, next) => {
           deleted: { $ne: true },
           droppedOut: { $ne: true },
           class: mongoose.Types.ObjectId(req.params.classId),
+          completed: { $ne: true },
         },
       },
       {
@@ -114,6 +118,7 @@ exports.getBranchStudents = async (req, res, next) => {
           class: mongoose.Types.ObjectId(req.params.classId),
           verified: { $ne: false },
           deleted: { $ne: true },
+          completed: { $ne: true },
         },
       },
       {
