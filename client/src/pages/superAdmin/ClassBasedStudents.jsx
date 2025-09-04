@@ -1,12 +1,11 @@
 import { useEffect, useState } from "react";
 import { ExcelRenderer } from "react-excel-renderer";
 import { Link, useParams } from "react-router-dom";
-import Axios from "../../Axios"; // Assuming this path is correct
+import Axios from "../../Axios";
 import { toast } from "react-toastify";
 
-// --- Helper Components (can be in the same file or separate files) ---
+// --- Helper Components ---
 
-// A simple loading spinner
 function LoadingSpinner() {
   return (
     <div className="flex justify-center items-center h-full py-20">
@@ -15,27 +14,27 @@ function LoadingSpinner() {
   );
 }
 
-// A component to show when there's no data
-function EmptyState({ onAddClick }) {
+function EmptyState({ onAddClick, showAdd }) {
   return (
     <div className="text-center py-16 px-6 bg-white rounded-lg shadow-md">
       <h3 className="text-xl font-semibold text-gray-800">No Students Found</h3>
       <p className="mt-2 text-gray-500">
         Get started by adding students to this class.
       </p>
-      <div className="mt-6">
-        <button
-          onClick={onAddClick}
-          className="inline-flex items-center px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-        >
-          Add Students
-        </button>
-      </div>
+      {showAdd && (
+        <div className="mt-6">
+          <button
+            onClick={onAddClick}
+            className="inline-flex items-center px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          >
+            Add Students
+          </button>
+        </div>
+      )}
     </div>
   );
 }
 
-// The main table displaying the list of students
 function StudentsTable({ students, selectedStudents, onSelect, onSelectAll }) {
   const allSelected =
     students.length > 0 && selectedStudents.length === students.length;
@@ -111,7 +110,6 @@ function StudentsTable({ students, selectedStudents, onSelect, onSelectAll }) {
   );
 }
 
-// The modal for uploading an Excel file
 function UploadModal({ isOpen, onClose, classId, onUploadSuccess }) {
   const [file, setFile] = useState(null);
   const [rows, setRows] = useState([]);
@@ -121,7 +119,7 @@ function UploadModal({ isOpen, onClose, classId, onUploadSuccess }) {
   if (!isOpen) return null;
 
   const handleFileChange = (e) => {
-    if (isUploading) return; // Prevent file change during upload
+    if (isUploading) return;
     const selectedFile = e.target.files[0];
     if (selectedFile) {
       setFile(selectedFile);
@@ -138,7 +136,7 @@ function UploadModal({ isOpen, onClose, classId, onUploadSuccess }) {
   };
 
   const handleUpload = async () => {
-    if (!file || isUploading) return; // Prevent double upload
+    if (!file || isUploading) return;
     const formData = new FormData();
     formData.append("file", file);
     formData.append("class", classId);
@@ -153,7 +151,6 @@ function UploadModal({ isOpen, onClose, classId, onUploadSuccess }) {
       }
     } catch (err) {
       setError(err.response?.data?.message || "An unexpected error occurred.");
-      console.log(err.response);
     } finally {
       setIsUploading(false);
     }
@@ -164,7 +161,6 @@ function UploadModal({ isOpen, onClose, classId, onUploadSuccess }) {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center p-4">
       <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
-        {/* Modal Header */}
         <div className="p-4 border-b flex justify-between items-center">
           <h3 className="text-xl font-semibold text-gray-800">
             Upload Students from Excel
@@ -178,7 +174,6 @@ function UploadModal({ isOpen, onClose, classId, onUploadSuccess }) {
           </button>
         </div>
 
-        {/* Modal Body */}
         <div className="p-6 space-y-6 overflow-y-auto">
           <div>
             <label
@@ -193,7 +188,7 @@ function UploadModal({ isOpen, onClose, classId, onUploadSuccess }) {
               type="file"
               accept=".xlsx, .xls"
               onChange={handleFileChange}
-              disabled={isUploading} // disable input while uploading
+              disabled={isUploading}
             />
             <p className="mt-1 text-xs text-gray-500">
               Supported formats: .xlsx, .xls
@@ -260,7 +255,6 @@ function UploadModal({ isOpen, onClose, classId, onUploadSuccess }) {
           )}
         </div>
 
-        {/* Modal Footer */}
         <div className="p-4 border-t bg-gray-50 flex justify-end items-center space-x-4 rounded-b-lg">
           {error && <p className="text-sm text-red-600 mr-auto">{error}</p>}
           <button
@@ -297,18 +291,44 @@ function AllStudents() {
   const { classId } = useParams();
   const [students, setStudents] = useState([]);
   const [className, setClassName] = useState(null);
-  const [classes, setClasses] = useState([]); // for dropdown
+  const [classes, setClasses] = useState([]);
   const [selectedClass, setSelectedClass] = useState("");
   const [selectedStudents, setSelectedStudents] = useState([]);
   const [initialLoading, setInitialLoading] = useState(true);
   const [showUploadModal, setShowUploadModal] = useState(false);
 
+  // Configuration state
+  const [configuration, setConfiguration] = useState(null);
+  const [configLoading, setConfigLoading] = useState(true);
+  const [configError, setConfigError] = useState(null);
+
+  // If you use authentication, fetch it here (optional)
+  // const { authData } = useContext(AuthContext);
+
+  // Fetch configuration
+  useEffect(() => {
+    const getConfigurations = async () => {
+      setConfigLoading(true);
+      setConfigError(null);
+      try {
+        const response = await Axios.get("/configurations");
+        setConfiguration(response.data);
+      } catch (err) {
+        setConfigError("Failed to load configuration. Please try again later.");
+      } finally {
+        setConfigLoading(false);
+      }
+    };
+    getConfigurations();
+  }, []);
+
+  // Fetch class and student data
   const fetchData = async () => {
     try {
       const [classRes, studentsRes, classesRes] = await Promise.all([
         Axios.get(`/class/${classId}`),
         Axios.get(`/student/my-students/data/${classId}`),
-        Axios.get(`/class`), // get all classes for promotion dropdown
+        Axios.get(`/class`),
       ]);
       setClassName(classRes.data);
       setStudents(studentsRes.data);
@@ -323,6 +343,7 @@ function AllStudents() {
   useEffect(() => {
     window.scrollTo(0, 0);
     fetchData();
+    // eslint-disable-next-line
   }, [classId]);
 
   // Checkbox handling
@@ -351,10 +372,10 @@ function AllStudents() {
       fetchData();
       setSelectedStudents([]);
     } catch (err) {
-      console.error(err);
       toast.error("Failed to promote students.");
     }
   };
+
   const handleDropOut = async () => {
     if (selectedStudents.length === 0) {
       alert("Please select at least one student to drop out.");
@@ -375,10 +396,15 @@ function AllStudents() {
       fetchData();
       setSelectedStudents([]);
     } catch (err) {
-      console.error(err);
       toast.error("Failed to drop out students.");
     }
   };
+
+  const showAddStudents =
+    !configLoading &&
+    configuration &&
+    configuration.studentDataUpload === true;
+
   return (
     <>
       <main className="bg-gray-100 min-h-screen p-4 sm:p-6 lg:p-8">
@@ -422,12 +448,14 @@ function AllStudents() {
                   Drop Out
                 </button>
               )}
-              <button
-                onClick={() => setShowUploadModal(true)}
-                className="px-4 py-2 bg-blue-600 text-white rounded-md"
-              >
-                Add Students
-              </button>
+              {showAddStudents && (
+                <button
+                  onClick={() => setShowUploadModal(true)}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-md"
+                >
+                  Add Students
+                </button>
+              )}
             </div>
           </div>
 
@@ -443,7 +471,10 @@ function AllStudents() {
                 onSelectAll={handleSelectAll}
               />
             ) : (
-              <EmptyState onAddClick={() => setShowUploadModal(true)} />
+              <EmptyState
+                onAddClick={() => setShowUploadModal(true)}
+                showAdd={showAddStudents}
+              />
             )}
           </div>
         </div>
@@ -459,4 +490,5 @@ function AllStudents() {
     </>
   );
 }
+
 export default AllStudents;

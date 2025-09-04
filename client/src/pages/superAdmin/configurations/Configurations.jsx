@@ -170,7 +170,6 @@ const AdminConfigPage = () => {
               Application Settings
             </h2>
 
-            {/* Setting Item */}
             <div className="flex justify-between items-center">
               <div>
                 <h3 className="font-medium text-gray-700">
@@ -216,6 +215,22 @@ const AdminConfigPage = () => {
                 enabled={settings?.hallTicketDownload}
                 onChange={() => handleToggle("hallTicketDownload")}
                 loading={loading.toggle === "hallTicketDownload"}
+              />
+            </div>
+
+            <div className="flex justify-between items-center">
+              <div>
+                <h3 className="font-medium text-gray-700">
+                  Student Data Upload
+                </h3>
+                <p className="text-sm text-gray-500">
+                  Enable or disable uploading of student data.
+                </p>
+              </div>
+              <ToggleSwitch
+                enabled={settings?.studentDataUpload}
+                onChange={() => handleToggle("studentDataUpload")}
+                loading={loading.toggle === "studentDataUpload"}
               />
             </div>
 

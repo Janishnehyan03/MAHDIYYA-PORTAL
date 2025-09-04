@@ -24,6 +24,10 @@ const configurationSchema = new mongoose.Schema(
     lastRegisterNo: {
       type: String,
     },
+    studentDataUpload: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,

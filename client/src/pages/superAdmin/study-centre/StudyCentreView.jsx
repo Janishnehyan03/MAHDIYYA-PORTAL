@@ -7,11 +7,12 @@ import {
   faMapLocationDot,
   faMapPin,
   faPhone,
-  faUserTie
+  faTrashCan,
+  faUserTie,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import Axios from "../../../Axios";
 import Loading from "../../../components/Loading"; // Assuming you have a standard Loading component
 
@@ -53,6 +54,20 @@ function StudyCentreView() {
   const [teacherCount, setTeacherCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const navigation = useNavigate();
+
+  const deleteStudyCentre = async (e) => {
+    e.preventDefault();
+    if (window.confirm("Are you sure you want to delete this study centre?")) {
+      try {
+        await Axios.delete(`/study-centre/${centreId}`);
+        navigation("/study-centres");
+      } catch (err) {
+        console.error("Failed to delete study centre:", err.response || err);
+        setError("Could not delete study centre. Please try again later.");
+      }
+    }
+  };
 
   useEffect(() => {
     const getStudyCentre = async () => {
@@ -213,6 +228,12 @@ function StudyCentreView() {
                 <FontAwesomeIcon icon={faEdit} />
                 Edit Centre
               </Link>
+              <button
+                onClick={deleteStudyCentre}
+              className="w-full text-center bg-red-600 text-white font-semibold py-2.5 px-4 rounded-lg shadow-sm hover:bg-red-700 transition-colors flex items-center justify-center gap-2">
+                <FontAwesomeIcon icon={faTrashCan} />
+                Delete Centre
+              </button>
               {studyCentre.googleMapUrl && (
                 <a
                   href={studyCentre.googleMapUrl}

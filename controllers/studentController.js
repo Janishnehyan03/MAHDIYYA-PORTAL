@@ -241,7 +241,7 @@ exports.dropOutStudents = async (req, res, next) => {
 // get dropout list
 exports.getDropoutList = async (req, res, next) => {
   try {
-    const students = await Student.find({ droppedOut: true })
+    const students = await Student.find({ droppedOut: true ,branch:req.user.branch})
       .populate("branch", "studyCentreName")
       .populate("class", "className")
       .sort({ updatedAt: -1 }); // Sort by most recent dropouts first
