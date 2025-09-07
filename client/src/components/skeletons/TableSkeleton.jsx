@@ -1,4 +1,3 @@
-import React from "react";
 
 const SkeletonRow = ({ cols }) => (
   <tr className="bg-white border-b border-slate-200">

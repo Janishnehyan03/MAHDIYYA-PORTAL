@@ -84,4 +84,19 @@ router.post(
   studentController.recoverDroppedOutStudents
 );
 
+router.delete(
+  "/class/:classId",
+  protect,
+  restrictTo("superAdmin"),
+  studentController.bulkDeleteStudentsOfClass
+);
+
+router.post(
+  "/bulk-import/:classId",
+  protect,
+  restrictTo("superAdmin"),
+  uploads.single("file"),
+  studentController.bulkImportStudentsWithClassAndBranch
+);
+
 module.exports = router;

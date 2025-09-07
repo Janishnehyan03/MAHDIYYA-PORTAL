@@ -3,6 +3,7 @@ const Student = require("../models/studentModel");
 const globalFunctions = require("../utils/globalFuctions");
 const mongoose = require("mongoose");
 const xlsx = require("xlsx");
+const StudyCentre = require("../models/studyCentreModel");
 
 exports.getStudent = globalFunctions.getOne(
   Student,
@@ -14,7 +15,11 @@ exports.getStudent = globalFunctions.getOne(
 
 exports.getAllStudents = async (req, res, next) => {
   try {
-    let query = { deleted: { $ne: true }, completed: { $ne: true } }; // Initialize an empty query object
+    let query = {
+      deleted: { $ne: true },
+      completed: { $ne: true },
+      droppedOut: { $ne: true },
+    }; // Initialize an empty query object
     let data = [];
 
     // Check query parameters and set conditions accordingly
@@ -23,6 +28,7 @@ exports.getAllStudents = async (req, res, next) => {
       data = await Student.find({
         deleted: { $ne: true },
         completed: { $ne: true },
+        droppedOut: { $ne: true },
       })
         .populate("branch")
         .populate("class")
@@ -241,7 +247,10 @@ exports.dropOutStudents = async (req, res, next) => {
 // get dropout list
 exports.getDropoutList = async (req, res, next) => {
   try {
-    const students = await Student.find({ droppedOut: true ,branch:req.user.branch})
+    const students = await Student.find({
+      droppedOut: true,
+      branch: req.user.branch,
+    })
       .populate("branch", "studyCentreName")
       .populate("class", "className")
       .sort({ updatedAt: -1 }); // Sort by most recent dropouts first
@@ -311,6 +320,125 @@ exports.recoverDroppedOutStudents = async (req, res, next) => {
     res.status(200).json({ message: "Selected students have been recovered" });
   } catch (error) {
     console.error("Error recovering students:", error);
+    next(error);
+  }
+};
+
+// bulk delete students with class
+exports.bulkDeleteStudentsOfClass = async (req, res, next) => {
+  try {
+    const { classId } = req.params;
+    if (!classId) {
+      return res
+        .status(400)
+        .json({ message: "classId is required in the request params." });
+    }
+
+    await Student.deleteMany({ class: classId });
+    res
+      .status(200)
+      .json({ message: "All students from the class have been deleted." });
+  } catch (error) {
+    console.error("Error deleting students:", error);
+    next(error);
+  }
+};
+
+// bulk import students from excel file with classId and branchCode per student row
+const parseExcelFile = async (file) => {
+  const workbook = xlsx.read(file.buffer, { type: "buffer" });
+  const sheet = workbook.Sheets[workbook.SheetNames[0]];
+  const rows = xlsx.utils.sheet_to_json(sheet, { defval: "" });
+
+  // Map Excel columns to DB fields
+  return rows.map((row) => ({
+    registerNo: row["REG. NO"]?.toString().trim(),
+    name: row["NAME"]?.toString().trim(),
+    fatherName: row["FATHER"]?.toString().trim(),
+    house: row["HOUSE"]?.toString().trim(),
+    place: row["PLACE"]?.toString().trim(),
+    postOffice: row["PO"]?.toString().trim(),
+    pinCode: row["PINCODE"]?.toString().trim(),
+    district: row["DISTRICT"]?.toString().trim(),
+    state: row["STATE"]?.toString().trim(),
+    phone: row["PHONE"]?.toString().trim(),
+    dateOfBirth: row["DOB"]?.toString().trim(),
+    className: row["CLASS"]?.toString().trim(),
+    studyCentreName: row["STUDY CENTRE"]?.toString().trim(),
+    studyCentreCode: row["CENTRE CODE"]?.toString().trim(),
+  }));
+};
+
+exports.bulkImportStudentsWithClassAndBranch = async (req, res, next) => {
+  try {
+    const { classId } = req.params;
+    if (!classId) {
+      return res.status(400).json({
+        message: "classId is required in the request params.",
+      });
+    }
+
+    const file = req.file;
+    if (!file) {
+      return res.status(400).json({ message: "Excel file is required." });
+    }
+
+    // Parse Excel
+    const rawStudents = await parseExcelFile(file);
+
+    // Collect unique studyCentreCodes from Excel
+    const studyCentreCodes = [
+      ...new Set(rawStudents.map((s) => s.studyCentreCode)),
+    ];
+
+    // Find all study centres for those codes
+    const studyCentres = await StudyCentre.find({
+      studyCentreCode: { $in: studyCentreCodes },
+    });
+
+    // Create a lookup map for studyCentreCode → branchId
+    const branchMap = {};
+    studyCentres.forEach((sc) => {
+      branchMap[sc.studyCentreCode] = sc._id;
+    });
+
+    // Get current academic year
+    const academicYear = await AcademicYear.findOne({ currentYear: true });
+
+    // Map students to DB format
+    const students = rawStudents.map((student) => {
+      const branchId = branchMap[student.studyCentreCode];
+      if (!branchId) {
+        throw new Error(
+          `No StudyCentre found for CENTRE CODE: ${student.studyCentreCode}`
+        );
+      }
+
+      return {
+        registerNo: student.registerNo,
+        studentName: student.name,
+        fatherName: student.fatherName,
+        house: student.house,
+        place: student.place,
+        postOffice: student.postOffice,
+        pinCode: student.pinCode,
+        district: student.district,
+        state: student.state,
+        phone: student.phone,
+        dateOfBirth: student.dateOfBirth,
+        class: classId,
+        branch: branchId,
+        academicYear: academicYear?._id,
+        verified: true,
+        deleted: false,
+      };
+    });
+
+    await Student.insertMany(students);
+
+    res.status(201).json({ message: "Students imported successfully." });
+  } catch (error) {
+    console.error("Error importing students:", error);
     next(error);
   }
 };
