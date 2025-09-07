@@ -4,6 +4,8 @@ import {
   faSortUp,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { saveAs } from "file-saver";
+import * as XLSX from "xlsx";
 
 function StudentsTable({
   loading,
@@ -23,6 +25,40 @@ function StudentsTable({
     return sortConfig.direction === "ascending" ? faSortUp : faSortDown;
   };
 
+  // 👉 Export function
+  const handleExport = () => {
+    if (!sortedStudents || sortedStudents.length === 0) return;
+
+    // 🔹 Export ALL fields of each student
+    const exportData = sortedStudents.map((student) => ({
+      "REG. NO": student.registerNo || "N/A",
+      "NAME": student.studentName || "N/A",
+      "FATHER": student.fatherName || "N/A",
+      "HOUSE": student.houseName || "N/A",
+      "PLACE": student.place || "N/A",
+      "PO": student.postOffice || "N/A",
+      "PINCODE": student.pinCode || "N/A",
+      "DISTRICT": student.district || "N/A",
+      "STATE": student.state || "N/A",
+      "PHONE": student.phone || "N/A",
+      "DOB": student.dateOfBirth || "N/A",
+      "CLASS": student.class?.className || "N/A",
+      "STUDY CENTRE": student.branch?.studyCentreName || "N/A",
+      "CENTRE CODE": student.branch?.studyCentreCode || "N/A",
+    }));
+
+    // Create worksheet & workbook
+    const ws = XLSX.utils.json_to_sheet(exportData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Students");
+
+    // Convert to Excel file and trigger download
+    const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+    const data = new Blob([excelBuffer], { type: "application/octet-stream" });
+    saveAs(data, "students.xlsx");
+  };
+
+
   return (
     <>
       <div className="p-4 flex justify-between items-center border-b border-slate-200">
@@ -34,16 +70,12 @@ function StudentsTable({
           of{" "}
           <span className="font-bold text-slate-800">
             {sortedStudents.length}
-          </span>{" "}
-          students
+          </span>
         </p>
         {sortedStudents.length > 0 && (
           <button
-            id="export-button"
             className="px-4 py-2 bg-indigo-600 text-white text-sm font-semibold rounded-md hover:bg-indigo-700 transition-colors flex items-center gap-2"
-            onClick={() => {
-              document.getElementById("export-button").nextSibling.click();
-            }}
+            onClick={handleExport}
             type="button"
           >
             Export to Excel
