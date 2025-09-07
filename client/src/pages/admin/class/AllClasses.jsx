@@ -12,6 +12,9 @@ function AllClasses() {
   const { authData } = useContext(UserAuthContext);
   const [classes, setClasses] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [configuration, setConfiguration] = useState(null);
+  const [configLoading, setConfigLoading] = useState(false);
+  const [configError, setConfigError] = useState(null);
 
   // For demo: fixed 5 class color themes
   const classColors = [
@@ -37,6 +40,25 @@ function AllClasses() {
     getAllClasses();
   }, []);
 
+  useEffect(() => {
+    const getConfigurations = async () => {
+      setConfigLoading(true);
+      setConfigError(null);
+      try {
+        const response = await Axios.get("/configurations");
+        setConfiguration(response.data);
+      } catch (err) {
+        setConfigError("Failed to load configuration. Please try again later.");
+      } finally {
+        setConfigLoading(false);
+      }
+    };
+    getConfigurations();
+  }, []);
+
+  const showAddStudents =
+    !configLoading && configuration && configuration.studentDataUpload === true;
+
   return (
     <div className="min-h-screen  p-4 sm:p-6 lg:p-8">
       <div className="max-w-4xl mx-auto">
@@ -50,11 +72,13 @@ function AllClasses() {
 
         {/* Actions Bar */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-8">
-          <Link to={`/new-student`} className="w-full sm:w-auto">
-            <button className="w-full sm:w-auto px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500">
-              Add New Student
-            </button>
-          </Link>
+          {showAddStudents && (
+            <Link to={`/new-student`} className="w-full sm:w-auto">
+              <button className="w-full sm:w-auto px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                Add New Student
+              </button>
+            </Link>
+          )}
           <a
             href="/CMS STUDENT FORM.xlsx"
             download
@@ -79,7 +103,9 @@ function AllClasses() {
                   className={`bg-white rounded-2xl shadow-lg border border-gray-100 p-7 flex flex-col items-center text-center transition-all duration-300 h-full group-hover:shadow-2xl group-hover:-translate-y-1 group-focus:shadow-2xl group-focus:-translate-y-1`}
                 >
                   <div
-                    className={`mb-5 w-16 h-16 flex items-center justify-center rounded-full bg-gradient-to-br ${classColors[idx % classColors.length]} text-white text-3xl shadow group-hover:scale-105 transform transition`}
+                    className={`mb-5 w-16 h-16 flex items-center justify-center rounded-full bg-gradient-to-br ${
+                      classColors[idx % classColors.length]
+                    } text-white text-3xl shadow group-hover:scale-105 transform transition`}
                   >
                     <FontAwesomeIcon icon={faChalkboardUser} />
                   </div>
@@ -92,27 +118,21 @@ function AllClasses() {
                 </div>
               </Link>
             ))}
-            <Link
-              to="/dropout-list"
-              className="group focus:outline-none"
-              tabIndex={0}
-            >
-              <div
-                className="bg-white rounded-2xl shadow-lg border border-gray-100 p-7 flex flex-col items-center text-center transition-all duration-300 h-full group-hover:shadow-2xl group-hover:-translate-y-1 group-focus:shadow-2xl group-focus:-translate-y-1"
-              >
-                <div
-                  className="mb-5 w-16 h-16 flex items-center justify-center rounded-full bg-gradient-to-br from-red-500 to-red-400 text-white text-3xl shadow group-hover:scale-105 transform transition"
-                >
-                  <FontAwesomeIcon icon={faFileArrowDown} />
-                </div>
-                <h3 className="text-lg font-bold text-gray-800">
-                  Drop Out List
-                </h3>
-                <p className="mt-2 text-sm text-gray-500">
-                  View Students Who Dropped Out
-                </p>
+          <Link
+            to="/dropout-list"
+            className="group focus:outline-none"
+            tabIndex={0}
+          >
+            <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-7 flex flex-col items-center text-center transition-all duration-300 h-full group-hover:shadow-2xl group-hover:-translate-y-1 group-focus:shadow-2xl group-focus:-translate-y-1">
+              <div className="mb-5 w-16 h-16 flex items-center justify-center rounded-full bg-gradient-to-br from-red-500 to-red-400 text-white text-3xl shadow group-hover:scale-105 transform transition">
+                <FontAwesomeIcon icon={faFileArrowDown} />
               </div>
-            </Link>
+              <h3 className="text-lg font-bold text-gray-800">Drop Out List</h3>
+              <p className="mt-2 text-sm text-gray-500">
+                View Students Who Dropped Out
+              </p>
+            </div>
+          </Link>
         </div>
 
         {/* Empty / Loading State */}
@@ -124,9 +144,12 @@ function AllClasses() {
         )}
         {!loading && classes.length === 0 && (
           <div className="text-center py-16 px-6 bg-white rounded-lg shadow-md border border-gray-200 mt-8">
-            <h3 className="text-xl font-semibold text-gray-700">No Classes Found</h3>
+            <h3 className="text-xl font-semibold text-gray-700">
+              No Classes Found
+            </h3>
             <p className="mt-2 text-gray-500">
-              There are currently no classes to display. Please add a class to get started.
+              There are currently no classes to display. Please add a class to
+              get started.
             </p>
           </div>
         )}
