@@ -97,17 +97,14 @@ function EditStudent() {
   const [loading, setLoading] = useState(false);
   const [classes, setClasses] = useState([]);
 
+
   // Fetch initial data
   useEffect(() => {
     const getStudent = async () => {
       try {
         const { data } = await Axios.get(`/student/${id}`);
-        // Ensure date is formatted for the input field if needed, e.g., YYYY-MM-DD
-        if (data.dateOfBirth) {
-          data.dateOfBirth = new Date(data.dateOfBirth)
-            .toISOString()
-            .split("T")[0];
-        }
+        console.log("Fetched student data:", data);
+  
         setFormData(data);
       } catch (error) {
         console.error("Failed to fetch student:", error);
@@ -203,17 +200,11 @@ function EditStudent() {
                   required
                   placeholder="Richard Doe"
                 />
-                <FormField
-                  id="motherName"
-                  label="Mother's Name"
-                  value={formData.motherName}
-                  onChange={onChange}
-                  placeholder="Jane Doe"
-                />
+        
                 <FormField
                   id="dateOfBirth"
                   label="Date of Birth"
-                  type="date"
+                  type="text"
                   value={formData.dateOfBirth}
                   onChange={onChange}
                   required

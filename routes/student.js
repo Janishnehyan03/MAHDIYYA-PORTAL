@@ -65,6 +65,13 @@ router.post(
   studentController.dropOutStudents
 );
 
+router.post(
+  "/drop-out/:studentId",
+  protect,
+  restrictTo("admin", "superAdmin"),
+  studentController.dropOutStudent
+);
+
 router.get(
   "/list/dropout",
   protect,

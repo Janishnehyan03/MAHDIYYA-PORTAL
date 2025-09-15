@@ -244,6 +244,30 @@ exports.dropOutStudents = async (req, res, next) => {
   }
 };
 
+// dropout student
+exports.dropOutStudent = async (req, res, next) => {
+  try {
+    const { studentId } = req.params;
+    if (!studentId) {
+      return res.status(400).json({ message: "Student ID is required." });
+    }
+
+    const student = await Student.findByIdAndUpdate(studentId, {
+      droppedOut: true,
+    });
+    if (!student) {
+      return res.status(404).json({ message: "Student not found." });
+    }
+
+    res
+      .status(200)
+      .json({ message: "Student has been marked as dropped out." });
+  } catch (error) {
+    console.error("Error dropping out student:", error);
+    next(error);
+  }
+};
+
 // get dropout list
 exports.getDropoutList = async (req, res, next) => {
   try {

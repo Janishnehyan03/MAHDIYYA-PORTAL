@@ -2,9 +2,16 @@ import React, { useEffect, useState, useCallback } from "react";
 import { toast } from "react-toastify";
 import Axios from "../../../Axios";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faTrash, faSpinner, faPlus } from "@fortawesome/free-solid-svg-icons";
+import {
+  faTrash,
+  faSpinner,
+  faPlus,
+  faEdit,
+  faCheck,
+  faTimes,
+} from "@fortawesome/free-solid-svg-icons";
 
-// A modern, reusable Toggle Switch component
+// Toggle Switch component
 const ToggleSwitch = ({ enabled, onChange, loading }) => (
   <button
     type="button"
@@ -22,20 +29,24 @@ const ToggleSwitch = ({ enabled, onChange, loading }) => (
   </button>
 );
 
-// Main Component
 const AdminConfigPage = () => {
   const [settings, setSettings] = useState(null);
   const [academicYears, setAcademicYears] = useState([]);
   const [newAcademicYear, setNewAcademicYear] = useState("");
   const [regNoInput, setRegNoInput] = useState("");
 
-  // Granular loading states for better UX
+  // For editing academic year
+  const [editingYearId, setEditingYearId] = useState(null);
+  const [editingYearValue, setEditingYearValue] = useState("");
+
   const [loading, setLoading] = useState({
     page: true,
-    toggle: null, // Holds the key of the setting being toggled
+    toggle: null,
     regNo: false,
     creatingYear: false,
-    updatingYear: null, // Holds the ID of the year being updated/deleted
+    updatingYear: null,
+    togglingCurrent: null,
+    editingYear: null,
   });
 
   // Fetch initial data
@@ -61,12 +72,10 @@ const AdminConfigPage = () => {
     fetchData();
   }, [fetchData]);
 
-  // Handle toggling of boolean settings with optimistic UI
+  // Handle toggling of boolean settings
   const handleToggle = async (key) => {
     setLoading((prev) => ({ ...prev, toggle: key }));
     const originalSettings = { ...settings };
-
-    // Optimistically update the UI
     setSettings((prev) => ({ ...prev, [key]: !prev[key] }));
 
     try {
@@ -75,7 +84,7 @@ const AdminConfigPage = () => {
       });
     } catch (err) {
       toast.error(`Failed to update setting. Please try again.`);
-      setSettings(originalSettings); // Revert on error
+      setSettings(originalSettings);
       console.error(err);
     } finally {
       setLoading((prev) => ({ ...prev, toggle: null }));
@@ -84,8 +93,7 @@ const AdminConfigPage = () => {
 
   // Handle saving the last register number on blur
   const handleRegNoBlur = async () => {
-    if (regNoInput === settings.lastRegisterNo) return; // No change
-
+    if (regNoInput === settings.lastRegisterNo) return;
     setLoading((prev) => ({ ...prev, regNo: true }));
     try {
       await Axios.patch(`/configurations/${settings._id}`, {
@@ -95,7 +103,7 @@ const AdminConfigPage = () => {
       toast.success("Last register number updated.");
     } catch (err) {
       toast.error("Failed to update register number.");
-      setRegNoInput(settings.lastRegisterNo); // Revert on error
+      setRegNoInput(settings.lastRegisterNo);
       console.error(err);
     } finally {
       setLoading((prev) => ({ ...prev, regNo: false }));
@@ -140,6 +148,76 @@ const AdminConfigPage = () => {
       console.error(err);
     } finally {
       setLoading((prev) => ({ ...prev, updatingYear: null }));
+    }
+  };
+
+  // Start editing an academic year
+  const startEditAcademicYear = (year) => {
+    setEditingYearId(year._id);
+    setEditingYearValue(year.year);
+  };
+
+  // Cancel editing
+  const cancelEditAcademicYear = () => {
+    setEditingYearId(null);
+    setEditingYearValue("");
+  };
+
+  // Update an academic year (PUT/PATCH)
+  const updateAcademicYear = async (id) => {
+    if (!editingYearValue.trim()) {
+      toast.warn("Academic year cannot be empty.");
+      return;
+    }
+    setLoading((prev) => ({ ...prev, editingYear: id }));
+    try {
+      const { data } = await Axios.patch(`/academic-year/${id}`, {
+        year: editingYearValue,
+      });
+      setAcademicYears((prev) =>
+        prev.map((y) => (y._id === id ? { ...y, year: data.year } : y))
+      );
+      toast.success("Academic year updated.");
+      cancelEditAcademicYear();
+    } catch (err) {
+      toast.error("Failed to update academic year.");
+      console.error(err);
+    } finally {
+      setLoading((prev) => ({ ...prev, editingYear: null }));
+    }
+  };
+
+  // Toggle current year
+  const toggleCurrentYear = async (id) => {
+    setLoading((prev) => ({ ...prev, togglingCurrent: id }));
+    try {
+      // Find the year to toggle
+      const yearToToggle = academicYears.find((y) => y._id === id);
+      const newCurrent = !yearToToggle.currentYear;
+
+      // Update on server
+      const { data } = await Axios.patch(`/academic-year/${id}`, {
+        currentYear: newCurrent,
+      });
+
+      // Update local state
+      setAcademicYears((prev) =>
+        prev.map((y) =>
+          y._id === id
+            ? { ...y, currentYear: newCurrent }
+            : y
+        )
+      );
+      toast.success(
+        newCurrent
+          ? "Set as current academic year."
+          : "Unset as current academic year."
+      );
+    } catch (err) {
+      toast.error("Failed to update current academic year.");
+      console.error(err);
+    } finally {
+      setLoading((prev) => ({ ...prev, togglingCurrent: null }));
     }
   };
 
@@ -297,22 +375,86 @@ const AdminConfigPage = () => {
               {academicYears.map((year) => (
                 <div
                   key={year._id}
-                  className="flex items-center justify-between bg-gray-50 p-2 rounded-md"
+                  className="flex items-center justify-between bg-gray-50 p-2 rounded-md gap-2"
                 >
-                  <p className="font-medium text-gray-700">{year.year}</p>
-                  <button
-                    onClick={() => deleteAcademicYear(year._id)}
-                    disabled={loading.updatingYear === year._id}
-                    className="text-gray-400 hover:text-red-600 disabled:text-gray-300"
-                    aria-label="Delete year"
-                  >
-                    <FontAwesomeIcon
-                      icon={
-                        loading.updatingYear === year._id ? faSpinner : faTrash
-                      }
-                      spin={loading.updatingYear === year._id}
-                    />
-                  </button>
+                  {editingYearId === year._id ? (
+                    <>
+                      <input
+                        type="text"
+                        value={editingYearValue}
+                        onChange={(e) => setEditingYearValue(e.target.value)}
+                        className="flex-grow px-2 py-1 border border-gray-300 rounded"
+                        disabled={loading.editingYear === year._id}
+                      />
+                      <button
+                        onClick={() => updateAcademicYear(year._id)}
+                        disabled={loading.editingYear === year._id}
+                        className="text-green-600 hover:text-green-800"
+                        aria-label="Save"
+                      >
+                        <FontAwesomeIcon
+                          icon={
+                            loading.editingYear === year._id
+                              ? faSpinner
+                              : faCheck
+                          }
+                          spin={loading.editingYear === year._id}
+                        />
+                      </button>
+                      <button
+                        onClick={cancelEditAcademicYear}
+                        disabled={loading.editingYear === year._id}
+                        className="text-gray-400 hover:text-red-600"
+                        aria-label="Cancel"
+                      >
+                        <FontAwesomeIcon icon={faTimes} />
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <div className="flex items-center gap-2 flex-grow">
+                        <span className="font-medium text-gray-700">
+                          {year.year}
+                        </span>
+                        {year.currentYear && (
+                          <span className="px-2 py-0.5 text-xs rounded bg-blue-100 text-blue-700 font-semibold">
+                            Current
+                          </span>
+                        )}
+                      </div>
+                      <ToggleSwitch
+                        enabled={year.currentYear}
+                        loading={loading.togglingCurrent === year._id}
+                        onChange={() => toggleCurrentYear(year._id)}
+                      />
+                      <button
+                        onClick={() => startEditAcademicYear(year)}
+                        className="text-blue-500 hover:text-blue-700"
+                        aria-label="Edit year"
+                        disabled={
+                          loading.updatingYear === year._id ||
+                          loading.editingYear
+                        }
+                      >
+                        <FontAwesomeIcon icon={faEdit} />
+                      </button>
+                      <button
+                        onClick={() => deleteAcademicYear(year._id)}
+                        disabled={loading.updatingYear === year._id}
+                        className="text-gray-400 hover:text-red-600 disabled:text-gray-300"
+                        aria-label="Delete year"
+                      >
+                        <FontAwesomeIcon
+                          icon={
+                            loading.updatingYear === year._id
+                              ? faSpinner
+                              : faTrash
+                          }
+                          spin={loading.updatingYear === year._id}
+                        />
+                      </button>
+                    </>
+                  )}
                 </div>
               ))}
             </div>

@@ -45,14 +45,11 @@ exports.getOne =
     }
   };
 exports.updateOne = (Model) => async (req, res) => {
-  console.log(req.body);
   try {
     const item = await Model.findById(req.params.id);
     if (item) {
       let data = await Model.findByIdAndUpdate(req.params.id, req.body);
-      console.log('====================================');
-      console.log(data);
-      console.log('====================================');
+
       res.status(200).json(data);
     } else {
       res.status(400).json({ message: "document not found" });
