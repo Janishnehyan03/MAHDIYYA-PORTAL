@@ -98,6 +98,7 @@ exports.getResults = async (req, res) => {
       })
         .populate({
           path: "student",
+          match: { droppedOut: false }, // Only students who have not dropped out
           populate: [
             { path: "branch" }, // Populate branch details
             { path: "class" }, // Populate class details
@@ -354,7 +355,10 @@ exports.fetchToUpdate = async (req, res) => {
       subject: mongoose.Types.ObjectId(subjectId),
       class: mongoose.Types.ObjectId(classId),
     })
-      .populate("student")
+      .populate({
+        path: "student",
+        match: { droppedOut: false },
+      })
       .populate("exam");
     if (!result) return res.status(404).json({ message: "Result not found" });
     res.json(result);
