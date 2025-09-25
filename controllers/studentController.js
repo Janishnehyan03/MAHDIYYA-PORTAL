@@ -122,6 +122,7 @@ exports.getBranchStudents = async (req, res, next) => {
         $match: {
           branch: mongoose.Types.ObjectId(req.params.studyCentreId),
           class: mongoose.Types.ObjectId(req.params.classId),
+          droppedOut: { $ne: true },
           verified: { $ne: false },
           deleted: { $ne: true },
           completed: { $ne: true },
