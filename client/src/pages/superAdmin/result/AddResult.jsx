@@ -57,7 +57,9 @@ const AddResult = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!selectedBranch || !selectedClass || !exam || !subject) {
-      toast.error("Please select all fields: Centre, Class, Exam, and Subject.");
+      toast.error(
+        "Please select all fields: Centre, Class, Exam, and Subject."
+      );
       return;
     }
 
@@ -115,10 +117,13 @@ const AddResult = () => {
         fetchExistingResults(); // Re-fetch to get the latest data with new _ids
       } catch (error) {
         console.error("Error submitting marks:", error);
-        toast.error(error.response?.data?.error || "An error occurred while submitting.", {
-          position: toast.POSITION.TOP_CENTER,
-          autoClose: 3000,
-        });
+        toast.error(
+          error.response?.data?.error || "An error occurred while submitting.",
+          {
+            position: toast.POSITION.TOP_CENTER,
+            autoClose: 3000,
+          }
+        );
       } finally {
         setLoading(false);
       }
@@ -151,8 +156,12 @@ const AddResult = () => {
 
   const getAllBranches = useCallback(async () => {
     try {
-      const branchQuery = authData.branch?._id ? `&_id=${authData.branch._id}` : '';
-      const response = await Axios.get(`/study-centre?sort=studyCentreName${branchQuery}`);
+      const branchQuery = authData.branch?._id
+        ? `&_id=${authData.branch._id}`
+        : "";
+      const response = await Axios.get(
+        `/study-centre?sort=studyCentreName${branchQuery}`
+      );
       setBranches(response.data.docs);
     } catch (error) {
       console.error(error.response);
@@ -171,7 +180,9 @@ const AddResult = () => {
   const getStudents = useCallback(async () => {
     if (selectedBranch && selectedClass) {
       try {
-        const response = await Axios.get(`/student/data/${selectedBranch}/${selectedClass}`);
+        const response = await Axios.get(
+          `/student/data/${selectedBranch}/${selectedClass}`
+        );
         setStudents(response.data);
       } catch (error) {
         console.error(error);
@@ -185,14 +196,21 @@ const AddResult = () => {
   useEffect(() => {
     getStudents();
     fetchExistingResults();
-  }, [selectedClass, selectedBranch, exam, subject, getStudents, fetchExistingResults]);
+  }, [
+    selectedClass,
+    selectedBranch,
+    exam,
+    subject,
+    getStudents,
+    fetchExistingResults,
+  ]);
 
   useEffect(() => {
     getClasses();
     getExams(true);
     getAllSubjects();
     getAllBranches();
-  }, [pathname, getClasses, getExams, getAllSubjects, getAllBranches]);
+  }, [pathname]);
 
   const isFormFilled = selectedBranch && selectedClass && exam && subject;
 
@@ -203,12 +221,15 @@ const AddResult = () => {
           <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-6 text-center">
             Add Student Assessment Marks
           </h2>
-          
+
           {/* Filters Section */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
             {/* Study Centre Selection */}
             <div>
-              <label htmlFor="branch" className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                htmlFor="branch"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
                 Study Centre
               </label>
               <select
@@ -228,7 +249,10 @@ const AddResult = () => {
 
             {/* Class Selection */}
             <div>
-              <label htmlFor="class" className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                htmlFor="class"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
                 Class
               </label>
               <select
@@ -248,7 +272,10 @@ const AddResult = () => {
 
             {/* Exam Selection */}
             <div>
-              <label htmlFor="exam" className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                htmlFor="exam"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
                 Exam
               </label>
               <select
@@ -268,7 +295,10 @@ const AddResult = () => {
 
             {/* Subject Selection */}
             <div>
-              <label htmlFor="subject" className="block text-sm font-medium text-gray-700 mb-1">
+              <label
+                htmlFor="subject"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
                 Subject
               </label>
               <select
@@ -290,7 +320,7 @@ const AddResult = () => {
               </select>
             </div>
           </div>
-          
+
           {/* Student Marks Table */}
           {isFormFilled && (
             <div className="mt-8">
@@ -303,17 +333,36 @@ const AddResult = () => {
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
                     <tr>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Register No</th>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Student Name</th>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Marks Obtained</th>
+                      <th
+                        scope="col"
+                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                      >
+                        Register No
+                      </th>
+                      <th
+                        scope="col"
+                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                      >
+                        Student Name
+                      </th>
+                      <th
+                        scope="col"
+                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                      >
+                        Marks Obtained
+                      </th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
                     {students.length > 0 ? (
                       students.map((student) => (
                         <tr key={student._id} className="hover:bg-gray-50">
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{student?.registerNo}</td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{student.studentName}</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                            {student?.registerNo}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                            {student.studentName}
+                          </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <input
                               type="number"
@@ -322,14 +371,19 @@ const AddResult = () => {
                               className="w-24 border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm"
                               value={studentMarks[student._id] || ""}
                               placeholder="N/A"
-                              onChange={(e) => handleMarkChange(student._id, e.target.value)}
+                              onChange={(e) =>
+                                handleMarkChange(student._id, e.target.value)
+                              }
                             />
                           </td>
                         </tr>
                       ))
                     ) : (
                       <tr>
-                        <td colSpan="3" className="text-center py-10 text-gray-500">
+                        <td
+                          colSpan="3"
+                          className="text-center py-10 text-gray-500"
+                        >
                           No students found for the selected criteria.
                         </td>
                       </tr>
@@ -337,7 +391,7 @@ const AddResult = () => {
                   </tbody>
                 </table>
               </div>
-              
+
               {students.length > 0 && (
                 <div className="mt-6 flex justify-end">
                   <button

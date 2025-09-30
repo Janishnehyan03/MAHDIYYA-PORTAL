@@ -33,7 +33,8 @@ exports.getMyResults = async (req, res) => {
     // Make sure marksObtained is always a number for Results
     results = results.map((result) => ({
       ...result.toObject(),
-      marksObtained: typeof result.marksObtained === "number" ? result.marksObtained : 0,
+      marksObtained:
+        typeof result.marksObtained === "number" ? result.marksObtained : 0,
     }));
 
     // Make sure cceMark is a number or "A" for CCE (or 0 if invalid/missing)
@@ -62,8 +63,6 @@ exports.getMyResults = async (req, res) => {
       : 0;
     const roundedPercentage = Math.floor(percentage);
 
-   
-
     // Respond with both results arrays, student info, and stats
     return res.json({
       results,
@@ -82,7 +81,9 @@ exports.getMyResults = async (req, res) => {
 exports.getResults = async (req, res) => {
   try {
     if (!req.query.classId || !req.query.examId) {
-      return res.status(400).json({ message: "Class ID and Exam ID are required" });
+      return res
+        .status(400)
+        .json({ message: "Class ID and Exam ID are required" });
     }
 
     // Fetch exam results based on class and exam IDs
@@ -94,9 +95,10 @@ exports.getResults = async (req, res) => {
     const results = await Result.find(resultQuery)
       .populate({
         path: "student",
+        match: { droppedOut: { $ne: true } }, // Only include students who have not dropped out
         populate: [
           { path: "branch" }, // Populate branch details
-          { path: "class" },   // Populate class details
+          { path: "class" }, // Populate class details
         ],
       })
       .populate("subject")
@@ -109,9 +111,10 @@ exports.getResults = async (req, res) => {
     const cceResults = await CceMark.find(resultQuery)
       .populate({
         path: "student",
+        match: { droppedOut: { $ne: true } }, // Only include students who have not dropped out
         populate: [
           { path: "branch" }, // Populate branch details
-          { path: "class" },   // Populate class details
+          { path: "class" }, // Populate class details
         ],
       })
       .populate("subject")
@@ -168,7 +171,8 @@ exports.getResults = async (req, res) => {
     const filteredStudents = req.query.studyCentreId
       ? sortedStudents.filter(
           (studentResult) =>
-            studentResult?.student?.branch?._id.toString() === req.query.studyCentreId
+            studentResult?.student?.branch?._id.toString() ===
+            req.query.studyCentreId
         )
       : sortedStudents;
 
@@ -181,7 +185,8 @@ exports.getResults = async (req, res) => {
         .filter((result) => result.type === "cce")
         .reduce((sum, result) => sum + result.subject.totalMarks, 0);
 
-      const marksObtained = studentResult.examMarksObtained + studentResult.cceMarksObtained;
+      const marksObtained =
+        studentResult.examMarksObtained + studentResult.cceMarksObtained;
       const totalMarks = totalExamMarks + totalCCEMarks;
       const percentage = (marksObtained / totalMarks) * 100;
 
@@ -190,7 +195,7 @@ exports.getResults = async (req, res) => {
           const cceSubject = studentResult.subjectResults.find(
             (sr) =>
               sr.subject._id.toString() ===
-              subjectResult.subject._id.toString() && sr.type === "cce"
+                subjectResult.subject._id.toString() && sr.type === "cce"
           );
           const cceMarks = cceSubject ? cceSubject.marksObtained : 0;
           return (
@@ -224,8 +229,6 @@ exports.getResults = async (req, res) => {
     return res.status(500).json({ error: "Internal Server Error" });
   }
 };
-
-
 
 exports.getGlobalResults = async (req, res) => {
   try {
@@ -304,14 +307,24 @@ exports.createResults = async (req, res) => {
   try {
     // Prepare bulk operations
     const bulkOps = resultsData.map((resultData) => {
-      const { student, exam, marksObtained, class: studentClass, subject, _id } = resultData;
+      const {
+        student,
+        exam,
+        marksObtained,
+        class: studentClass,
+        subject,
+        _id,
+      } = resultData;
 
       return {
         updateOne: {
           filter: { student, subject, exam },
-          update: { $set: { marksObtained, class: studentClass }, $setOnInsert: { student, exam, subject } },
-          upsert: true // Create if not exists
-        }
+          update: {
+            $set: { marksObtained, class: studentClass },
+            $setOnInsert: { student, exam, subject },
+          },
+          upsert: true, // Create if not exists
+        },
       };
     });
 
@@ -322,14 +335,17 @@ exports.createResults = async (req, res) => {
     res.status(201).json({ message: "Results processed", results });
   } catch (err) {
     console.error(err);
-    if (err.name === "ValidationError" && err.message.includes("Duplicate mark entry")) {
-      return res.status(400).json({ error: "Duplicate mark entry for the subject." });
+    if (
+      err.name === "ValidationError" &&
+      err.message.includes("Duplicate mark entry")
+    ) {
+      return res
+        .status(400)
+        .json({ error: "Duplicate mark entry for the subject." });
     }
     res.status(400).json({ message: err.message });
   }
 };
-
-
 
 exports.updateResult = async (req, res) => {
   try {

@@ -63,6 +63,7 @@ router.post("/download", async (req, res) => {
   try {
     const student = await Student.findOne({
       registerNo: req.body.registerNo,
+      droppedOut: { $ne: true }
     });
     if (!student) {
       return res.status(400).json({ message: "Invalid Register Number" });
@@ -108,7 +109,7 @@ router.post("/bulk-download", protect, async (req, res) => {
     }
 
     // Step 1: Find all students that belong to the given class and branch
-    const students = await Student.find({ class: classId, branch: branchId }).populate("class branch");
+    const students = await Student.find({ class: classId, branch: branchId, droppedOut: { $ne: true } }).populate("class branch");
 
     if (students.length === 0) {
       return res.status(404).json({ message: "No students found for this class and branch" });

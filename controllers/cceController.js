@@ -98,6 +98,7 @@ exports.getResults = async (req, res) => {
       })
         .populate({
           path: "student",
+          match: { droppedOut: { $ne: true } }, // Only include students who have not dropped out
           populate: [
             { path: "branch" }, // Populate branch details
             { path: "class" }, // Populate class details
@@ -320,7 +321,6 @@ exports.createResults = async (req, res) => {
 
 exports.updateResult = async (req, res) => {
   try {
-    console.log("Updating results:", req.body);
     const results = await Promise.all(
       req.body.map(async (resultData) => {
         const { _id, cceMark } = resultData;
