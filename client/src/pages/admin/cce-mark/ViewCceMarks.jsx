@@ -235,8 +235,8 @@ function ResultsTable({ results, subjectNames, onDownload }) {
                   {result.student?.studentName || "N/A"}
                 </td>
                 {Array.from(subjectNames).map((subjectName) => {
-                  const subjectResult = result.subjectResults.find(
-                    (sr) => sr.subject.subjectName === subjectName
+                  const subjectResult = result?.subjectResults.find(
+                    (sr) => sr.subject?.subjectName === subjectName
                   );
                   const mark = subjectResult ? subjectResult.cceMark : "-";
                   const isFailing =

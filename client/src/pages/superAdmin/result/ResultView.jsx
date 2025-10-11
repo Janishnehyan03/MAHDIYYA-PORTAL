@@ -20,10 +20,11 @@ const StyledSelect = ({ value, onChange, options, placeholder, ...props }) => (
   <select
     value={value || ""}
     onChange={onChange}
+    
     className="w-full bg-white border border-slate-300 text-slate-700 font-medium py-2.5 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
     {...props}
   >
-    <option value="" disabled>{placeholder}</option>
+    <option value="" >{placeholder}</option>
     {options.map((opt) => (
       <option key={opt.value} value={opt.value}>
         {opt.label}
@@ -54,7 +55,7 @@ const FilterBar = ({ filters, setFilters, classes, branches, exams, authData, on
           onChange={(e) => setFilters({ ...filters, studyCentreId: e.target.value })}
           options={branches.map(b => ({ value: b._id, label: b.studyCentreName }))}
           placeholder="-- Select Study Centre --"
-          required
+          // required
         />
       )}
       <StyledSelect
@@ -170,8 +171,9 @@ function ResultView() {
 
   const areFiltersSet =
     filters.classId &&
-    filters.examId &&
-    (authData.role !== "superAdmin" || filters.studyCentreId);
+    filters.examId 
+    // &&
+    // (authData.role !== "superAdmin" || filters.studyCentreId);
 
   // --- Data Fetching ---
   useEffect(() => {

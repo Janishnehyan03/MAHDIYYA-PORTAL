@@ -104,7 +104,10 @@ exports.getResults = async (req, res) => {
             { path: "class" }, // Populate class details
           ],
         })
-        .populate("subject");
+        .populate({
+          path: "subject",
+          match: { class: mongoose.Types.ObjectId(req.query.classId) }, // Only include subjects belonging to the selected class
+        });
 
       if (results.length === 0) {
         return res.status(404).json({ message: "No results found" });
@@ -143,11 +146,17 @@ exports.getResults = async (req, res) => {
 
       const modifiedResults = sortedStudents.map((studentResult, index) => {
         const totalMarks = studentResult.subjectResults.reduce(
-          (sum, subjectResult) => sum + subjectResult.subject.totalMarks,
+          (sum, subjectResult) => {
+            // Only add if subject and totalMarks exist
+            if (subjectResult.subject && subjectResult.subject.totalMarks != null) {
+              return sum + subjectResult.subject.totalMarks;
+            }
+            return sum;
+          },
           0
         );
         const cceMark = studentResult.totalMarks;
-        const percentage = (cceMark / totalMarks) * 100;
+        const percentage = totalMarks > 0 ? (cceMark / totalMarks) * 100 : 0;
         const passed = studentResult.subjectResults.every(
           (subjectResult) => subjectResult.cceMark >= 40
         );
