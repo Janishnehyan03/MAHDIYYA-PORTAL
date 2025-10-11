@@ -7,6 +7,7 @@ import { toast } from "react-toastify";
 import Axios from "../../../Axios";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCloudDownloadAlt } from "@fortawesome/free-solid-svg-icons";
+import { jsPDF } from "jspdf";
 
 /**
  * Generates a single hall ticket image using the Canvas API.
@@ -61,7 +62,13 @@ const generateHallTicketImage = (ticket, examName, backgroundImage) => {
     const colWidth = tableWidth / 5;
     const headerHeight = 35;
     const rowHeight = 40;
-    const tableHeaders = ["Date", "Subject", "Code", "Time", "Invigilator's Sign"];
+    const tableHeaders = [
+      "Date",
+      "Subject",
+      "Code",
+      "Time",
+      "Invigilator's Sign",
+    ];
 
     // Draw Header
     ctx.fillStyle = "#2d3748"; // gray-800
@@ -77,29 +84,45 @@ const generateHallTicketImage = (ticket, examName, backgroundImage) => {
         tableStartY + 23
       );
     });
-    
+
     // Draw Table Rows
     ticket?.hallTicketDetails?.subjects?.forEach((subject, index) => {
       const rowY = tableStartY + headerHeight + index * rowHeight;
-      
+
       // Set cell text style
       ctx.fillStyle = COLOR_PRIMARY;
       ctx.font = `15px ${FONT_PRIMARY}`;
-      
+
       // Date
       ctx.textAlign = "center";
-      ctx.fillText(moment(subject?.date).format("DD-MM-YYYY"), tableStartX + colWidth * 0.5, rowY + 25);
-      
+      ctx.fillText(
+        moment(subject?.date).format("DD-MM-YYYY"),
+        tableStartX + colWidth * 0.5,
+        rowY + 25
+      );
+
       // Subject Name
       ctx.textAlign = "left";
-      ctx.fillText(subject?.subjectId?.subjectName, tableStartX + colWidth + 10, rowY + 25);
-      
+      ctx.fillText(
+        subject?.subjectId?.subjectName,
+        tableStartX + colWidth + 10,
+        rowY + 25
+      );
+
       // Subject Code
       ctx.textAlign = "center";
-      ctx.fillText(subject?.subjectId?.subjectCode, tableStartX + colWidth * 2.5, rowY + 25);
-      
+      ctx.fillText(
+        subject?.subjectId?.subjectCode,
+        tableStartX + colWidth * 2.5,
+        rowY + 25
+      );
+
       // Time
-      ctx.fillText(moment(subject?.time, "HH:mm").format("hh:mm A"), tableStartX + colWidth * 3.5, rowY + 25);
+      ctx.fillText(
+        moment(subject?.time, "HH:mm").format("hh:mm A"),
+        tableStartX + colWidth * 3.5,
+        rowY + 25
+      );
 
       // Draw horizontal line for each row
       ctx.strokeStyle = "#e2e8f0"; // gray-200
@@ -111,12 +134,22 @@ const generateHallTicketImage = (ticket, examName, backgroundImage) => {
 
     // Draw Table Borders
     ctx.strokeStyle = "#a0aec0"; // gray-400
-    ctx.strokeRect(tableStartX, tableStartY, tableWidth, headerHeight + ticket.hallTicketDetails.subjects.length * rowHeight);
+    ctx.strokeRect(
+      tableStartX,
+      tableStartY,
+      tableWidth,
+      headerHeight + ticket.hallTicketDetails.subjects.length * rowHeight
+    );
     for (let i = 1; i < tableHeaders.length; i++) {
-        ctx.beginPath();
-        ctx.moveTo(tableStartX + colWidth * i, tableStartY);
-        ctx.lineTo(tableStartX + colWidth * i, tableStartY + headerHeight + ticket.hallTicketDetails.subjects.length * rowHeight);
-        ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(tableStartX + colWidth * i, tableStartY);
+      ctx.lineTo(
+        tableStartX + colWidth * i,
+        tableStartY +
+          headerHeight +
+          ticket.hallTicketDetails.subjects.length * rowHeight
+      );
+      ctx.stroke();
     }
 
     // --- Resolve with Blob ---
@@ -149,51 +182,91 @@ function BulkHallTickets() {
 
     try {
       // 1. Fetch bulk hall ticket data
-      const { data } = await Axios.post("/hall-ticket/bulk-download", { class: classId });
+      const { data } = await Axios.post("/hall-ticket/bulk-download", {
+        class: classId,
+      });
 
       if (!data.hallTickets || data.hallTickets.length === 0) {
         toast.info("No hall tickets available for this class.");
         return;
       }
-      
+
       // 2. Fetch background image asset
-      const bgResponse = await axios.get("/HallTicketBG.jpg", { responseType: "arraybuffer" });
+      const bgResponse = await axios.get("/HallTicketBG.jpg", {
+        responseType: "arraybuffer",
+      });
       const backgroundImage = new Image();
       backgroundImage.src = URL.createObjectURL(new Blob([bgResponse.data]));
-      await new Promise(resolve => backgroundImage.onload = resolve); // Wait for image to load
+      await new Promise((resolve) => (backgroundImage.onload = resolve)); // Wait for image to load
 
       // 3. Generate all hall ticket images in parallel for performance
       let completedCount = 0;
-      const zip = new JSZip();
-      const imageGenerationPromises = data.hallTickets.map(ticket => 
-        generateHallTicketImage(ticket, data.hallTickets[0]?.examName, backgroundImage)
-          .then(blob => {
-            zip.file(`${ticket.registerNo}.jpg`, blob);
-            // Update progress after each image is generated
-            completedCount++;
-            setDownloadProgress((completedCount / data.hallTickets.length) * 100);
-          })
+      const images = await Promise.all(
+        data.hallTickets.map((ticket) =>
+          generateHallTicketImage(
+            ticket,
+            data.hallTickets[0]?.examName,
+            backgroundImage
+          )
+            .then((blob) => {
+              return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result); // result is a base64 data URL
+                reader.readAsDataURL(blob);
+              });
+            })
+            .then((dataUrl) => {
+              completedCount++;
+              setDownloadProgress(
+                (completedCount / data.hallTickets.length) * 100
+              );
+              return dataUrl;
+            })
+        )
       );
-      
-      await Promise.all(imageGenerationPromises);
 
-      // 4. Generate and save the ZIP file
-      const zipBlob = await zip.generateAsync({ type: "blob" });
-      const className = classes.find((cls) => cls._id === classId)?.className || "Hall-Tickets";
-      saveAs(zipBlob, `${className}.zip`);
+      // 4. Create a single PDF with all images as pages
+      const firstImg = new window.Image();
+      firstImg.src = images[0];
+      await new Promise((resolve) => (firstImg.onload = resolve));
+      const pdf = new jsPDF({
+        orientation: firstImg.width > firstImg.height ? "l" : "p",
+        unit: "px",
+        format: [firstImg.width, firstImg.height],
+      });
+
+      // Add first page
+      pdf.addImage(images[0], "JPEG", 0, 0, firstImg.width, firstImg.height);
+
+      // Add the rest
+      for (let i = 1; i < images.length; i++) {
+        const img = new window.Image();
+        img.src = images[i];
+        // Wait for image to load to get correct dimensions
+        await new Promise((resolve) => (img.onload = resolve));
+        pdf.addPage(
+          [img.width, img.height],
+          img.width > img.height ? "l" : "p"
+        );
+        pdf.addImage(images[i], "JPEG", 0, 0, img.width, img.height);
+      }
+
+      // 5. Download the PDF
+      const className =
+        classes.find((cls) => cls._id === classId)?.className || "Hall-Tickets";
+      pdf.save(`${className}.pdf`);
       toast.success("Hall tickets downloaded successfully!");
-
     } catch (error) {
       console.error("Error downloading bulk hall tickets:", error);
-      toast.error(error.response?.data?.message || "An error occurred during download.");
+      toast.error(
+        error.response?.data?.message || "An error occurred during download."
+      );
     } finally {
-      // 5. Reset state
       setIsDownloading(false);
       setDownloadProgress(0);
       setActiveClassId(null);
     }
   };
-
   // --- Effects ---
   useEffect(() => {
     getAllClasses();
@@ -222,7 +295,8 @@ function BulkHallTickets() {
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {classes.map((classItem) => {
-                  const isCurrentClassDownloading = activeClassId === classItem._id;
+                  const isCurrentClassDownloading =
+                    activeClassId === classItem._id;
                   return (
                     <tr key={classItem._id} className="hover:bg-gray-50">
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
@@ -236,14 +310,20 @@ function BulkHallTickets() {
                         >
                           {isCurrentClassDownloading ? (
                             <>
-                              <div className="absolute top-0 left-0 h-full bg-blue-700 rounded-md" style={{ width: `${downloadProgress}%` }}></div>
+                              <div
+                                className="absolute top-0 left-0 h-full bg-blue-700 rounded-md"
+                                style={{ width: `${downloadProgress}%` }}
+                              ></div>
                               <span className="relative z-10">
                                 Downloading... {Math.round(downloadProgress)}%
                               </span>
                             </>
                           ) : (
                             <>
-                              <FontAwesomeIcon icon={faCloudDownloadAlt} className="mr-2 -ml-1 h-5 w-5" />
+                              <FontAwesomeIcon
+                                icon={faCloudDownloadAlt}
+                                className="mr-2 -ml-1 h-5 w-5"
+                              />
                               <span>Download</span>
                             </>
                           )}
@@ -256,7 +336,7 @@ function BulkHallTickets() {
             </table>
           </div>
           {classes.length === 0 && !isDownloading && (
-             <p className="text-center text-gray-500 py-8">No classes found.</p>
+            <p className="text-center text-gray-500 py-8">No classes found.</p>
           )}
         </div>
       </div>
