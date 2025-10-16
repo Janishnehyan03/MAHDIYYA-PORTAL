@@ -467,3 +467,59 @@ exports.bulkImportStudentsWithClassAndBranch = async (req, res, next) => {
     next(error);
   }
 };
+
+const cloudinary = require("../config/cloudinary");
+exports.updateStudentImage = async (req, res) => {
+  cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+  });
+  try {
+    const studentId = req.params.id;
+    if (!req.file) {
+      return res.status(400).json({ message: "No image file provided." });
+    }
+
+    // Upload image to Cloudinary
+    const streamUpload = (req) => {
+      return new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+          {
+            folder: "students",
+            public_id: `student_${studentId}_${Date.now()}`,
+            resource_type: "image",
+          },
+          (error, result) => {
+            if (result) {
+              resolve(result);
+            } else {
+              reject(error);
+            }
+          }
+        );
+        stream.end(req.file.buffer);
+      });
+    };
+
+    const result = await streamUpload(req);
+
+    // Update student with new image URL
+    const student = await Student.findByIdAndUpdate(
+      studentId,
+      { imageUrl: result.secure_url },
+      { new: true }
+    );
+
+    res.status(200).json({
+      message: "Image uploaded successfully.",
+      imageUrl: result.secure_url,
+      student,
+    });
+  } catch (error) {
+    console.error("Error uploading image:", error);
+    res
+      .status(500)
+      .json({ message: "Image upload failed.", error: error.message });
+  }
+};

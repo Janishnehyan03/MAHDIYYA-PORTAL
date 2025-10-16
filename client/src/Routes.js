@@ -1,11 +1,4 @@
-import {
-  CceMark,
-  Course,
-  Result,
-  Student,
-  StudyCentre,
-  Teacher,
-} from "./pages";
+import { CceMark, Result, Student, StudyCentre, Teacher } from "./pages";
 import AdminHome from "./pages/AdminHome";
 import ViewTeacher from "./pages/ViewTeacher";
 import FileUpload from "./pages/admin/FileUpload";
@@ -27,8 +20,6 @@ import RecycleBin from "./pages/superAdmin/RecycleBin";
 import TimeTables from "./pages/superAdmin/Timetables";
 import UploadedFiles from "./pages/superAdmin/UploadedFiles";
 import Configurations from "./pages/superAdmin/configurations/Configurations";
-import CourseHome from "./pages/superAdmin/course/CourseHome";
-import CourseTable from "./pages/superAdmin/course/CourseTable";
 import CreateNotification from "./pages/superAdmin/notification/CreateNotification";
 
 export const SuperAdminRoutes = [
@@ -69,16 +60,6 @@ export const SuperAdminRoutes = [
     component: <EditSubject />,
     role: "superAdmin",
   },
-  {
-    route: "/courses",
-    component: <CourseHome />,
-    role: "superAdmin",
-  },
-  {
-    route: "/course-table",
-    component: <CourseTable />,
-    role: "superAdmin",
-  },
 
   {
     route: "/create-notification",
@@ -90,21 +71,7 @@ export const SuperAdminRoutes = [
     component: <ClassManagment />,
     role: "superAdmin",
   },
-  {
-    route: "/create-course",
-    component: <Course.CreateCourse />,
-    role: "superAdmin",
-  },
-  {
-    route: "/edit-course/:id",
-    component: <Course.EditCourse />,
-    role: "superAdmin",
-  },
-  {
-    route: "/all-courses",
-    component: <Course.AllCourses />,
-    role: "superAdmin",
-  },
+
   {
     route: "/create-exam",
     component: <CreateExam />,
@@ -157,17 +124,17 @@ export const SuperAdminRoutes = [
   {
     route: "/transfer-student/:studentId",
     component: <Student.TransferStudent />,
-    role: "superAdmin"
+    role: "superAdmin",
   },
   {
     route: "/admission-management",
     component: <AdmissionManagement />,
-    role: "superAdmin"
+    role: "superAdmin",
   },
   {
     route: "/previous-results",
     component: <PreviousExamManagement />,
-    role: "superAdmin"
+    role: "superAdmin",
   },
 ];
 

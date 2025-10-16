@@ -9,7 +9,7 @@ import {
   faUserSlash,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useContext, useEffect, useMemo, useState } from "react";
+import { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import Axios from "../../Axios";
@@ -126,6 +126,11 @@ function StudentProfile() {
   const [examResults, setExamResults] = useState(null);
   const [resultsLoading, setResultsLoading] = useState(false);
   const [resultsError, setResultsError] = useState("");
+
+  // --- Image Upload State ---
+  const [uploading, setUploading] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState(null);
+  const fileInputRef = useRef(null);
 
   // --- Data Fetching ---
   useEffect(() => {
@@ -275,6 +280,33 @@ function StudentProfile() {
     if (modalState.type === "delete") handleDelete();
   };
 
+  // --- Image Upload Handlers ---
+  const handleImageChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setPreviewUrl(URL.createObjectURL(file)); // show preview
+
+    // Upload image to backend
+    const formData = new FormData();
+    formData.append("image", file);
+
+    setUploading(true);
+    try {
+      const { data } = await Axios.patch(`/student/${student._id}/image`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      toast.success("Profile image updated!");
+      setStudent((prev) => ({ ...prev, imageUrl: data.student.imageUrl }));
+      setPreviewUrl(null); // clear preview
+    } catch (error) {
+      toast.error("Image upload failed.");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const triggerFileInput = () => fileInputRef.current?.click();
+
   // --- Render Logic ---
   if (loading) {
     return (
@@ -288,7 +320,6 @@ function StudentProfile() {
     return (
       <div className="text-center p-10">
         <h2 className="text-2xl font-bold text-slate-700">Student Not Found</h2>
-       
       </div>
     );
   }
@@ -312,7 +343,6 @@ function StudentProfile() {
               No further academic actions (exam results, edit, transfer, verification) are available for dropped out students.
             </p>
             <div className="flex flex-col md:flex-row gap-3 mt-8">
-            
               {/* Optionally: allow delete if superAdmin */}
               {authData?.role === "superAdmin" && (
                 <button
@@ -374,7 +404,41 @@ function StudentProfile() {
           {/* Card Header */}
           <div className="bg-slate-50 p-6 md:p-8 border-b border-slate-200">
             <div className="flex flex-col sm:flex-row items-center gap-6">
-              <ProfileAvatar name={student.studentName} />
+              {/* --- Image Upload and Avatar --- */}
+              <div className="relative group">
+                {student.imageUrl || previewUrl ? (
+                  <img
+                    src={previewUrl || student.imageUrl}
+                    alt={student.studentName}
+                    className="w-24 h-24 object-cover rounded-full border-4 border-white shadow-md"
+                  />
+                ) : (
+                  <ProfileAvatar name={student.studentName} />
+                )}
+                {/* Upload overlay button */}
+                <button
+                  type="button"
+                  onClick={triggerFileInput}
+                  className="absolute bottom-0 right-0 bg-indigo-600 text-white p-2 rounded-full shadow-lg opacity-80 hover:opacity-100 transition group-hover:opacity-100"
+                  disabled={uploading}
+                  title="Change Profile Photo"
+                >
+                  <FontAwesomeIcon icon={faEdit} />
+                </button>
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  ref={fileInputRef}
+                  onChange={handleImageChange}
+                  disabled={uploading}
+                />
+                {uploading && (
+                  <div className="absolute inset-0 bg-white bg-opacity-60 flex items-center justify-center rounded-full">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-4 border-indigo-600"></div>
+                  </div>
+                )}
+              </div>
               <div className="text-center sm:text-left">
                 <h1 className="text-3xl font-extrabold text-slate-800">
                   {student.studentName}

@@ -29,8 +29,10 @@ const AddResult = () => {
   const maxMark = selectedExam?.maxPaperMark;
 
   const handleMarkChange = (studentId, value) => {
-    // Allow clearing the input
-    if (value === "") {
+    // ✅ Allow "A" for absent, numeric marks, or empty input
+    const trimmedValue = value.trim().toUpperCase();
+
+    if (trimmedValue === "") {
       setStudentMarks((prevMarks) => ({
         ...prevMarks,
         [studentId]: "",
@@ -38,9 +40,16 @@ const AddResult = () => {
       return;
     }
 
-    const newMarks = parseInt(value, 10);
+    if (trimmedValue === "A") {
+      setStudentMarks((prevMarks) => ({
+        ...prevMarks,
+        [studentId]: "A", // ✅ Store as string "A"
+      }));
+      return;
+    }
 
-    // Validate marks are within the allowed range
+    const newMarks = parseInt(trimmedValue, 10);
+
     if (!isNaN(newMarks) && newMarks >= 0 && newMarks <= maxMark) {
       setStudentMarks((prevMarks) => ({
         ...prevMarks,
@@ -66,55 +75,48 @@ const AddResult = () => {
     if (window.confirm("Are you sure you want to submit this result?")) {
       setLoading(true);
       try {
-        // Prepare results data by mapping over students
         const resultsData = students.map((student) => {
           const existingResult = existingResults.find(
             (result) => result?.student?._id === student._id
           );
+
+          const markValue = studentMarks[student._id];
+
           return {
             student: student._id,
             exam,
-            // Use Number() to handle empty strings from input, default to 0
-            marksObtained: Number(studentMarks[student._id] || 0),
+            // ✅ Send "A" if absent, else numeric mark or 0
+            marksObtained: markValue === "A" ? "A" : Number(markValue) || 0,
             class: selectedClass,
             subject,
-            _id: existingResult ? existingResult._id : null, // Use existing result ID if available
+            _id: existingResult ? existingResult._id : null,
           };
         });
 
-        // Function to send requests in batches to avoid overwhelming the server
+        // ✅ Send in batches (unchanged)
         const sendRequestsInBatches = async (data, batchSize) => {
           for (let i = 0; i < data.length; i += batchSize) {
             const batch = data.slice(i, i + batchSize);
             const requests = batch.map((result) => {
               if (result._id) {
-                // PATCH request to update an existing result
                 return Axios.patch("/result", [
                   { _id: result._id, marksObtained: result.marksObtained },
                 ]);
               } else {
-                // POST request to create a new result
-                return Axios.post("/result", {
-                  student: result.student,
-                  exam: result.exam,
-                  marksObtained: result.marksObtained,
-                  class: result.class,
-                  subject: result.subject,
-                });
+                return Axios.post("/result", result);
               }
             });
             await Promise.all(requests);
           }
         };
 
-        // Send requests in batches of 10
         await sendRequestsInBatches(resultsData, 10);
 
         toast.success("Marks submitted successfully!", {
           position: toast.POSITION.TOP_CENTER,
           autoClose: 3000,
         });
-        fetchExistingResults(); // Re-fetch to get the latest data with new _ids
+        fetchExistingResults();
       } catch (error) {
         console.error("Error submitting marks:", error);
         toast.error(
@@ -139,6 +141,7 @@ const AddResult = () => {
         const fetchedResults = response.data || [];
         setExistingResults(fetchedResults);
 
+        // ✅ Keep "A" or number when setting marks
         const marks = fetchedResults.reduce((acc, result) => {
           if (result?.student?._id) {
             acc[result.student._id] = result.marksObtained;
@@ -365,11 +368,15 @@ const AddResult = () => {
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <input
-                              type="number"
-                              min="0"
+                              type="text"
+                              min="1"
                               max={maxMark}
                               className="w-24 border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm"
-                              value={studentMarks[student._id] || ""}
+                              value={
+                                studentMarks[student._id] === undefined
+                                  ? ""
+                                  : studentMarks[student._id]
+                              }
                               placeholder="N/A"
                               onChange={(e) =>
                                 handleMarkChange(student._id, e.target.value)

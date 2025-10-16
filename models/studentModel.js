@@ -92,7 +92,7 @@ const studentSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
-
+    imageUrl: String,
     deleted: { type: Boolean, default: false },
   },
   { timestamps: true }

@@ -106,4 +106,12 @@ router.post(
   studentController.bulkImportStudentsWithClassAndBranch
 );
 
+router.patch(
+  "/:id/image",
+  protect,
+  restrictTo("admin", "superAdmin"),
+  uploads.single("image"),
+  studentController.updateStudentImage
+);
+
 module.exports = router;

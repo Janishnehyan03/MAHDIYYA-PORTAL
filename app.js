@@ -44,7 +44,6 @@ app.use("/api/duty", require("./routes/duty"));
 app.use("/api/notification", require("./routes/notification"));
 app.use("/api/subject", require("./routes/subject"));
 app.use("/api/class", require("./routes/class"));
-app.use("/api/course", require("./routes/course"));
 app.use("/api/exam", require("./routes/exam"));
 app.use("/api/downloads", require("./routes/downloads"));
 app.use("/api/uploads", require("./routes/uploads"));

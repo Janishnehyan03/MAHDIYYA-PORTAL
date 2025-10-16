@@ -26,12 +26,9 @@ import AllMAHDIYYAHTeachers from "./superAdmin/teacher/AllMahdiyyaTeachers.jsx";
 
 import EditCceMark from "./admin/cce-mark/EditCceMark.jsx";
 import ViewCceMarks from "./admin/cce-mark/ViewCceMarks.jsx";
-import TransferStudent from "./student/TransferStudent.jsx";
-import AllCourses from "./superAdmin/course/AllCourses.jsx";
-import CreateCourse from "./superAdmin/course/CreateCourse";
-import EditCourse from "./superAdmin/course/EditCourse";
-import AddCceMark from "./superAdmin/result/AddCceMark.jsx";
 import DropoutList from "./student/DropoutList.jsx";
+import TransferStudent from "./student/TransferStudent.jsx";
+import AddCceMark from "./superAdmin/result/AddCceMark.jsx";
 
 export const Teacher = {
   EditTeacher,
@@ -75,9 +72,4 @@ export const CceMark = {
   AddCceMark,
   ViewCceMarks,
   EditCceMark
-};
-export const Course = {
-  CreateCourse,
-  EditCourse,
-  AllCourses
 };

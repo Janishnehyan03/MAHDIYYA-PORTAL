@@ -316,11 +316,23 @@ exports.createResults = async (req, res) => {
         _id,
       } = resultData;
 
+      // Handle "A" type mark logic
+      let finalMark;
+      if (marksObtained === "A") {
+        finalMark = "A";
+      } else {
+        const mark = Number(marksObtained);
+        finalMark = isNaN(mark) ? 0 : mark;
+      }
+
       return {
         updateOne: {
           filter: { student, subject, exam },
           update: {
-            $set: { marksObtained, class: studentClass },
+            $set: {
+              marksObtained: finalMark,
+              class: studentClass,
+            },
             $setOnInsert: { student, exam, subject },
           },
           upsert: true, // Create if not exists
@@ -335,6 +347,7 @@ exports.createResults = async (req, res) => {
     res.status(201).json({ message: "Results processed", results });
   } catch (err) {
     console.error(err);
+
     if (
       err.name === "ValidationError" &&
       err.message.includes("Duplicate mark entry")
@@ -343,6 +356,7 @@ exports.createResults = async (req, res) => {
         .status(400)
         .json({ error: "Duplicate mark entry for the subject." });
     }
+
     res.status(400).json({ message: err.message });
   }
 };

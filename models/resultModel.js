@@ -18,11 +18,11 @@ const resultSchema = new mongoose.Schema({
     ref: "Subject",
     required: true,
   },
-  marksObtained: { type: Number, required: true },
+  marksObtained: { type: String, required: true },
   yearAndMonth: { type: String },
 });
 
-resultSchema.pre(/^find/, function(next) {
+resultSchema.pre(/^find/, function (next) {
   // Only include documents where the deleted field is not true
   this.find({ deleted: { $ne: true } });
   next();
