@@ -1,7 +1,15 @@
-import { faFileExcel, faSearch, faSpinner, faTableList, faWandMagicSparkles } from "@fortawesome/free-solid-svg-icons";
+
+import {
+  faFileExcel,
+  faSearch,
+  faSpinner,
+  faTableList,
+  faWandMagicSparkles,
+} from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import * as XLSX from "xlsx";
+import { toast } from "react-toastify";
 
 import Axios from "../../../Axios";
 import { ClassContext } from "../../../context/classContext";
@@ -11,7 +19,9 @@ import { UserAuthContext } from "../../../context/userContext";
 
 const PageHeader = ({ title, subtitle }) => (
   <div className="text-center mb-8">
-    <h1 className="text-4xl font-bold text-slate-800 tracking-tight">{title}</h1>
+    <h1 className="text-4xl font-bold text-slate-800 tracking-tight">
+      {title}
+    </h1>
     <p className="mt-2 text-lg text-slate-500">{subtitle}</p>
   </div>
 );
@@ -20,11 +30,10 @@ const StyledSelect = ({ value, onChange, options, placeholder, ...props }) => (
   <select
     value={value || ""}
     onChange={onChange}
-    
     className="w-full bg-white border border-slate-300 text-slate-700 font-medium py-2.5 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition"
     {...props}
   >
-    <option value="" >{placeholder}</option>
+    <option value="">{placeholder}</option>
     {options.map((opt) => (
       <option key={opt.value} value={opt.value}>
         {opt.label}
@@ -33,11 +42,19 @@ const StyledSelect = ({ value, onChange, options, placeholder, ...props }) => (
   </select>
 );
 
-const FilterBar = ({ filters, setFilters, classes, branches, exams, authData, onFetch }) => (
+const FilterBar = ({
+  filters,
+  setFilters,
+  classes,
+  branches,
+  exams,
+  authData,
+  onFetch,
+}) => (
   <div className="p-6 bg-white border border-slate-200 rounded-2xl shadow-sm">
     <form
       className="grid grid-cols-1 md:grid-cols-3 gap-4"
-      onSubmit={e => {
+      onSubmit={(e) => {
         e.preventDefault();
         onFetch();
       }}
@@ -45,15 +62,20 @@ const FilterBar = ({ filters, setFilters, classes, branches, exams, authData, on
       <StyledSelect
         value={filters.classId}
         onChange={(e) => setFilters({ ...filters, classId: e.target.value })}
-        options={classes.map(c => ({ value: c._id, label: c.className }))}
+        options={classes.map((c) => ({ value: c._id, label: c.className }))}
         placeholder="-- Select Class --"
         required
       />
       {authData.role === "superAdmin" && (
         <StyledSelect
           value={filters.studyCentreId}
-          onChange={(e) => setFilters({ ...filters, studyCentreId: e.target.value })}
-          options={branches.map(b => ({ value: b._id, label: b.studyCentreName }))}
+          onChange={(e) =>
+            setFilters({ ...filters, studyCentreId: e.target.value })
+          }
+          options={branches.map((b) => ({
+            value: b._id,
+            label: b.studyCentreName,
+          }))}
           placeholder="-- Select Study Centre --"
           // required
         />
@@ -61,7 +83,7 @@ const FilterBar = ({ filters, setFilters, classes, branches, exams, authData, on
       <StyledSelect
         value={filters.examId}
         onChange={(e) => setFilters({ ...filters, examId: e.target.value })}
-        options={exams.map(e => ({ value: e._id, label: e.examName }))}
+        options={exams.map((e) => ({ value: e._id, label: e.examName }))}
         placeholder="-- Select Exam --"
         required
       />
@@ -84,73 +106,133 @@ const EmptyState = ({ icon, title, message }) => (
 );
 
 const ResultsTable = ({ results, subjectNames }) => (
-    <div className="overflow-x-auto">
-        <table className="min-w-full text-sm">
-            <thead className="bg-slate-100 sticky top-0 z-10">
-                <tr>
-                    <th className="p-3 text-left font-semibold text-slate-600 border-b-2 border-slate-200" rowSpan="2">#</th>
-                    <th className="p-3 text-left font-semibold text-slate-600 border-b-2 border-slate-200" rowSpan="2">Register No</th>
-                    <th className="p-3 text-left font-semibold text-slate-600 border-b-2 border-slate-200" rowSpan="2">Student Name</th>
-                    {Array.from(subjectNames).map((subjectName) => (
-                        <th key={subjectName} className="p-3 text-center font-semibold text-slate-600 border-b-2 border-slate-200" colSpan="3">{subjectName}</th>
-                    ))}
-                </tr>
-                <tr>
-                    {Array.from(subjectNames).flatMap((subjectName) => [
-                        <th key={`${subjectName}-fa`} className="p-2 text-center font-medium text-slate-500 text-xs border-b-2 border-slate-200">FA</th>,
-                        <th key={`${subjectName}-sa`} className="p-2 text-center font-medium text-slate-500 text-xs border-b-2 border-slate-200">SA</th>,
-                        <th key={`${subjectName}-total`} className="p-2 text-center font-bold text-slate-600 text-xs border-b-2 border-slate-200">Total</th>,
-                    ])}
-                </tr>
-            </thead>
-            <tbody className="bg-white">
-                {results.map((result, index) => <ResultTableRow key={result?._id || index} result={result} index={index} subjectNames={subjectNames} />)}
-            </tbody>
-        </table>
-    </div>
+  <div className="overflow-x-auto">
+    <table className="min-w-full text-sm">
+      <thead className="bg-slate-100 sticky top-0 z-10">
+        <tr>
+          <th
+            className="p-3 text-left font-semibold text-slate-600 border-b-2 border-slate-200"
+            rowSpan="2"
+          >
+            #
+          </th>
+          <th
+            className="p-3 text-left font-semibold text-slate-600 border-b-2 border-slate-200"
+            rowSpan="2"
+          >
+            Register No
+          </th>
+          <th
+            className="p-3 text-left font-semibold text-slate-600 border-b-2 border-slate-200"
+            rowSpan="2"
+          >
+            Student Name
+          </th>
+          {Array.from(subjectNames.entries()).map(([code, name]) => (
+            <th
+              key={code}
+              className="p-3 text-center font-semibold text-slate-600 border-b-2 border-slate-200"
+              colSpan="3"
+            >
+              <div className="text-sm">{name}</div>
+              <div className="text-xs text-slate-400">{code}</div>
+            </th>
+          ))}
+        </tr>
+        <tr>
+          {Array.from(subjectNames.entries()).flatMap(([code]) => [
+            <th
+              key={`${code}-fa`}
+              className="p-2 text-center font-medium text-slate-500 text-xs border-b-2 border-slate-200"
+            >
+              FA
+            </th>,
+            <th
+              key={`${code}-sa`}
+              className="p-2 text-center font-medium text-slate-500 text-xs border-b-2 border-slate-200"
+            >
+              SA
+            </th>,
+            <th
+              key={`${code}-total`}
+              className="p-2 text-center font-bold text-slate-600 text-xs border-b-2 border-slate-200"
+            >
+              Total
+            </th>,
+          ])}
+        </tr>
+      </thead>
+      <tbody className="bg-white">
+        {results.map((result, index) => (
+          <ResultTableRow
+            key={result?._id || index}
+            result={result}
+            index={index}
+            subjectNames={subjectNames}
+          />
+        ))}
+      </tbody>
+    </table>
+  </div>
 );
 
-const ResultTableRow = ({ result, index, subjectNames }) => {
-    // Determine row background color for striped effect
-    const rowClass = index % 2 === 0 ? 'bg-white' : 'bg-slate-50/70';
+function ResultTableRow({ result, subjectNames, index }) {
+  return (
+    <tr className="hover:bg-slate-50 transition">
+      <td className="p-3 border-t border-slate-200">{index + 1}</td>
+      <td className="p-3 border-t border-slate-200">{result.student?.registerNo ?? "-"}</td>
+      <td className="p-3 border-t border-slate-200 font-medium text-slate-700">
+        {result.student?.studentName ?? result.student?.name ?? "-"}
+      </td>
 
-    return (
-      <tr className={rowClass}>
-        <td className="p-3 text-slate-500">{index + 1}</td>
-        <td className="p-3 font-mono text-slate-600">{result.student?.registerNo || "N/A"}</td>
-        <td className="p-3 font-semibold text-slate-800">{result.student?.studentName || "N/A"}</td>
-        {Array.from(subjectNames).flatMap((subjectName) => {
-          const examResult = result.subjectResults.find(sr => sr.subject.subjectName === subjectName && sr.type === "exam");
-          const cceResult = result.subjectResults.find(sr => sr.subject.subjectName === subjectName && sr.type === "cce");
+      {Array.from(subjectNames.keys()).flatMap((code) => {
+        const examResult = result.subjectResults?.find(
+          (sr) => sr.subject?.subjectCode === code && sr.type === "exam"
+        );
+        const cceResult = result.subjectResults?.find(
+          (sr) => sr.subject?.subjectCode === code && sr.type === "cce"
+        );
 
-          const cceMarks = cceResult?.marksObtained;
-          const saMarks = examResult?.marksObtained;
+        const cceMarks = cceResult?.marksObtained;
+        const saMarks = examResult?.marksObtained;
 
-          let totalMarks;
-          if (cceMarks === "A" && saMarks === "A") {
-            totalMarks = "A";
-          } else if (cceMarks === "A") {
-            totalMarks = saMarks ?? "-";
-          } else if (saMarks === "A") {
-            totalMarks = cceMarks ?? "-";
-          } else if (cceMarks == null && saMarks == null) {
-            totalMarks = "-";
-          } else {
-            totalMarks = (Number(cceMarks) || 0) + (Number(saMarks) || 0);
-          }
+        let totalMarks;
+        if (cceMarks === "A" && saMarks === "A") {
+          totalMarks = "A";
+        } else if (cceMarks === "A") {
+          totalMarks = saMarks ?? "-";
+        } else if (saMarks === "A") {
+          totalMarks = cceMarks ?? "-";
+        } else if (cceMarks == null && saMarks == null) {
+          totalMarks = "-";
+        } else {
+          totalMarks = (Number(cceMarks) || 0) + (Number(saMarks) || 0);
+        }
 
-          const hasMarks = cceResult || examResult;
-
-          return [
-            <td key={`${subjectName}-cce`} className="p-3 text-center text-slate-600">{cceMarks ?? "-"}</td>,
-            <td key={`${subjectName}-sa`} className="p-3 text-center text-slate-600">{saMarks ?? "-"}</td>,
-            <td key={`${subjectName}-total`} className="p-3 text-center font-bold text-indigo-600">{hasMarks ? totalMarks : "-"}</td>
-          ];
-        })}
-      </tr>
-    );
-};
-
+        return [
+          <td
+            key={`${result?._id || index}-${code}-fa`}
+            className="p-3 text-center border-t border-slate-200"
+          >
+            {cceMarks ?? "-"}
+          </td>,
+          <td
+            key={`${result?._id || index}-${code}-sa`}
+            className="p-3 text-center border-t border-slate-200"
+          >
+            {saMarks ?? "-"}
+          </td>,
+          <td
+            key={`${result?._id || index}-${code}-total`}
+            className="p-3 text-center border-t border-slate-200 font-semibold text-slate-700"
+          >
+            {totalMarks}
+          </td>,
+        ];
+      })}
+    </tr>
+  );
+}
 
 // --- The Main Component ---
 
@@ -169,11 +251,9 @@ function ResultView() {
     studyCentreId: "",
   });
 
-  const areFiltersSet =
-    filters.classId &&
-    filters.examId 
-    // &&
-    // (authData.role !== "superAdmin" || filters.studyCentreId);
+  const areFiltersSet = filters.classId && filters.examId;
+  // &&
+  // (authData.role !== "superAdmin" || filters.studyCentreId);
 
   // --- Data Fetching ---
   useEffect(() => {
@@ -224,49 +304,49 @@ function ResultView() {
     if (!searchTerm) return results;
     return results.filter(
       (result) =>
-        result.student?.studentName
+        (result.student?.studentName || result.student?.name || "")
           .toLowerCase()
           .includes(searchTerm.toLowerCase()) ||
-        result.student?.registerNo
+        (result.student?.registerNo || result.student?.admNo || "")
           .toLowerCase()
           .includes(searchTerm.toLowerCase())
     );
   }, [results, searchTerm]);
 
   const subjectNames = useMemo(() => {
-    const names = new Set();
+    const subjects = new Map();
     results.forEach((r) =>
-      (r.subjectResults || []).forEach((sr) =>
-        sr.subject?.subjectName && names.add(sr.subject.subjectName)
-      )
+      (r.subjectResults || []).forEach((sr) => {
+        if (sr.subject?.subjectCode) {
+          subjects.set(sr.subject.subjectCode, sr.subject.subjectName);
+        }
+      })
     );
-    return names;
+    return subjects;
   }, [results]);
 
   // --- Excel Download Handler ---
   const downloadExcel = () => {
-    const selectedClass = classes.find((c) => c._id === filters.classId);
-    const selectedExam = exams.find((e) => e._id === filters.examId);
-    const fileName = `${selectedClass?.className || "Class"}_${
-      selectedExam?.examName || "Exam"
-    }.xlsx`;
+    if (!results.length) {
+      toast.error("No results to export");
+      return;
+    }
 
-    const worksheetData = filteredResults.map((result, index) => {
+    const data = results.map((result) => {
       const row = {
-        "#": index + 1,
-        "Register No": result.student?.registerNo || "N/A",
-        "Student Name": result.student?.studentName || "N/A",
-        "Study Centre": result.student?.branch?.studyCentreCode || "N/A",
+        "#": results.indexOf(result) + 1,
+        "Adm No": result.student?.admNo || result.student?.registerNo || "-",
+        "Student Name": result.student?.studentName || result.student?.name || "-",
       };
-      subjectNames.forEach((subjectName) => {
+
+      subjectNames.forEach((name, code) => {
         const examResult = (result.subjectResults || []).find(
-          (sr) => sr.subject?.subjectName === subjectName && sr.type === "exam"
+          (sr) => sr.subject?.subjectCode === code && sr.type === "exam"
         );
         const cceResult = (result.subjectResults || []).find(
-          (sr) => sr.subject?.subjectName === subjectName && sr.type === "cce"
+          (sr) => sr.subject?.subjectCode === code && sr.type === "cce"
         );
 
-        // Handle "A" (absent) in marks
         const cceMarks = cceResult?.marksObtained;
         const saMarks = examResult?.marksObtained;
 
@@ -283,18 +363,19 @@ function ResultView() {
           totalMarks = (Number(cceMarks) || 0) + (Number(saMarks) || 0);
         }
 
-        row[`${subjectName} FA`] = cceMarks ?? "-";
-        row[`${subjectName} SA`] = saMarks ?? "-";
-        row[`${subjectName} Total`] =
-          examResult || cceResult ? totalMarks : "-";
+        row[`${name} FA`] = cceMarks ?? "-";
+        row[`${name} SA`] = saMarks ?? "-";
+        row[`${name} Total`] = examResult || cceResult ? totalMarks : "-";
       });
+
       return row;
     });
 
-    const worksheet = XLSX.utils.json_to_sheet(worksheetData);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Results");
-    XLSX.writeFile(workbook, fileName);
+    const ws = XLSX.utils.json_to_sheet(data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Results");
+    XLSX.writeFile(wb, "Exam_Results.xlsx");
+    toast.success("Results exported successfully");
   };
 
   return (
@@ -358,9 +439,16 @@ function ResultView() {
                 ) : filteredResults.length > 0 ? (
                   <>
                     <p className="text-sm text-slate-600 mb-4 px-2">
-                      Showing <span className="font-bold">{filteredResults.length}</span> results.
+                      Showing{" "}
+                      <span className="font-bold">
+                        {filteredResults.length}
+                      </span>{" "}
+                      results.
                     </p>
-                    <ResultsTable results={filteredResults} subjectNames={subjectNames} />
+                    <ResultsTable
+                      results={filteredResults}
+                      subjectNames={subjectNames}
+                    />
                   </>
                 ) : (
                   <EmptyState

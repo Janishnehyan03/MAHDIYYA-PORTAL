@@ -138,6 +138,7 @@ const AddResult = () => {
         const response = await Axios.get(
           `/result/fetch?examId=${exam}&subjectId=${subject}&classId=${selectedClass}`
         );
+
         const fetchedResults = response.data || [];
         setExistingResults(fetchedResults);
 
