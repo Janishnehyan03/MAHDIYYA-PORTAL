@@ -299,7 +299,8 @@ function StudentProfile() {
       setStudent((prev) => ({ ...prev, imageUrl: data.student.imageUrl }));
       setPreviewUrl(null); // clear preview
     } catch (error) {
-      toast.error("Image upload failed.");
+      console.error("Image upload failed:", error.response);
+      toast.error(error.response?.data?.message || "Image upload failed.");
     } finally {
       setUploading(false);
     }

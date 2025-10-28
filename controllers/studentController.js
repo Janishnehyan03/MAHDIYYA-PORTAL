@@ -469,6 +469,7 @@ exports.bulkImportStudentsWithClassAndBranch = async (req, res, next) => {
 };
 
 const cloudinary = require("../config/cloudinary");
+
 exports.updateStudentImage = async (req, res) => {
   cloudinary.config({
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -479,6 +480,15 @@ exports.updateStudentImage = async (req, res) => {
     const studentId = req.params.id;
     if (!req.file) {
       return res.status(400).json({ message: "No image file provided." });
+    }
+
+    // Validate file size before uploading to Cloudinary to avoid Cloudinary 400 errors
+    // Default max size is 10 MB, can be overridden with env var MAX_IMAGE_UPLOAD_SIZE (in bytes)
+    const MAX_FILE_SIZE = parseInt(process.env.MAX_IMAGE_UPLOAD_SIZE, 10) || 10 * 1024 * 1024;
+    if (typeof req.file.size === "number" && req.file.size > MAX_FILE_SIZE) {
+      return res.status(400).json({
+        message: `Maximum file size exceeded. Please upload an image smaller than ${MAX_FILE_SIZE / (1024 * 1024)} MB.`,
+      });
     }
 
     // Upload image to Cloudinary
