@@ -1,4 +1,3 @@
-
 import {
   faFileExcel,
   faSearch,
@@ -180,7 +179,9 @@ function ResultTableRow({ result, subjectNames, index }) {
   return (
     <tr className="hover:bg-slate-50 transition">
       <td className="p-3 border-t border-slate-200">{index + 1}</td>
-      <td className="p-3 border-t border-slate-200">{result.student?.registerNo ?? "-"}</td>
+      <td className="p-3 border-t border-slate-200">
+        {result.student?.registerNo ?? "-"}
+      </td>
       <td className="p-3 border-t border-slate-200 font-medium text-slate-700">
         {result.student?.studentName ?? result.student?.name ?? "-"}
       </td>
@@ -244,13 +245,29 @@ function ResultView() {
   const [results, setResults] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const { authData } = useContext(UserAuthContext);
+  const [subjects, setSubjects] = useState([]);
 
+  
   const [filters, setFilters] = useState({
     classId: "",
     examId: "",
     studyCentreId: "",
   });
-
+  
+  useEffect(() => {
+    const fetchSubjects = async () => {
+      if (!filters.classId) return;
+      try {
+        const { data } = await Axios.get(`/subject?class=${filters.classId}`);
+        console.log("Fetched subjects:", data);
+        setSubjects(data); // assuming `data` is an array of subject objects
+      } catch (error) {
+        console.error("Failed to fetch subjects:", error);
+        setSubjects([]);
+      }
+    };
+    fetchSubjects();
+  }, [filters.classId]);
   const areFiltersSet = filters.classId && filters.examId;
   // &&
   // (authData.role !== "superAdmin" || filters.studyCentreId);
@@ -314,16 +331,28 @@ function ResultView() {
   }, [results, searchTerm]);
 
   const subjectNames = useMemo(() => {
-    const subjects = new Map();
-    results.forEach((r) =>
+    const subjectsMap = new Map();
+
+    // Get all subjects for the selected class first
+    const validSubjectCodes = subjects.map((s) => s.subjectCode);
+
+    results.forEach((r) => {
       (r.subjectResults || []).forEach((sr) => {
-        if (sr.subject?.subjectCode) {
-          subjects.set(sr.subject.subjectCode, sr.subject.subjectName);
+        const code = sr.subject?.subjectCode;
+        const name = sr.subject?.subjectName;
+        if (code && validSubjectCodes.includes(code)) {
+          subjectsMap.set(code, name);
         }
-      })
-    );
-    return subjects;
-  }, [results]);
+      });
+    });
+
+    // If results are empty, just use the class subjects directly
+    if (subjectsMap.size === 0 && subjects.length > 0) {
+      subjects.forEach((s) => subjectsMap.set(s.subjectCode, s.subjectName));
+    }
+
+    return subjectsMap;
+  }, [results, subjects]);
 
   // --- Excel Download Handler ---
   const downloadExcel = () => {
@@ -336,7 +365,8 @@ function ResultView() {
       const row = {
         "#": results.indexOf(result) + 1,
         "Adm No": result.student?.admNo || result.student?.registerNo || "-",
-        "Student Name": result.student?.studentName || result.student?.name || "-",
+        "Student Name":
+          result.student?.studentName || result.student?.name || "-",
       };
 
       subjectNames.forEach((name, code) => {
