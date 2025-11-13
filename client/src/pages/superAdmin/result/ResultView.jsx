@@ -247,13 +247,12 @@ function ResultView() {
   const { authData } = useContext(UserAuthContext);
   const [subjects, setSubjects] = useState([]);
 
-  
   const [filters, setFilters] = useState({
     classId: "",
     examId: "",
     studyCentreId: "",
   });
-  
+
   useEffect(() => {
     const fetchSubjects = async () => {
       if (!filters.classId) return;
@@ -367,6 +366,8 @@ function ResultView() {
         "Adm No": result.student?.admNo || result.student?.registerNo || "-",
         "Student Name":
           result.student?.studentName || result.student?.name || "-",
+        "Study Centre": result.student?.branch?.studyCentreName || "-",
+        "Study Centre Code": result.student?.branch?.studyCentreCode || "-",
       };
 
       subjectNames.forEach((name, code) => {
