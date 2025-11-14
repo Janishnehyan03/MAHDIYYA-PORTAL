@@ -476,60 +476,93 @@ exports.updateStudentImage = async (req, res) => {
     api_key: process.env.CLOUDINARY_API_KEY,
     api_secret: process.env.CLOUDINARY_API_SECRET,
   });
+
   try {
     const studentId = req.params.id;
+
     if (!req.file) {
       return res.status(400).json({ message: "No image file provided." });
     }
 
-    // Validate file size before uploading to Cloudinary to avoid Cloudinary 400 errors
-    // Default max size is 10 MB, can be overridden with env var MAX_IMAGE_UPLOAD_SIZE (in bytes)
-    const MAX_FILE_SIZE = parseInt(process.env.MAX_IMAGE_UPLOAD_SIZE, 10) || 10 * 1024 * 1024;
+    // Validate file size
+    const MAX_FILE_SIZE =
+      parseInt(process.env.MAX_IMAGE_UPLOAD_SIZE, 10) || 10 * 1024 * 1024;
+
     if (typeof req.file.size === "number" && req.file.size > MAX_FILE_SIZE) {
       return res.status(400).json({
-        message: `Maximum file size exceeded. Please upload an image smaller than ${MAX_FILE_SIZE / (1024 * 1024)} MB.`,
+        message: `Maximum file size exceeded. Please upload an image smaller than ${
+          MAX_FILE_SIZE / (1024 * 1024)
+        } MB.`,
       });
     }
 
-    // Upload image to Cloudinary
+    // ---- STEP 1: Upload original file ----
     const streamUpload = (req) => {
       return new Promise((resolve, reject) => {
         const stream = cloudinary.uploader.upload_stream(
           {
-            folder: "students",
-            public_id: `student_${studentId}_${Date.now()}`,
+            folder: "students/tmp", // temp folder
             resource_type: "image",
           },
           (error, result) => {
-            if (result) {
-              resolve(result);
-            } else {
-              reject(error);
-            }
+            if (result) resolve(result);
+            else reject(error);
           }
         );
         stream.end(req.file.buffer);
       });
     };
 
-    const result = await streamUpload(req);
+    const uploadResult = await streamUpload(req);
 
-    // Update student with new image URL
-    const student = await Student.findByIdAndUpdate(
+    // Fetch student data
+    const studentData = await Student.findById(studentId);
+    if (!studentData) {
+      return res.status(404).json({ message: "Student not found" });
+    }
+
+    const regNo = studentData.registerNo;
+    if (!regNo) {
+      return res.status(400).json({
+        message: "Student does not have a register number",
+      });
+    }
+
+    // ---- STEP 2: Rename + force PNG ----
+    // final public_id should be: students/<regNo>
+    const finalPublicId = `students/${regNo}`;
+
+    const renamed = await cloudinary.uploader.rename(
+      uploadResult.public_id,
+      finalPublicId,
+      {
+        overwrite: true,
+        resource_type: "image",
+        format: "png", // force PNG output
+      }
+    );
+
+    // ---- STEP 3: Create the final fixed URL ----
+    const finalUrl = `https://res.cloudinary.com/${process.env.CLOUDINARY_CLOUD_NAME}/image/upload/${finalPublicId}.png`;
+
+    // ---- STEP 4: Update database ----
+    const updatedStudent = await Student.findByIdAndUpdate(
       studentId,
-      { imageUrl: result.secure_url },
+      { imageUrl: finalUrl },
       { new: true }
     );
 
     res.status(200).json({
-      message: "Image uploaded successfully.",
-      imageUrl: result.secure_url,
-      student,
+      message: "Image uploaded, renamed, and converted to PNG successfully.",
+      imageUrl: finalUrl,
+      student: updatedStudent,
     });
+
   } catch (error) {
-    console.error("Error uploading image:", error);
-    res
-      .status(500)
-      .json({ message: "Image upload failed.", error: error.message });
+    console.error("Error processing image:", error);
+    res.status(500).json({
+      message: "Image upload failed.",
+      error: error.message,
+    });
   }
 };
