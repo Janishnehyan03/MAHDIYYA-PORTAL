@@ -1,58 +1,75 @@
-const { default: mongoose } = require("mongoose");
+// controllers/cceController.js
+const mongoose = require("mongoose");
 const CceMark = require("../models/cceModel");
 const Student = require("../models/studentModel");
 const { deleteOne } = require("../utils/globalFuctions");
 
+// Helper: treat "A" as absent, others as numeric
+function parseCceInput(value) {
+  if (value === "A" || value === "a") {
+    return { absent: true, mark: null };
+  }
+  const num = Number(value);
+  return {
+    absent: false,
+    mark: Number.isNaN(num) ? 0 : num,
+  };
+}
+
+// =================== getMyResults ===================
 exports.getMyResults = async (req, res) => {
   try {
-    let student = await Student.findOne({ registerNo: req.params.registerNo })
+    const student = await Student.findOne({ registerNo: req.params.registerNo })
       .populate("branch")
       .populate("class");
 
-    let results = await CceMark.find({
-      student: student._id,
-    })
+    if (!student) {
+      return res.status(404).json({ message: "Student Not Found" });
+    }
+
+    const results = await CceMark.find({ student: student._id })
       .populate("student")
       .populate("subject")
       .populate("exam");
 
-    if (results.length === 0) {
+    if (!results || results.length === 0) {
       return res.status(200).json({ message: "Result Not Found" });
     }
 
-    const allSubjectsPassed = results.every((result) => result.cceMark >= 40);
+    // All subjects passed? (treat absent as fail)
+    const allSubjectsPassed = results.every((result) => {
+      const mark = typeof result.cceMark === "number" ? result.cceMark : 0;
+      return !result.absent && mark >= 40;
+    });
 
-    const grandTotal = results.reduce(
-      (total, result) => total + result.cceMark,
-      0
-    );
+    // Grand total (absent -> 0)
+    const grandTotal = results.reduce((total, result) => {
+      const mark = typeof result.cceMark === "number" ? result.cceMark : 0;
+      return total + mark;
+    }, 0);
 
-    // Calculate total possible marks (assuming each subject has a maximum of 100 marks)
     const totalPossibleMarks = results.length * 100;
-
-    // Calculate percentage
-    const percentage = (grandTotal / totalPossibleMarks) * 100;
+    const percentage = totalPossibleMarks
+      ? (grandTotal / totalPossibleMarks) * 100
+      : 0;
     const roundedPercentage = Math.floor(percentage);
-    // Rank const studentClassId = student.class;
 
-    // Find all students in the same class
+    // ------- Rank within same class & branch -------
     const classmates = await Student.find({
       class: student.class,
       branch: student.branch,
     });
 
-    // Calculate grand total for each student
     const grandTotals = await Promise.all(
       classmates.map(async (classmate) => {
         const classmateResults = await CceMark.find({ student: classmate._id });
-        return classmateResults.reduce(
-          (total, result) => total + result.cceMark,
-          0
-        );
+        return classmateResults.reduce((total, result) => {
+          const mark = typeof result.cceMark === "number" ? result.cceMark : 0;
+          return total + mark;
+        }, 0);
       })
     );
 
-    // Sort classmates by grand total in descending order
     const sortedClassmates = classmates
       .map((classmate, index) => ({
         classmate,
@@ -60,132 +77,153 @@ exports.getMyResults = async (req, res) => {
       }))
       .sort((a, b) => b.grandTotal - a.grandTotal);
 
-    // Find the rank of the current student
-    let studentRank = 1;
-    let prevGrandTotal = Infinity;
-    for (const { classmate, grandTotal } of sortedClassmates) {
-      if (grandTotal < prevGrandTotal) {
-        studentRank += 1;
-        prevGrandTotal = grandTotal;
-      }
+    const rankIndex = sortedClassmates.findIndex((item) =>
+      item.classmate._id.equals(student._id)
+    );
+    const studentRank = rankIndex === -1 ? null : rankIndex + 1;
 
-      if (classmate._id.equals(student._id)) {
-        break;
-      }
-    }
+    // Map results for client: show "A" for absent
+    const mappedResults = results.map((r) => {
+      const obj = r.toObject();
+      return {
+        ...obj,
+        cceMark: obj.absent
+          ? "A"
+          : typeof obj.cceMark === "number"
+          ? obj.cceMark
+          : 0,
+      };
+    });
 
     return res.json({
-      results,
+      results: mappedResults,
       promoted: allSubjectsPassed,
       grandTotal,
       percentage: roundedPercentage,
       totalPossibleMarks,
-      studentRank: studentRank - 1,
+      studentRank,
       student,
     });
   } catch (err) {
-    console.error(err);
+    console.error("getMyResults CCE error:", err);
     return res.status(500).json({ error: "Internal Server Error" });
   }
 };
+
+// =================== getResults (class + exam) ===================
 exports.getResults = async (req, res) => {
   try {
-    let results;
-    if (req.query.classId && req.query.examId) {
-      results = await CceMark.find({
-        class: mongoose.Types.ObjectId(req.query.classId),
-        exam: mongoose.Types.ObjectId(req.query.examId),
-      })
-        .populate({
-          path: "student",
-          match: { droppedOut: { $ne: true } }, // Only include students who have not dropped out
-          populate: [
-            { path: "branch" }, // Populate branch details
-            { path: "class" }, // Populate class details
-          ],
-        })
-        .populate({
-          path: "subject",
-          match: { class: mongoose.Types.ObjectId(req.query.classId) }, // Only include subjects belonging to the selected class
-        });
+    if (!req.query.classId || !req.query.examId) {
+      return res
+        .status(400)
+        .json({ message: "Class ID and Exam ID are required" });
+    }
 
-      if (results.length === 0) {
-        return res.status(404).json({ message: "No results found" });
+    const results = await CceMark.find({
+      class: mongoose.Types.ObjectId(req.query.classId),
+      exam: mongoose.Types.ObjectId(req.query.examId),
+    })
+      .populate({
+        path: "student",
+        match: { droppedOut: { $ne: true } },
+        populate: [{ path: "branch" }, { path: "class" }],
+      })
+      .populate({
+        path: "subject",
+        match: { class: mongoose.Types.ObjectId(req.query.classId) },
+      });
+
+    if (!results || results.length === 0) {
+      return res.status(404).json({ message: "No results found" });
+    }
+
+    const studentResults = {};
+    results.forEach((result) => {
+      const studentId = result?.student?._id?.toString();
+      if (!studentId) return;
+
+      if (!studentResults[studentId]) {
+        studentResults[studentId] = {
+          student: result.student,
+          totalMarksObtained: 0,
+          subjectResults: [],
+        };
       }
 
-      const studentResults = {};
-      results.forEach((result) => {
-        const studentId = result?.student?._id.toString();
-        if (!studentResults[studentId]) {
-          studentResults[studentId] = {
-            student: result.student,
-            totalMarks: 0,
-            subjectResults: [],
-          };
-        }
-        studentResults[studentId].totalMarks += result.cceMark;
-        studentResults[studentId].subjectResults.push({
-          subject: result.subject,
-          cceMark: result.cceMark,
-        });
+      const mark = result.absent
+        ? 0
+        : typeof result.cceMark === "number"
+        ? result.cceMark
+        : 0;
+
+      studentResults[studentId].totalMarksObtained += mark;
+      studentResults[studentId].subjectResults.push({
+        subject: result.subject,
+        cceMark: result.absent ? "A" : mark,
+        absent: result.absent,
+      });
+    });
+
+    // Filter by centre if provided, then sort by registerNo
+    const filteredStudents = Object.values(studentResults)
+      .filter((sr) =>
+        req.query.studyCentreId
+          ? sr?.student?.branch?._id?.toString() === req.query.studyCentreId
+          : true
+      )
+      .sort((a, b) => {
+        const aReg = (a.student.registerNo || "").toString();
+        const bReg = (b.student.registerNo || "").toString();
+        return aReg.localeCompare(bReg);
       });
 
-      // Sort the students by registerNo (ascending)
-      const sortedStudents = Object.values(studentResults)
-        .filter(
-          (studentResult) =>
-            studentResult?.student?.branch?._id.toString() ===
-            req.query.studyCentreId
-        )
-        .sort((a, b) => {
-          // Assuming registerNo is a string, sort lexicographically
-          if (a.student.registerNo < b.student.registerNo) return -1;
-          if (a.student.registerNo > b.student.registerNo) return 1;
-          return 0;
-        });
+    const modifiedResults = filteredStudents.map((studentResult, index) => {
+      const totalMarks = studentResult.subjectResults.reduce(
+        (sum, subjectResult) => {
+          const totalForSubject =
+            subjectResult.subject && subjectResult.subject.totalMarks != null
+              ? subjectResult.subject.totalMarks
+              : 0;
+          return sum + totalForSubject;
+        },
+        0
+      );
 
-      const modifiedResults = sortedStudents.map((studentResult, index) => {
-        const totalMarks = studentResult.subjectResults.reduce(
-          (sum, subjectResult) => {
-            // Only add if subject and totalMarks exist
-            if (subjectResult.subject && subjectResult.subject.totalMarks != null) {
-              return sum + subjectResult.subject.totalMarks;
-            }
-            return sum;
-          },
-          0
-        );
-        const cceMark = studentResult.totalMarks;
-        const percentage = totalMarks > 0 ? (cceMark / totalMarks) * 100 : 0;
-        const passed = studentResult.subjectResults.every(
-          (subjectResult) => subjectResult.cceMark >= 40
-        );
+      const cceMarkTotal = studentResult.totalMarksObtained;
+      const percentage = totalMarks ? (cceMarkTotal / totalMarks) * 100 : 0;
 
-        const rank = index + 1; // Assign rank based on the sorted order
-
-        return {
-          student: studentResult.student,
-          subjectResults: studentResult.subjectResults,
-          passed,
-          failed: !passed,
-          percentage,
-          rank,
-          cceMark,
-          totalMarks,
-          // Add any other required fields here
-        };
+      const passed = studentResult.subjectResults.every((subjectResult) => {
+        const mark =
+          subjectResult.cceMark === "A"
+            ? 0
+            : Number(subjectResult.cceMark) || 0;
+        return !subjectResult.absent && mark >= 40;
       });
-      return res.json(modifiedResults);
-    }
+
+      return {
+        student: studentResult.student,
+        subjectResults: studentResult.subjectResults,
+        passed,
+        failed: !passed,
+        percentage,
+        rank: index + 1,
+        cceMark: cceMarkTotal,
+        totalMarks,
+      };
+    });
+
+    return res.json(modifiedResults);
   } catch (err) {
-    console.error(err);
+    console.error("CCE getResults error:", err);
     return res.status(500).json({ error: "Internal Server Error" });
   }
 };
 
+// =================== getGlobalResults ===================
 exports.getGlobalResults = async (req, res) => {
   try {
-    let data = await CceMark.aggregate([
+    const data = await CceMark.aggregate([
+      { $match: { deleted: { $ne: true } } },
       {
         $lookup: {
           from: "students",
@@ -194,9 +232,7 @@ exports.getGlobalResults = async (req, res) => {
           as: "student_info",
         },
       },
-      {
-        $unwind: "$student_info",
-      },
+      { $unwind: "$student_info" },
       {
         $lookup: {
           from: "branches",
@@ -221,16 +257,9 @@ exports.getGlobalResults = async (req, res) => {
           as: "subjectInfo",
         },
       },
-      {
-        $unwind: "$branch_info",
-      },
-      {
-        $unwind: "$class_info",
-      },
-      {
-        $unwind: "$subjectInfo",
-      },
-
+      { $unwind: "$branch_info" },
+      { $unwind: "$class_info" },
+      { $unwind: "$subjectInfo" },
       {
         $group: {
           _id: {
@@ -242,138 +271,126 @@ exports.getGlobalResults = async (req, res) => {
             subject: "$subjectInfo.subjectName",
             examId: "$exam",
           },
-          count: { $sum: 1 }, // Optionally, you can count the number of results for each group
+          count: { $sum: 1 },
         },
       },
     ]);
 
     return res.status(200).json(data);
   } catch (err) {
-    console.error(err);
+    console.error("CCE getGlobalResults error:", err);
     return res.status(500).json({ error: "Internal Server Error" });
   }
 };
 
+// =================== createResults (CCE) ===================
 exports.createResults = async (req, res) => {
-  // Expecting resultsData to be an array of result objects from req.body
-  const resultsData = Array.isArray(req.body) ? req.body : [req.body]; // Ensure it's an array
+  const resultsData = Array.isArray(req.body) ? req.body : [req.body];
 
   try {
-    const results = await Promise.all(
-      resultsData.map(async (resultData) => {
-        const {
-          student,
-          exam,
-          cceMark,
-          class: studentClass,
-          subject,
-        } = resultData;
+    const bulkOps = resultsData.map((r) => {
+      const { student, exam, cceMark, class: studentClass, subject } = r;
+      const { absent, mark } = parseCceInput(cceMark);
 
-        // Find existing result by student and subject
-        const existingResult = await CceMark.findOne({
-          student,
-          subject,
-          exam,
-        });
+      return {
+        updateOne: {
+          filter: {
+            student: mongoose.Types.ObjectId(student),
+            subject: mongoose.Types.ObjectId(subject),
+            exam: mongoose.Types.ObjectId(exam),
+          },
+          update: {
+            $set: {
+              cceMark: mark,
+              absent,
+            },
+            $setOnInsert: {
+              student: mongoose.Types.ObjectId(student),
+              exam: mongoose.Types.ObjectId(exam),
+              subject: mongoose.Types.ObjectId(subject),
+              class: mongoose.Types.ObjectId(studentClass),
+            },
+          },
+          upsert: true,
+        },
+      };
+    });
 
-        if (existingResult) {
-          // Update existing result
-          if (cceMark === "A") {
-            existingResult.cceMark = "A";
-          } else {
-            const mark = Number(cceMark);
-            existingResult.cceMark = isNaN(mark) ? 0 : mark;
-          }
-          await existingResult.save();
-          return existingResult; // Return updated result
-        } else {
-          // Create a new result
-          let markValue;
-          if (cceMark === "A") {
-            markValue = "A";
-          } else {
-            const mark = Number(cceMark);
-            markValue = isNaN(mark) ? 0 : mark;
-          }
-          const newResult = new CceMark({
-            student,
-            exam,
-            cceMark: markValue,
-            class: studentClass,
-            subject,
-          });
-          await newResult.save();
-          return newResult; // Return newly created result
-        }
-      })
-    );
+    const results = await CceMark.bulkWrite(bulkOps, { ordered: false });
 
-    // Respond with the created or updated results
-    res.status(201).json(results);
+    res.status(201).json({ message: "CCE results processed", results });
   } catch (err) {
-    console.error(err); // Changed to console.error for better error logging
+    console.error("CCE createResults error:", err);
 
-    // Handle validation errors specifically for duplicate marks
+    if (err.code === 11000) {
+      return res
+        .status(409)
+        .json({ error: "Duplicate CCE mark entry for this subject." });
+    }
+
     if (
       err.name === "ValidationError" &&
-      err.message.includes("Duplicate mark entry for the subject")
+      err.message.includes("Duplicate mark entry")
     ) {
       return res
         .status(400)
-        .json({ error: "Duplicate mark entry for the subject." });
+        .json({ error: "Duplicate CCE mark entry for the subject." });
     }
 
-    // General error response
     res.status(400).json({ message: err.message });
   }
 };
 
+// =================== updateResult (CCE) ===================
 exports.updateResult = async (req, res) => {
   try {
     const results = await Promise.all(
       req.body.map(async (resultData) => {
         const { _id, cceMark } = resultData;
+        if (!_id || cceMark === undefined) return null;
 
-        // Only update if _id and cceMark are provided
-        if (_id && cceMark !== undefined) {
-          return await CceMark.findByIdAndUpdate(
-            _id,
-            { cceMark: cceMark },
-            { new: true }
-          );
-        }
+        const { absent, mark } = parseCceInput(cceMark);
+
+        return await CceMark.findByIdAndUpdate(
+          _id,
+          { cceMark: mark, absent },
+          { new: true }
+        );
       })
     );
 
-    // Filter out any undefined results from the update
     const filteredResults = results.filter(Boolean);
     res.json(filteredResults);
   } catch (err) {
-    console.log(err);
+    console.error("CCE updateResult error:", err);
     res.status(400).json({ message: err.message });
   }
 };
 
+// =================== fetchToUpdate ===================
 exports.fetchToUpdate = async (req, res) => {
   try {
-    let { examId, subjectId, classId } = req.query;
+    const { examId, subjectId, classId } = req.query;
 
     const result = await CceMark.find({
       exam: mongoose.Types.ObjectId(examId),
       subject: mongoose.Types.ObjectId(subjectId),
       class: mongoose.Types.ObjectId(classId),
     })
-      .populate({
-        path: "student",
-        // match: { droppedOut: false },
-      })
+      .populate({ path: "student" })
       .populate("exam");
-    if (!result) return res.status(404).json({ message: "Result not found" });
+
+    if (!result || result.length === 0) {
+      return res.status(404).json({ message: "Result not found" });
+    }
     res.json(result);
   } catch (err) {
+    console.error("CCE fetchToUpdate error:", err);
     res.status(400).json({ message: err.message });
   }
 };
+
+// =================== getExamStatistics ===================
 exports.getExamStatistics = async (req, res) => {
   try {
     const result = await CceMark.aggregate([
@@ -388,9 +405,7 @@ exports.getExamStatistics = async (req, res) => {
           as: "subjectDetails",
         },
       },
-      {
-        $unwind: "$subjectDetails",
-      },
+      { $unwind: "$subjectDetails" },
       {
         $group: {
           _id: {
@@ -399,24 +414,30 @@ exports.getExamStatistics = async (req, res) => {
           },
           passed: {
             $sum: {
-              $cond: {
-                if: {
-                  $gte: ["$cceMark", 40],
+              $cond: [
+                {
+                  $and: [
+                    { $gte: ["$cceMark", 40] },
+                    { $eq: ["$absent", false] },
+                  ],
                 },
-                then: 1,
-                else: 0,
-              },
+                1,
+                0,
+              ],
             },
           },
           failed: {
             $sum: {
-              $cond: {
-                if: {
-                  $lt: ["$cceMark", 40],
+              $cond: [
+                {
+                  $or: [
+                    { $lt: ["$cceMark", 40] },
+                    { $eq: ["$absent", true] },
+                  ],
                 },
-                then: 1,
-                else: 0,
-              },
+                1,
+                0,
+              ],
             },
           },
         },
@@ -431,12 +452,14 @@ exports.getExamStatistics = async (req, res) => {
         },
       },
     ]);
-    // Extract the aggregated data
-    if (!result) return res.status(404).json({ message: "Result not found" });
-    const examStatistics = result;
 
-    res.json(examStatistics);
+    if (!result) {
+      return res.status(404).json({ message: "Result not found" });
+    }
+
+    res.json(result);
   } catch (err) {
+    console.error("CCE getExamStatistics error:", err);
     res.status(400).json({ message: err.message });
   }
 };

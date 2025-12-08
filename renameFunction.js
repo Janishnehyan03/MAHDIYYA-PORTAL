@@ -1,8 +1,10 @@
-require("dotenv").config();
-const mongoose = require("mongoose");
+const fs = require("fs-extra");
 const axios = require("axios");
-const { v2: cloudinary } = require("cloudinary");
-const Student = require("./models/studentModel");
+const cloudinary = require("cloudinary").v2;
+const dotenv = require("dotenv");
+const archiver = require("archiver");
+
+dotenv.config();
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -10,79 +12,76 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-async function connectDB() {
-  await mongoose.connect(process.env.MONGO_URI);
-  console.log("MongoDB connected");
-}
+async function downloadFolder(folder) {
+  let nextCursor = null;
+  let allResources = [];
 
-const wait = (ms) => new Promise((res) => setTimeout(res, ms));
+  console.log("Fetching resources...");
 
-async function reuploadImages() {
-  await connectDB();
+  // Pagination loop
+  do {
+    const res = await cloudinary.search
+      .expression(`folder:${folder}`)
+      .max_results(1000)
+      .next_cursor(nextCursor)
+      .execute();
 
-  const students = await Student.find({
-    imageUrl: { $exists: true, $ne: "" }
-  });
+    allResources = [...allResources, ...res.resources];
+    nextCursor = res.next_cursor;
 
-  console.log(`Found ${students.length} students to re-upload.`);
+    console.log(`Fetched ${allResources.length} items so far...`);
+  } while (nextCursor);
 
-  for (const stu of students) {
-    try {
-      if (!stu.registerNo) {
-        console.log(`SKIPPED ${stu._id} (no registerNo)`);
-        continue;
-      }
+  console.log(`Total files found: ${allResources.length}`);
 
-      console.log(`\n---- FIXING ${stu.registerNo} ----`);
-      console.log("Downloading:", stu.imageUrl);
+  // Ensure local folder exists
+  const downloadPath = `./downloads/${folder}`;
+  fs.ensureDirSync(downloadPath);
 
-      // 1) Download original (CDN cached) image
-      const res = await axios.get(stu.imageUrl, {
-        responseType: "arraybuffer",
-      });
+  // Download files
+  for (const file of allResources) {
+    const url = file.secure_url;
+    const fileName = file.public_id.replace(`${folder}/`, "") + `.${file.format}`;
+    const filePath = `${downloadPath}/${fileName}`;
 
-      const buffer = Buffer.from(res.data, "binary");
+    console.log("Downloading:", fileName);
 
-      // 2) Re-upload to Cloudinary using CLEAN public_id
-      const uploaded = await new Promise((resolve, reject) => {
-        const stream = cloudinary.uploader.upload_stream(
-          {
-            folder: "students",
-            public_id: stu.registerNo,
-            overwrite: true,
-            resource_type: "image",
-          },
-          (err, result) => {
-            if (err) reject(err);
-            else resolve(result);
-          }
-        );
+    const response = await axios.get(url, { responseType: "stream" });
 
-        stream.end(buffer);
-      });
-
-      // 3) BUILD CLEAN VERSIONLESS URL
-      const cleanUrl =
-        `https://res.cloudinary.com/${process.env.CLOUDINARY_CLOUD_NAME}` +
-        `/image/upload/students/${stu.registerNo}.${uploaded.format}`;
-
-      console.log("Uploaded clean URL:", cleanUrl);
-
-      // 4) Update DB
-      stu.imageUrl = cleanUrl;
-      await stu.save();
-
-      console.log("DB UPDATED");
-
-    } catch (err) {
-      console.log(`ERROR for ${stu.registerNo}:`, err.message);
-    }
-
-    await wait(250); // avoid Cloudinary rate limit
+    await new Promise((resolve, reject) => {
+      const stream = response.data.pipe(fs.createWriteStream(filePath));
+      stream.on("finish", resolve);
+      stream.on("error", reject);
+    });
   }
 
-  console.log("\nALL DONE (version removed from every URL)");
-  process.exit();
+  console.log("All files downloaded!");
+
+  // Create ZIP file
+  const zipPath = `./${folder}.zip`;
+  await zipFolder(downloadPath, zipPath);
+
+  console.log(`ZIP created: ${zipPath}`);
 }
 
-reuploadImages();
+// Function to zip folder
+async function zipFolder(sourceFolder, outPath) {
+  return new Promise((resolve, reject) => {
+    const output = fs.createWriteStream(outPath);
+    const archive = archiver("zip", { zlib: { level: 9 } });
+
+    output.on("close", () => {
+      console.log(`Total ZIP size: ${archive.pointer()} bytes`);
+      resolve();
+    });
+
+    archive.on("error", (err) => reject(err));
+
+    archive.pipe(output);
+    archive.directory(sourceFolder, false);
+    archive.finalize();
+  });
+}
+
+// Run
+downloadFolder("students"); // change folder name

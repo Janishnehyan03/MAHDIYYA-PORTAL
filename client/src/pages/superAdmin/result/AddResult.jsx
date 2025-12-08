@@ -26,45 +26,64 @@ const AddResult = () => {
   const [existingResults, setExistingResults] = useState([]);
 
   const selectedExam = exams.find((examObj) => examObj._id === exam);
-  const maxMark = selectedExam?.maxPaperMark;
+  const maxMark = selectedExam?.maxPaperMark ?? null; // can be null
 
+  // ---------- MARK INPUT HANDLER ----------
   const handleMarkChange = (studentId, value) => {
-    // ✅ Allow "A" for absent, numeric marks, or empty input
-    const trimmedValue = value.trim().toUpperCase();
+    const raw = value ?? "";
+    const trimmed = raw.trim().toUpperCase();
 
-    if (trimmedValue === "") {
-      setStudentMarks((prevMarks) => ({
-        ...prevMarks,
+    // Empty input: clear mark
+    if (trimmed === "") {
+      setStudentMarks((prev) => ({
+        ...prev,
         [studentId]: "",
       }));
       return;
     }
 
-    if (trimmedValue === "A") {
-      setStudentMarks((prevMarks) => ({
-        ...prevMarks,
-        [studentId]: "A", // ✅ Store as string "A"
+    // Absent: "A"
+    if (trimmed === "A") {
+      setStudentMarks((prev) => ({
+        ...prev,
+        [studentId]: "A",
       }));
       return;
     }
 
-    const newMarks = parseInt(trimmedValue, 10);
+    // Numeric marks
+    const num = Number(trimmed);
 
-    if (!isNaN(newMarks) && newMarks >= 0 && newMarks <= maxMark) {
-      setStudentMarks((prevMarks) => ({
-        ...prevMarks,
-        [studentId]: newMarks,
-      }));
-    } else if (newMarks > maxMark) {
+    if (Number.isNaN(num) || num < 0) {
+      toast.warn(
+        "Please enter a valid non-negative number or 'A' for absent.",
+        {
+          autoClose: 2000,
+          position: "top-center",
+        }
+      );
+      return;
+    }
+
+    // If maxMark is defined, enforce upper limit
+    if (maxMark != null && num > maxMark) {
       toast.warn(`Marks cannot exceed the maximum of ${maxMark}`, {
         autoClose: 2000,
         position: "top-center",
       });
+      return;
     }
+
+    setStudentMarks((prev) => ({
+      ...prev,
+      [studentId]: num,
+    }));
   };
 
+  // ---------- SUBMIT ----------
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (!selectedBranch || !selectedClass || !exam || !subject) {
       toast.error(
         "Please select all fields: Centre, Class, Exam, and Subject."
@@ -72,66 +91,96 @@ const AddResult = () => {
       return;
     }
 
-    if (window.confirm("Are you sure you want to submit this result?")) {
-      setLoading(true);
-      try {
-        const resultsData = students.map((student) => {
-          const existingResult = existingResults.find(
-            (result) => result?.student?._id === student._id
-          );
+    if (!window.confirm("Are you sure you want to submit this result?")) return;
 
-          const markValue = studentMarks[student._id];
+    setLoading(true);
+    try {
+      const newResults = [];
+      const updateResults = [];
 
-          return {
-            student: student._id,
-            exam,
-            // ✅ Send "A" if absent, else numeric mark or 0
-            marksObtained: markValue === "A" ? "A" : Number(markValue) || 0,
-            class: selectedClass,
-            subject,
-            _id: existingResult ? existingResult._id : null,
-          };
-        });
+      students.forEach((student) => {
+        const existingResult = existingResults.find(
+          (result) => result?.student?._id === student._id
+        );
 
-        // ✅ Send in batches (unchanged)
-        const sendRequestsInBatches = async (data, batchSize) => {
-          for (let i = 0; i < data.length; i += batchSize) {
-            const batch = data.slice(i, i + batchSize);
-            const requests = batch.map((result) => {
-              if (result._id) {
-                return Axios.patch("/result", [
-                  { _id: result._id, marksObtained: result.marksObtained },
-                ]);
-              } else {
-                return Axios.post("/result", result);
-              }
-            });
-            await Promise.all(requests);
-          }
+        const markValue = studentMarks[student._id];
+
+        // If no value and no existing result, skip (no change)
+        if ((markValue === undefined || markValue === "") && !existingResult) {
+          return;
+        }
+
+        const marksObtained =
+          markValue === "A"
+            ? "A"
+            : markValue === "" || markValue === undefined
+            ? 0
+            : Number(markValue);
+
+        // Payload for new result
+        const basePayload = {
+          student: student._id,
+          exam,
+          marksObtained,
+          class: selectedClass,
+          subject,
         };
 
-        await sendRequestsInBatches(resultsData, 10);
+        if (existingResult && existingResult._id) {
+          // Update existing
+          updateResults.push({
+            _id: existingResult._id,
+            marksObtained,
+          });
+        } else {
+          // Create new
+          newResults.push(basePayload);
+        }
+      });
 
-        toast.success("Marks submitted successfully!", {
+      if (!newResults.length && !updateResults.length) {
+        toast.info("No changes to submit.", {
+          autoClose: 2000,
+          position: "top-center",
+        });
+        setLoading(false);
+        return;
+      }
+
+      // POST all new results in one request (backend accepts array or single)
+      if (newResults.length) {
+        await Axios.post("/result", newResults);
+      }
+
+      // PATCH all updates in one request (backend expects array)
+      if (updateResults.length) {
+        await Axios.patch("/result", updateResults);
+      }
+
+      toast.success("Marks submitted successfully!", {
+        position: toast.POSITION.TOP_CENTER,
+        autoClose: 3000,
+      });
+
+      // Refresh existing results so marks re-load correctly
+      fetchExistingResults();
+    } catch (error) {
+      console.error("Error submitting marks:", error);
+      toast.error(
+        error?.response?.data?.error ||
+          error?.response?.data?.message ||
+          "An error occurred while submitting.",
+        {
           position: toast.POSITION.TOP_CENTER,
           autoClose: 3000,
-        });
-        fetchExistingResults();
-      } catch (error) {
-        console.error("Error submitting marks:", error);
-        toast.error(
-          error.response?.data?.error || "An error occurred while submitting.",
-          {
-            position: toast.POSITION.TOP_CENTER,
-            autoClose: 3000,
-          }
-        );
-      } finally {
-        setLoading(false);
-      }
+        }
+      );
+    } finally {
+      setLoading(false);
     }
   };
 
+  // ---------- FETCH EXISTING RESULTS ----------
   const fetchExistingResults = useCallback(async () => {
     if (selectedClass && selectedBranch && exam && subject) {
       try {
@@ -142,11 +191,13 @@ const AddResult = () => {
         const fetchedResults = response.data || [];
         setExistingResults(fetchedResults);
 
-        // ✅ Keep "A" or number when setting marks
+        // Map studentId -> mark (keep "A" or number)
         const marks = fetchedResults.reduce((acc, result) => {
-          if (result?.student?._id) {
-            acc[result.student._id] = result.marksObtained;
-          }
+          const studentId = result?.student?._id;
+          if (!studentId) return acc;
+
+          // If backend sends "A" for absent or number for marks
+          acc[studentId] = result.marksObtained ?? "";
           return acc;
         }, {});
         setStudentMarks(marks);
@@ -155,68 +206,72 @@ const AddResult = () => {
         setExistingResults([]);
         setStudentMarks({});
       }
+    } else {
+      // Clear when filters not complete
+      setExistingResults([]);
+      setStudentMarks({});
     }
   }, [selectedClass, selectedBranch, exam, subject]);
 
+  // ---------- BRANCHES ----------
   const getAllBranches = useCallback(async () => {
     try {
-      const branchQuery = authData.branch?._id
+      const branchQuery = authData?.branch?._id
         ? `&_id=${authData.branch._id}`
         : "";
       const response = await Axios.get(
         `/study-centre?sort=studyCentreName${branchQuery}`
       );
-      setBranches(response.data.docs);
+      setBranches(response.data.docs || []);
     } catch (error) {
-      console.error(error.response);
+      console.error("Error fetching branches:", error?.response || error);
     }
-  }, [authData.branch]);
+  }, [authData?.branch]);
 
+  // ---------- SUBJECTS ----------
   const getAllSubjects = useCallback(async () => {
     try {
       const response = await Axios.get("/subject");
-      setSubjects(response.data);
+      setSubjects(response.data || []);
     } catch (error) {
-      console.error(error);
+      console.error("Error fetching subjects:", error);
     }
   }, []);
 
+  // ---------- STUDENTS ----------
   const getStudents = useCallback(async () => {
     if (selectedBranch && selectedClass) {
       try {
         const response = await Axios.get(
           `/student/data/${selectedBranch}/${selectedClass}`
         );
-        setStudents(response.data);
+        setStudents(response.data || []);
       } catch (error) {
-        console.error(error);
-        setStudents([]); // Clear students on error
+        console.error("Error fetching students:", error);
+        setStudents([]);
       }
     } else {
-      setStudents([]); // Clear students if branch or class is not selected
+      setStudents([]);
     }
   }, [selectedBranch, selectedClass]);
 
+  // When filters change, refetch students + results
   useEffect(() => {
     getStudents();
     fetchExistingResults();
-  }, [
-    selectedClass,
-    selectedBranch,
-    exam,
-    subject,
-    getStudents,
-    fetchExistingResults,
-  ]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedClass, selectedBranch, exam, subject]);
 
+  // Initial loads (classes, exams, subjects, branches)
   useEffect(() => {
     getClasses();
     getExams(true);
     getAllSubjects();
     getAllBranches();
-  }, [pathname]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pathname]); // or [] if you only want it once on mount
 
-  const isFormFilled = selectedBranch && selectedClass && exam && subject;
+  const isFormFilled = !!(selectedBranch && selectedClass && exam && subject);
 
   return (
     <div className="min-h-screen bg-gray-50 p-4 sm:p-6 lg:p-8">
@@ -239,7 +294,12 @@ const AddResult = () => {
               <select
                 id="branch"
                 value={selectedBranch}
-                onChange={(e) => setSelectedBranch(e.target.value)}
+                onChange={(e) => {
+                  setSelectedBranch(e.target.value);
+                  setStudents([]);
+                  setExistingResults([]);
+                  setStudentMarks({});
+                }}
                 className="w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               >
                 <option value="">Select Study Centre</option>
@@ -262,7 +322,12 @@ const AddResult = () => {
               <select
                 id="class"
                 value={selectedClass}
-                onChange={(e) => setSelectedClass(e.target.value)}
+                onChange={(e) => {
+                  setSelectedClass(e.target.value);
+                  setStudents([]);
+                  setExistingResults([]);
+                  setStudentMarks({});
+                }}
                 className="w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               >
                 <option value="">Select a Class</option>
@@ -285,7 +350,11 @@ const AddResult = () => {
               <select
                 id="exam"
                 value={exam}
-                onChange={(e) => setExam(e.target.value)}
+                onChange={(e) => {
+                  setExam(e.target.value);
+                  setExistingResults([]);
+                  setStudentMarks({});
+                }}
                 className="w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               >
                 <option value="">Select Exam</option>
@@ -308,14 +377,24 @@ const AddResult = () => {
               <select
                 id="subject"
                 value={subject}
-                onChange={(e) => setSubject(e.target.value)}
+                onChange={(e) => {
+                  setSubject(e.target.value);
+                  setExistingResults([]);
+                  setStudentMarks({});
+                }}
                 disabled={!selectedClass}
                 className="w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-3 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100"
               >
                 <option value="">Select Subject</option>
                 {selectedClass &&
                   subjects
-                    .filter((item) => item.class?._id === selectedClass)
+                    .filter((item) => {
+                      // support both item.class = id or populated object
+                      const cls = item.class;
+                      if (!cls) return false;
+                      if (typeof cls === "string") return cls === selectedClass;
+                      return cls._id === selectedClass;
+                    })
                     .map((subjectItem) => (
                       <option value={subjectItem._id} key={subjectItem._id}>
                         {subjectItem.subjectName} ({subjectItem.subjectCode})
@@ -328,7 +407,7 @@ const AddResult = () => {
           {/* Student Marks Table */}
           {isFormFilled && (
             <div className="mt-8">
-              {maxMark && (
+              {maxMark != null && (
                 <p className="text-blue-600 font-semibold my-3 text-center">
                   Maximum Marks: {maxMark}
                 </p>
@@ -370,15 +449,11 @@ const AddResult = () => {
                           <td className="px-6 py-4 whitespace-nowrap">
                             <input
                               type="text"
-                              min="1"
-                              max={maxMark}
                               className="w-24 border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-sm"
                               value={
-                                studentMarks[student._id] === undefined
-                                  ? ""
-                                  : studentMarks[student._id]
+                                studentMarks[student._id] ?? "" // null/undefined -> ""
                               }
-                              placeholder="N/A"
+                              placeholder="mark / A"
                               onChange={(e) =>
                                 handleMarkChange(student._id, e.target.value)
                               }
@@ -389,7 +464,7 @@ const AddResult = () => {
                     ) : (
                       <tr>
                         <td
-                          colSpan="3"
+                          colSpan={3}
                           className="text-center py-10 text-gray-500"
                         >
                           No students found for the selected criteria.

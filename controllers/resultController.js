@@ -1,12 +1,25 @@
-const { default: mongoose } = require("mongoose");
+// controllers/resultsController.js
+const mongoose = require("mongoose");
 const Result = require("../models/resultModel");
 const Student = require("../models/studentModel");
 const CceMark = require("../models/cceModel");
 const { deleteOne } = require("../utils/globalFuctions");
 
+// Helper to parse marks and absent
+function parseMarkInput(marksObtained) {
+  if (marksObtained === "A" || marksObtained === "a") {
+    return { absent: true, marks: null };
+  }
+  const num = Number(marksObtained);
+  return {
+    absent: Number.isNaN(num) ? false : false,
+    marks: Number.isNaN(num) ? 0 : num,
+  };
+}
+
 exports.getMyResults = async (req, res) => {
   try {
-    let student = await Student.findOne({ registerNo: req.params.registerNo })
+    const student = await Student.findOne({ registerNo: req.params.registerNo })
       .populate("branch")
       .populate("class");
 
@@ -14,59 +27,62 @@ exports.getMyResults = async (req, res) => {
       return res.status(404).json({ message: "Student Not Found" });
     }
 
-    // Exam results
-    let results = await Result.find({
-      student: student._id,
-    })
+    let results = await Result.find({ student: student._id })
       .populate("student")
       .populate("subject")
       .populate("exam");
 
-    // CCE Results
-    let cceResults = await CceMark.find({
-      student: student._id,
-    })
+    let cceResults = await CceMark.find({ student: student._id })
       .populate("student")
       .populate("subject")
       .populate("exam");
 
-    // Make sure marksObtained is always a number for Results
-    results = results.map((result) => ({
-      ...result.toObject(),
-      marksObtained:
-        typeof result.marksObtained === "number" ? result.marksObtained : 0,
-    }));
-
-    // Make sure cceMark is a number or "A" for CCE (or 0 if invalid/missing)
-    cceResults = cceResults.map((cce) => ({
-      ...cce.toObject(),
-      cceMark:
-        cce.cceMark === "A"
+    // Map results for client: show "A" when absent
+    const mappedResults = results.map((r) => {
+      const obj = r.toObject();
+      return {
+        ...obj,
+        marksObtained: obj.absent
           ? "A"
-          : typeof cce.cceMark === "number"
-          ? cce.cceMark
-          : Number(cce.cceMark) || 0,
-    }));
+          : typeof obj.marksObtained === "number"
+          ? obj.marksObtained
+          : 0,
+      };
+    });
 
-    if (results.length === 0 && cceResults.length === 0) {
+    const mappedCce = cceResults.map((cce) => {
+      const obj = cce.toObject();
+      return {
+        ...obj,
+        cceMark:
+          obj.cceMark === "A"
+            ? "A"
+            : typeof obj.cceMark === "number"
+            ? obj.cceMark
+            : Number(obj.cceMark) || 0,
+      };
+    });
+
+    if (mappedResults.length === 0 && mappedCce.length === 0) {
       return res.status(200).json({ message: "Result Not Found" });
     }
 
-    // Only calculate grand total, total marks, and percentage from main exam results
-    const grandTotal = results.reduce(
-      (total, result) => total + result.marksObtained,
-      0
-    );
+    // Sum only numeric marks (exclude absent)
+    const grandTotal = results.reduce((total, r) => {
+      return (
+        total + (typeof r.marksObtained === "number" ? r.marksObtained : 0)
+      );
+    }, 0);
+
     const totalPossibleMarks = results.length * 100;
     const percentage = totalPossibleMarks
       ? (grandTotal / totalPossibleMarks) * 100
       : 0;
     const roundedPercentage = Math.floor(percentage);
 
-    // Respond with both results arrays, student info, and stats
     return res.json({
-      results,
-      cceResults,
+      results: mappedResults,
+      cceResults: mappedCce,
       grandTotal,
       percentage: roundedPercentage,
       totalPossibleMarks,
@@ -86,7 +102,6 @@ exports.getResults = async (req, res) => {
         .json({ message: "Class ID and Exam ID are required" });
     }
 
-    // Fetch exam results based on class and exam IDs
     const resultQuery = {
       class: mongoose.Types.ObjectId(req.query.classId),
       exam: mongoose.Types.ObjectId(req.query.examId),
@@ -95,36 +110,26 @@ exports.getResults = async (req, res) => {
     const results = await Result.find(resultQuery)
       .populate({
         path: "student",
-        match: { droppedOut: { $ne: true } }, // Only include students who have not dropped out
-        populate: [
-          { path: "branch" }, // Populate branch details
-          { path: "class" }, // Populate class details
-        ],
+        match: { droppedOut: { $ne: true } },
+        populate: [{ path: "branch" }, { path: "class" }],
       })
       .populate("subject")
       .sort({ "student.registerNo": 1 });
 
-    // if (results.length === 0) {
-    //   return res.status(404).json({ message: "No results found" });
-    // }
-
     const cceResults = await CceMark.find(resultQuery)
       .populate({
         path: "student",
-        match: { droppedOut: { $ne: true } }, // Only include students who have not dropped out
-        populate: [
-          { path: "branch" }, // Populate branch details
-          { path: "class" }, // Populate class details
-        ],
+        match: { droppedOut: { $ne: true } },
+        populate: [{ path: "branch" }, { path: "class" }],
       })
       .populate("subject")
       .sort({ "student.branch": 1 });
 
     const studentResults = {};
 
-    // Process results to compile student data
     results.forEach((result) => {
-      const studentId = result?.student?._id.toString();
+      const studentId = result?.student?._id?.toString();
+      if (!studentId) return; // ignore results without populated student
       if (!studentResults[studentId]) {
         studentResults[studentId] = {
           student: result.student,
@@ -135,16 +140,18 @@ exports.getResults = async (req, res) => {
         };
       }
 
-      studentResults[studentId].examMarksObtained += result.marksObtained;
+      studentResults[studentId].examMarksObtained +=
+        typeof result.marksObtained === "number" ? result.marksObtained : 0;
       studentResults[studentId].subjectResults.push({
         subject: result.subject,
-        marksObtained: result.marksObtained,
+        marksObtained: result.absent ? "A" : result.marksObtained,
         type: "exam",
       });
     });
 
     cceResults.forEach((cceResult) => {
-      const studentId = cceResult?.student?._id.toString();
+      const studentId = cceResult?.student?._id?.toString();
+      if (!studentId) return;
       if (!studentResults[studentId]) {
         studentResults[studentId] = {
           student: cceResult.student,
@@ -155,7 +162,9 @@ exports.getResults = async (req, res) => {
         };
       }
 
-      studentResults[studentId].cceMarksObtained += cceResult.cceMark;
+      const numericCce =
+        cceResult.cceMark === "A" ? 0 : Number(cceResult.cceMark) || 0;
+      studentResults[studentId].cceMarksObtained += numericCce;
       studentResults[studentId].subjectResults.push({
         subject: cceResult.subject,
         marksObtained: cceResult.cceMark,
@@ -164,50 +173,67 @@ exports.getResults = async (req, res) => {
     });
 
     const sortedStudents = Object.values(studentResults).sort((a, b) =>
-      a.student?.registerNo?.localeCompare(b?.student?.registerNo)
+      (a.student?.registerNo || "")
+        .toString()
+        .localeCompare((b.student?.registerNo || "").toString())
     );
 
-    // Apply studyCentreId filtering if it is provided
     const filteredStudents = req.query.studyCentreId
       ? sortedStudents.filter(
           (studentResult) =>
-            studentResult?.student?.branch?._id.toString() ===
+            studentResult?.student?.branch?._id?.toString() ===
             req.query.studyCentreId
         )
       : sortedStudents;
 
     const modifiedResults = filteredStudents.map((studentResult, index) => {
       const totalExamMarks = studentResult.subjectResults
-        .filter((result) => result.type === "exam")
-        .reduce((sum, result) => sum + result.subject.totalMarks, 0);
+        .filter((r) => r.type === "exam")
+        .reduce(
+          (sum, r) =>
+            sum +
+            (r.subject && r.subject.totalMarks ? r.subject.totalMarks : 0),
+          0
+        );
 
       const totalCCEMarks = studentResult.subjectResults
-        .filter((result) => result.type === "cce")
-        .reduce((sum, result) => sum + result.subject.totalMarks, 0);
+        .filter((r) => r.type === "cce")
+        .reduce(
+          (sum, r) =>
+            sum +
+            (r.subject && r.subject.totalMarks ? r.subject.totalMarks : 0),
+          0
+        );
 
       const marksObtained =
-        studentResult.examMarksObtained + studentResult.cceMarksObtained;
+        (studentResult.examMarksObtained || 0) +
+        (studentResult.cceMarksObtained || 0);
       const totalMarks = totalExamMarks + totalCCEMarks;
-      const percentage = (marksObtained / totalMarks) * 100;
+      const percentage = totalMarks ? (marksObtained / totalMarks) * 100 : 0;
 
       const passed = studentResult.subjectResults.every((subjectResult) => {
         if (subjectResult.type === "exam") {
+          // if this exam subject has a cce counterpart, include cce marks in pass condition
           const cceSubject = studentResult.subjectResults.find(
             (sr) =>
               sr.subject._id.toString() ===
                 subjectResult.subject._id.toString() && sr.type === "cce"
           );
-          const cceMarks = cceSubject ? cceSubject.marksObtained : 0;
-          return (
-            subjectResult.marksObtained >= 28 &&
-            cceMarks >= 1 &&
-            subjectResult.marksObtained + cceMarks >= 40
-          );
+          const cceMarks = cceSubject
+            ? cceSubject.marksObtained === "A"
+              ? 0
+              : Number(cceSubject.marksObtained) || 0
+            : 0;
+
+          const examMarks =
+            subjectResult.marksObtained === "A"
+              ? 0
+              : Number(subjectResult.marksObtained) || 0;
+
+          return examMarks >= 28 && cceMarks >= 1 && examMarks + cceMarks >= 40;
         }
         return true;
       });
-
-      const rank = index + 1;
 
       return {
         student: studentResult.student,
@@ -215,7 +241,7 @@ exports.getResults = async (req, res) => {
         passed,
         failed: !passed,
         percentage,
-        rank,
+        rank: index + 1,
         marksObtained,
         totalMarks,
         examMarks: studentResult.examMarksObtained,
@@ -232,7 +258,8 @@ exports.getResults = async (req, res) => {
 
 exports.getGlobalResults = async (req, res) => {
   try {
-    let data = await Result.aggregate([
+    const data = await Result.aggregate([
+      { $match: { deleted: { $ne: true } } },
       {
         $lookup: {
           from: "students",
@@ -241,9 +268,7 @@ exports.getGlobalResults = async (req, res) => {
           as: "student_info",
         },
       },
-      {
-        $unwind: "$student_info",
-      },
+      { $unwind: "$student_info" },
       {
         $lookup: {
           from: "branches",
@@ -268,16 +293,9 @@ exports.getGlobalResults = async (req, res) => {
           as: "subjectInfo",
         },
       },
-      {
-        $unwind: "$branch_info",
-      },
-      {
-        $unwind: "$class_info",
-      },
-      {
-        $unwind: "$subjectInfo",
-      },
-
+      { $unwind: "$branch_info" },
+      { $unwind: "$class_info" },
+      { $unwind: "$subjectInfo" },
       {
         $group: {
           _id: {
@@ -289,7 +307,7 @@ exports.getGlobalResults = async (req, res) => {
             subject: "$subjectInfo.subjectName",
             examId: "$exam",
           },
-          count: { $sum: 1 }, // Optionally, you can count the number of results for each group
+          count: { $sum: 1 },
         },
       },
     ]);
@@ -302,95 +320,101 @@ exports.getGlobalResults = async (req, res) => {
 };
 
 exports.createResults = async (req, res) => {
-  const resultsData = Array.isArray(req.body) ? req.body : [req.body]; // Ensure it's an array
+  const resultsData = Array.isArray(req.body) ? req.body : [req.body];
 
   try {
-    // Prepare bulk operations
-    const bulkOps = resultsData.map((resultData) => {
-      const {
-        student,
-        exam,
-        marksObtained,
-        class: studentClass,
-        subject,
-        _id,
-      } = resultData;
+    const bulkOps = resultsData.map((r) => {
+      const { student, exam, marksObtained, class: studentClass, subject } = r;
 
-      // Handle "A" type mark logic
-      let finalMark;
-      if (marksObtained === "A") {
-        finalMark = "A";
+      let absent = false;
+      let markNum = null;
+
+      if (marksObtained === "A" || marksObtained === "a") {
+        // Absent
+        absent = true;
+        markNum = null;
       } else {
-        const mark = Number(marksObtained);
-        finalMark = isNaN(mark) ? 0 : mark;
+        const parsed = Number(marksObtained);
+        markNum = Number.isNaN(parsed) ? 0 : parsed;
       }
 
       return {
         updateOne: {
-          filter: { student, subject, exam },
-          update: {
-            $set: {
-              marksObtained: finalMark,
-              class: studentClass,
-            },
-            $setOnInsert: { student, exam, subject },
+          filter: {
+            student: mongoose.Types.ObjectId(student),
+            subject: mongoose.Types.ObjectId(subject),
+            exam: mongoose.Types.ObjectId(exam),
           },
-          upsert: true, // Create if not exists
+          update: {
+            // ❗ Only put fields that can change here
+            $set: {
+              marksObtained: markNum,
+              absent,
+            },
+            // ❗ Only initial values on insert here (no conflict with $set)
+            $setOnInsert: {
+              student: mongoose.Types.ObjectId(student),
+              exam: mongoose.Types.ObjectId(exam),
+              subject: mongoose.Types.ObjectId(subject),
+              class: mongoose.Types.ObjectId(studentClass),
+            },
+          },
+          upsert: true,
         },
       };
     });
 
-    // Execute bulk operations
-    const results = await Result.bulkWrite(bulkOps);
+    const results = await Result.bulkWrite(bulkOps, { ordered: false });
 
-    // Respond with success
-    res.status(201).json({ message: "Results processed", results });
+    return res.status(201).json({ message: "Results processed", results });
   } catch (err) {
-    console.error(err);
+    console.error("createResults error:", err);
 
-    if (
-      err.name === "ValidationError" &&
-      err.message.includes("Duplicate mark entry")
-    ) {
+    // Duplicate key from unique index (student+exam+subject+class)
+    if (err.code === 11000) {
       return res
-        .status(400)
-        .json({ error: "Duplicate mark entry for the subject." });
+        .status(409)
+        .json({ error: "Duplicate mark entry for the subject (unique constraint)." });
     }
 
-    res.status(400).json({ message: err.message });
+    return res.status(400).json({ message: err.message });
   }
 };
 
 exports.updateResult = async (req, res) => {
   try {
-    const results = await Promise.all(
-      req.body.map(async (resultData) => {
-        const { _id, marksObtained } = resultData;
+    const updates = req.body.map(async (row) => {
+      const { _id, marksObtained } = row;
+      if (!_id || marksObtained === undefined) return null;
 
-        // Only update if _id and marksObtained are provided
-        if (_id && marksObtained !== undefined) {
-          return await Result.findByIdAndUpdate(
-            _id,
-            { marksObtained: parseInt(marksObtained) }, // Ensure cceMark is an integer
-            { new: true }
-          );
-        }
-      })
-    );
+      const { absent, marks } =
+        marksObtained === "A" || marksObtained === "a"
+          ? { absent: true, marks: null }
+          : {
+              absent: false,
+              marks: Number.isNaN(Number(marksObtained))
+                ? 0
+                : Number(marksObtained),
+            };
 
-    // Filter out any undefined results from the update
-    const filteredResults = results.filter(Boolean);
-    res.json(filteredResults);
+      return await Result.findByIdAndUpdate(
+        _id,
+        { marksObtained: marks, absent },
+        { new: true }
+      );
+    });
+
+    const resolved = (await Promise.all(updates)).filter(Boolean);
+    return res.json(resolved);
   } catch (err) {
-    console.error(err); // Changed to console.error for better error logging
-    res.status(400).json({ message: err.message });
+    console.error("updateResult error:", err);
+    return res.status(400).json({ message: err.message });
   }
 };
 
 exports.fetchToUpdate = async (req, res) => {
   try {
-    let { examId, subjectId, classId } = req.query;
-
+    const { examId, subjectId, classId } = req.query;
     const result = await Result.find({
       exam: mongoose.Types.ObjectId(examId),
       subject: mongoose.Types.ObjectId(subjectId),
@@ -398,17 +422,24 @@ exports.fetchToUpdate = async (req, res) => {
     })
       .populate("student")
       .populate("exam");
-    if (!result) return res.status(404).json({ message: "Result not found" });
+
+    if (!result || result.length === 0)
+      return res.status(404).json({ message: "Result not found" });
     res.json(result);
   } catch (err) {
+    console.error("fetchToUpdate error:", err);
     res.status(400).json({ message: err.message });
   }
 };
+
 exports.getExamStatistics = async (req, res) => {
   try {
     const result = await Result.aggregate([
       {
-        $match: { exam: mongoose.Types.ObjectId(req.query.examId) },
+        $match: {
+          exam: mongoose.Types.ObjectId(req.query.examId),
+          deleted: { $ne: true },
+        },
       },
       {
         $lookup: {
@@ -418,9 +449,7 @@ exports.getExamStatistics = async (req, res) => {
           as: "subjectDetails",
         },
       },
-      {
-        $unwind: "$subjectDetails",
-      },
+      { $unwind: "$subjectDetails" },
       {
         $group: {
           _id: {
@@ -429,24 +458,30 @@ exports.getExamStatistics = async (req, res) => {
           },
           passed: {
             $sum: {
-              $cond: {
-                if: {
-                  $gte: ["$marksObtained", 40],
+              $cond: [
+                {
+                  $and: [
+                    { $gte: ["$marksObtained", 40] },
+                    { $eq: ["$absent", false] },
+                  ],
                 },
-                then: 1,
-                else: 0,
-              },
+                1,
+                0,
+              ],
             },
           },
           failed: {
             $sum: {
-              $cond: {
-                if: {
-                  $lt: ["$marksObtained", 40],
+              $cond: [
+                {
+                  $or: [
+                    { $lt: ["$marksObtained", 40] },
+                    { $eq: ["$absent", true] },
+                  ],
                 },
-                then: 1,
-                else: 0,
-              },
+                1,
+                0,
+              ],
             },
           },
         },
@@ -461,13 +496,12 @@ exports.getExamStatistics = async (req, res) => {
         },
       },
     ]);
-    // Extract the aggregated data
-    if (!result) return res.status(404).json({ message: "Result not found" });
-    const examStatistics = result;
 
-    res.json(examStatistics);
+    if (!result) return res.status(404).json({ message: "Result not found" });
+    return res.json(result);
   } catch (err) {
-    res.status(400).json({ message: err.message });
+    console.error("getExamStatistics error:", err);
+    return res.status(400).json({ message: err.message });
   }
 };
 

@@ -27,7 +27,7 @@ const InitialState = () => (
       View FA Results
     </h3>
     <p className="mt-1 text-sm text-gray-500">
-      Please select filters above and click "Fetch Results" to begin.
+      Please select filters above and click &quot;Fetch Results&quot; to begin.
     </p>
   </div>
 );
@@ -183,8 +183,10 @@ function FilterPanel({
 }
 
 function ResultsTable({ results, subjectNames, onDownload }) {
-  // Define a failing threshold (e.g., less than 40%)
-  const FAILING_THRESHOLD = 4; // Assuming max marks are 10
+  // Failing threshold for FA (e.g. < 4 out of 10)
+  const FAILING_THRESHOLD = 4;
+
+  const subjectNameArray = Array.from(subjectNames);
 
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden">
@@ -212,7 +214,7 @@ function ResultsTable({ results, subjectNames, onDownload }) {
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Student Name
               </th>
-              {Array.from(subjectNames).map((subjectName) => (
+              {subjectNameArray.map((subjectName) => (
                 <th
                   key={subjectName}
                   className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
@@ -234,13 +236,46 @@ function ResultsTable({ results, subjectNames, onDownload }) {
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                   {result.student?.studentName || "N/A"}
                 </td>
-                {Array.from(subjectNames).map((subjectName) => {
-                  const subjectResult = result?.subjectResults.find(
+                {subjectNameArray.map((subjectName) => {
+                  const subjectResult = result?.subjectResults?.find(
                     (sr) => sr.subject?.subjectName === subjectName
                   );
-                  const mark = subjectResult ? subjectResult.cceMark : "-";
+
+                  // --- ABSENT & MARK HANDLING ---
+                  let rawMark =
+                    subjectResult && subjectResult.cceMark !== undefined
+                      ? subjectResult.cceMark
+                      : null;
+
+                  let displayMark = "-";
+                  let numericMark = null;
+
+                  if (rawMark === null || rawMark === undefined) {
+                    displayMark = "-";
+                    numericMark = null;
+                  } else if (
+                    rawMark === "A" ||
+                    rawMark === "a" ||
+                    subjectResult?.absent === true
+                  ) {
+                    // Treat "A"/"a" or absent=true as absent
+                    displayMark = "A";
+                    numericMark = 0; // used only for failing highlight
+                  } else {
+                    const n = Number(rawMark);
+                    if (Number.isNaN(n)) {
+                      // some unexpected value, just show as-is
+                      displayMark = String(rawMark);
+                      numericMark = null;
+                    } else {
+                      displayMark = n;
+                      numericMark = n;
+                    }
+                  }
+
                   const isFailing =
-                    typeof mark === "number" && mark < FAILING_THRESHOLD;
+                    numericMark !== null && numericMark < FAILING_THRESHOLD;
+
                   return (
                     <td
                       key={subjectName}
@@ -248,7 +283,7 @@ function ResultsTable({ results, subjectNames, onDownload }) {
                         isFailing ? "text-red-600 font-bold" : "text-gray-700"
                       }`}
                     >
-                      {mark}
+                      {displayMark}
                     </td>
                   );
                 })}
@@ -284,29 +319,30 @@ function ResultView() {
 
   // Fetch initial dropdown data
   useEffect(() => {
-    getClasses && getClasses();
-    getExams && getExams(true);
+    if (getClasses) getClasses();
+    if (getExams) getExams(true);
+
     if (authData.role === "superAdmin") {
       const getBranches = async () => {
         try {
           const { data } = await Axios.get(
             `/study-centre?sort=studyCentreName`
           );
-          setBranches(data.docs);
+          setBranches(data.docs || []);
         } catch (error) {
           console.error("Failed to fetch branches:", error);
         }
       };
       getBranches();
     }
-    // eslint-disable-next-line
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authData.role]);
 
   const handleFetchResults = useCallback(async () => {
     setLoading(true);
     setError(null);
     setHasSearched(true);
-    setResults([]); // Clear previous results
+    setResults([]);
 
     try {
       let studyCentre = "";
@@ -320,11 +356,11 @@ function ResultView() {
         `/cce?examId=${filters.examId}&classId=${filters.classId}&studyCentreId=${studyCentre}`
       );
 
-      setResults(data);
+      setResults(data || []);
 
       // Derive subject names from the fetched results
       const newSubjectNames = new Set();
-      data.forEach((result) => {
+      (data || []).forEach((result) => {
         if (Array.isArray(result.subjectResults)) {
           result.subjectResults.forEach((sr) => {
             if (sr.subject && sr.subject.subjectName) {
@@ -338,7 +374,7 @@ function ResultView() {
       setError(
         "Failed to fetch results. Please check your connection or try again."
       );
-      console.error(err.response || err);
+      console.error(err?.response || err);
     } finally {
       setLoading(false);
     }
@@ -347,17 +383,39 @@ function ResultView() {
   const downloadExcel = () => {
     if (!results.length) return;
 
+    const subjectNameArray = Array.from(subjectNames);
+
     const dataToExport = results.map((result) => {
       const row = {
         "Register No": result.student?.registerNo || "N/A",
         "Student Name": result.student?.studentName || "N/A",
       };
-      subjectNames.forEach((subjectName) => {
-        const subjectResult = result.subjectResults.find(
-          (sr) => sr.subject.subjectName === subjectName
+
+      subjectNameArray.forEach((subjectName) => {
+        const subjectResult = result.subjectResults?.find(
+          (sr) => sr.subject?.subjectName === subjectName
         );
-        row[subjectName] = subjectResult ? subjectResult.cceMark : "-";
+
+        let rawMark =
+          subjectResult && subjectResult.cceMark !== undefined
+            ? subjectResult.cceMark
+            : null;
+
+        let cellValue = "-";
+        if (
+          rawMark === "A" ||
+          rawMark === "a" ||
+          subjectResult?.absent === true
+        ) {
+          cellValue = "A";
+        } else if (rawMark !== null && rawMark !== undefined) {
+          const n = Number(rawMark);
+          cellValue = Number.isNaN(n) ? String(rawMark) : n;
+        }
+
+        row[subjectName] = cellValue;
       });
+
       return row;
     });
 
@@ -365,7 +423,6 @@ function ResultView() {
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Results");
 
-    // Create a more robust filename
     const selectedClass = classes.find((c) => c._id === filters.classId);
     const className = selectedClass
       ? selectedClass.className.replace(/\s+/g, "_")

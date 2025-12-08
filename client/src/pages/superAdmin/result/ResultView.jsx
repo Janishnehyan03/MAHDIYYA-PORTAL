@@ -14,6 +14,50 @@ import Axios from "../../../Axios";
 import { ClassContext } from "../../../context/classContext";
 import { UserAuthContext } from "../../../context/userContext";
 
+// ---------- Helper: normalize a single mark (exam or CCE) ----------
+
+/**
+ * Takes a subjectResult object (with marksObtained, absent?, type?) and returns:
+ *  - display: what to show in UI ("A", "-", or number)
+ *  - numeric: number for calculations (or null if not a valid number)
+ *  - isAbsent: true if absent
+ */
+function parseMark(subjectResult) {
+  if (!subjectResult) {
+    return { display: "-", numeric: null, isAbsent: false };
+  }
+
+  const { marksObtained, absent, type } = subjectResult;
+  const hasRecord = true; // because subjectResult exists
+  const absentFlag = absent === true;
+
+  // If CCE record exists and cceMark is null -> treat as ABSENT (fits your schema)
+  if (type === "cce" && hasRecord && (marksObtained === null || marksObtained === undefined)) {
+    return { display: "A", numeric: null, isAbsent: true };
+  }
+
+  const raw = marksObtained;
+  const rawStr =
+    raw === null || raw === undefined ? "" : String(raw).trim().toUpperCase();
+
+  // Treat explicit "A" or absent flag as ABSENT
+  if (rawStr === "A" || absentFlag) {
+    return { display: "A", numeric: null, isAbsent: true };
+  }
+
+  if (raw === null || raw === undefined || rawStr === "") {
+    return { display: "-", numeric: null, isAbsent: false };
+  }
+
+  const n = Number(raw);
+  if (Number.isNaN(n)) {
+    // unexpected non-numeric value: show as-is, but don't use in calculations
+    return { display: String(raw), numeric: null, isAbsent: false };
+  }
+
+  return { display: n, numeric: n, isAbsent: false };
+}
+
 // --- Reusable UI Components for a Cleaner Structure ---
 
 const PageHeader = ({ title, subtitle }) => (
@@ -76,7 +120,6 @@ const FilterBar = ({
             label: b.studyCentreName,
           }))}
           placeholder="-- Select Study Centre --"
-          // required
         />
       )}
       <StyledSelect
@@ -194,20 +237,47 @@ function ResultTableRow({ result, subjectNames, index }) {
           (sr) => sr.subject?.subjectCode === code && sr.type === "cce"
         );
 
-        const cceMarks = cceResult?.marksObtained;
-        const saMarks = examResult?.marksObtained;
+        const parsedCCE = parseMark(cceResult);
+        const parsedSA = parseMark(examResult);
 
-        let totalMarks;
-        if (cceMarks === "A" && saMarks === "A") {
-          totalMarks = "A";
-        } else if (cceMarks === "A") {
-          totalMarks = saMarks ?? "-";
-        } else if (saMarks === "A") {
-          totalMarks = cceMarks ?? "-";
-        } else if (cceMarks == null && saMarks == null) {
-          totalMarks = "-";
+        const cceDisplay = parsedCCE.display;
+        const saDisplay = parsedSA.display;
+
+        // ---- TOTAL CALCULATION WITH ABSENT SUPPORT ----
+        let totalDisplay;
+
+        if (parsedCCE.isAbsent && parsedSA.isAbsent) {
+          // both absent
+          totalDisplay = "A";
+        } else if (parsedCCE.isAbsent && parsedSA.numeric !== null) {
+          // only CCE absent → total = SA
+          totalDisplay = parsedSA.numeric;
+        } else if (parsedSA.isAbsent && parsedCCE.numeric !== null) {
+          // only SA absent → total = CCE
+          totalDisplay = parsedCCE.numeric;
+        } else if (
+          parsedCCE.numeric === null &&
+          parsedSA.numeric === null &&
+          !parsedCCE.isAbsent &&
+          !parsedSA.isAbsent
+        ) {
+          // both empty / non-numeric and not marked absent
+          totalDisplay = "-";
         } else {
-          totalMarks = (Number(cceMarks) || 0) + (Number(saMarks) || 0);
+          // both present numerically → sum (treat missing numeric as 0)
+          const sum = (parsedCCE.numeric || 0) + (parsedSA.numeric || 0);
+          // if sum is 0 but both displays are "-" (no marks at all), show "-"
+          if (
+            sum === 0 &&
+            cceDisplay === "-" &&
+            saDisplay === "-" &&
+            !parsedCCE.isAbsent &&
+            !parsedSA.isAbsent
+          ) {
+            totalDisplay = "-";
+          } else {
+            totalDisplay = sum;
+          }
         }
 
         return [
@@ -215,19 +285,19 @@ function ResultTableRow({ result, subjectNames, index }) {
             key={`${result?._id || index}-${code}-fa`}
             className="p-3 text-center border-t border-slate-200"
           >
-            {cceMarks ?? "-"}
+            {cceDisplay}
           </td>,
           <td
             key={`${result?._id || index}-${code}-sa`}
             className="p-3 text-center border-t border-slate-200"
           >
-            {saMarks ?? "-"}
+            {saDisplay}
           </td>,
           <td
             key={`${result?._id || index}-${code}-total`}
             className="p-3 text-center border-t border-slate-200 font-semibold text-slate-700"
           >
-            {totalMarks}
+            {totalDisplay}
           </td>,
         ];
       })}
@@ -253,13 +323,18 @@ function ResultView() {
     studyCentreId: "",
   });
 
+  const areFiltersSet = filters.classId && filters.examId;
+
+  // --- Fetch subjects for selected class ---
   useEffect(() => {
     const fetchSubjects = async () => {
-      if (!filters.classId) return;
+      if (!filters.classId) {
+        setSubjects([]);
+        return;
+      }
       try {
         const { data } = await Axios.get(`/subject?class=${filters.classId}`);
-        console.log("Fetched subjects:", data);
-        setSubjects(data); // assuming `data` is an array of subject objects
+        setSubjects(data || []);
       } catch (error) {
         console.error("Failed to fetch subjects:", error);
         setSubjects([]);
@@ -267,14 +342,11 @@ function ResultView() {
     };
     fetchSubjects();
   }, [filters.classId]);
-  const areFiltersSet = filters.classId && filters.examId;
-  // &&
-  // (authData.role !== "superAdmin" || filters.studyCentreId);
 
-  // --- Data Fetching ---
+  // --- Initial data: classes, exams, branches ---
   useEffect(() => {
     const fetchInitialData = async () => {
-      getClasses();
+      getClasses && getClasses();
       try {
         const [examsRes, branchesRes] = await Promise.all([
           Axios.get("/exam?isActive=true"),
@@ -282,17 +354,17 @@ function ResultView() {
             ? Axios.get("/study-centre?sort=studyCentreName")
             : Promise.resolve({ data: { docs: [] } }),
         ]);
-        setExams(examsRes.data);
-        setBranches(branchesRes.data.docs);
+        setExams(examsRes.data || []);
+        setBranches(branchesRes.data.docs || []);
       } catch (error) {
         console.error("Failed to fetch initial data:", error);
       }
     };
     fetchInitialData();
-    // eslint-disable-next-line
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authData.role]);
 
-  // --- Only fetch results on filter submit ---
+  // --- Fetch results only on submit ---
   const getResults = useCallback(async () => {
     if (!areFiltersSet) return;
     setLoading(true);
@@ -301,38 +373,44 @@ function ResultView() {
       const studyCentreParam =
         authData.role === "superAdmin"
           ? `&studyCentreId=${filters.studyCentreId}`
-          : `&studyCentreId=${authData.branch._id}`;
+          : authData.branch && authData.branch._id
+          ? `&studyCentreId=${authData.branch._id}`
+          : "";
+
       const { data } = await Axios.get(
         `/result?examId=${filters.examId}&classId=${filters.classId}${studyCentreParam}`
       );
-      setResults(data);
+      setResults(data || []);
     } catch (error) {
       console.error("Failed to fetch results:", error.response || error);
       setResults([]);
     } finally {
       setLoading(false);
     }
-    // eslint-disable-next-line
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filters, areFiltersSet, authData]);
 
   // --- Memoized Derived State for Performance ---
   const filteredResults = useMemo(() => {
     if (!searchTerm) return results;
-    return results.filter(
-      (result) =>
-        (result.student?.studentName || result.student?.name || "")
-          .toLowerCase()
-          .includes(searchTerm.toLowerCase()) ||
-        (result.student?.registerNo || result.student?.admNo || "")
-          .toLowerCase()
-          .includes(searchTerm.toLowerCase())
-    );
+    return results.filter((result) => {
+      const name = (
+        result.student?.studentName ||
+        result.student?.name ||
+        ""
+      ).toLowerCase();
+      const reg = (
+        result.student?.registerNo ||
+        result.student?.admNo ||
+        ""
+      ).toLowerCase();
+      const term = searchTerm.toLowerCase();
+      return name.includes(term) || reg.includes(term);
+    });
   }, [results, searchTerm]);
 
   const subjectNames = useMemo(() => {
     const subjectsMap = new Map();
-
-    // Get all subjects for the selected class first
     const validSubjectCodes = subjects.map((s) => s.subjectCode);
 
     results.forEach((r) => {
@@ -345,7 +423,6 @@ function ResultView() {
       });
     });
 
-    // If results are empty, just use the class subjects directly
     if (subjectsMap.size === 0 && subjects.length > 0) {
       subjects.forEach((s) => subjectsMap.set(s.subjectCode, s.subjectName));
     }
@@ -360,9 +437,9 @@ function ResultView() {
       return;
     }
 
-    const data = results.map((result) => {
+    const data = results.map((result, index) => {
       const row = {
-        "#": results.indexOf(result) + 1,
+        "#": index + 1,
         "Adm No": result.student?.admNo || result.student?.registerNo || "-",
         "Student Name":
           result.student?.studentName || result.student?.name || "-",
@@ -378,25 +455,41 @@ function ResultView() {
           (sr) => sr.subject?.subjectCode === code && sr.type === "cce"
         );
 
-        const cceMarks = cceResult?.marksObtained;
-        const saMarks = examResult?.marksObtained;
+        const parsedCCE = parseMark(cceResult);
+        const parsedSA = parseMark(examResult);
 
-        let totalMarks;
-        if (cceMarks === "A" && saMarks === "A") {
-          totalMarks = "A";
-        } else if (cceMarks === "A") {
-          totalMarks = saMarks ?? "-";
-        } else if (saMarks === "A") {
-          totalMarks = cceMarks ?? "-";
-        } else if (cceMarks == null && saMarks == null) {
-          totalMarks = "-";
+        let totalDisplay;
+        if (parsedCCE.isAbsent && parsedSA.isAbsent) {
+          totalDisplay = "A";
+        } else if (parsedCCE.isAbsent && parsedSA.numeric !== null) {
+          totalDisplay = parsedSA.numeric;
+        } else if (parsedSA.isAbsent && parsedCCE.numeric !== null) {
+          totalDisplay = parsedCCE.numeric;
+        } else if (
+          parsedCCE.numeric === null &&
+          parsedSA.numeric === null &&
+          !parsedCCE.isAbsent &&
+          !parsedSA.isAbsent
+        ) {
+          totalDisplay = "-";
         } else {
-          totalMarks = (Number(cceMarks) || 0) + (Number(saMarks) || 0);
+          const sum = (parsedCCE.numeric || 0) + (parsedSA.numeric || 0);
+          if (
+            sum === 0 &&
+            parsedCCE.display === "-" &&
+            parsedSA.display === "-" &&
+            !parsedCCE.isAbsent &&
+            !parsedSA.isAbsent
+          ) {
+            totalDisplay = "-";
+          } else {
+            totalDisplay = sum;
+          }
         }
 
-        row[`${name} FA`] = cceMarks ?? "-";
-        row[`${name} SA`] = saMarks ?? "-";
-        row[`${name} Total`] = examResult || cceResult ? totalMarks : "-";
+        row[`${name} FA`] = parsedCCE.display;
+        row[`${name} SA`] = parsedSA.display;
+        row[`${name} Total`] = examResult || cceResult ? totalDisplay : "-";
       });
 
       return row;
