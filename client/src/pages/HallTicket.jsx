@@ -136,10 +136,18 @@ function HallTicket() {
                         </p>
                       </div>
                     )}
-                    <div className="w-24 h-24 border border-black">
-                      <p className="text-[10px] leading-3 mt-5 text-gray-700 text-center">
-                        Paste your passport size photo here
-                      </p>
+                    <div className={`w-32 h-32 flex items-center justify-center overflow-hidden ${!data?.data?.imageUrl ? "border border-black" : ""}`}>
+                      {data?.data?.imageUrl ? (
+                        <img
+                          src={data?.data?.imageUrl}
+                          alt="Student"
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <p className="text-[10px] leading-3 text-gray-700 text-center">
+                          Paste your passport size photo here
+                        </p>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -162,19 +170,19 @@ function HallTicket() {
                         <tbody>
                           {data?.subjects?.map((subject, key) => (
                             <tr key={key} className="border border-blue-900">
-                              <td className="text-sm  border-r border-black ">
+                              <td className="p-2 text-xl font-bold  border-r border-black ">
                                 {moment(subject?.date).format("DD-MM-YYYY")}
                               </td>
-                              <td className="text-sm  border-r border-black">
+                              <td className="p-2 text-xl font-bold  border-r border-black">
                                 {subject?.subjectId?.subjectName}
                               </td>
-                              <td className="text-sm  border-r border-black">
+                              <td className="p-2 text-xl font-bold  border-r border-black">
                                 {subject?.subjectId?.subjectCode}
                               </td>
-                              <td className="text-sm  border-r text-[12px] border-black">
+                              <td className="p-2 text-xl font-bold  border-r text-[16px] border-black">
                                 {subject?.time}
                               </td>
-                              <td className="text-sm  border-r border-black">
+                              <td className="p-2 text-xl font-bold  border-r border-black">
                                 {"            "}
                               </td>
                             </tr>

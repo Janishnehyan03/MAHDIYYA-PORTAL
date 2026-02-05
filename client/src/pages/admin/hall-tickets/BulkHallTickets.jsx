@@ -1,13 +1,11 @@
-import React, { useState, useEffect, useCallback } from "react";
-import JSZip from "jszip";
-import { saveAs } from "file-saver";
+import { faCloudDownloadAlt } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import axios from "axios";
+import { jsPDF } from "jspdf";
 import moment from "moment";
+import { useCallback, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import Axios from "../../../Axios";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCloudDownloadAlt } from "@fortawesome/free-solid-svg-icons";
-import { jsPDF } from "jspdf";
 
 /**
  * Generates a single hall ticket image using the Canvas API.
@@ -17,7 +15,7 @@ import { jsPDF } from "jspdf";
  * @returns {Promise<Blob>} A promise that resolves with the generated image Blob.
  */
 const generateHallTicketImage = (ticket, examName, backgroundImage) => {
-  return new Promise((resolve) => {
+  return new Promise(async (resolve) => {
     // --- Canvas Setup ---
     const canvas = document.createElement("canvas");
     const ctx = canvas.getContext("2d");
@@ -38,9 +36,40 @@ const generateHallTicketImage = (ticket, examName, backgroundImage) => {
     ctx.fillStyle = COLOR_PRIMARY;
     ctx.textAlign = "center";
     ctx.fillText(examName, canvas.width / 2, POS_Y_START - 180);
+    // --- Draw Student Photo ---
+    if (ticket.imageUrl) {
+      try {
+        const studentImg = new Image();
+        studentImg.crossOrigin = "anonymous";
+        studentImg.src = ticket.imageUrl;
+        await new Promise((res) => {
+          studentImg.onload = res;
+          studentImg.onerror = () => {
+            console.error("Failed to load image from URL:", ticket.imageUrl);
+            res();
+          };
+        });
+        if (studentImg.complete && studentImg.naturalWidth > 0) {
+          // Calculate dimensions and position to fit the background box
+          const photoWidth = 210;
+          const photoHeight = 270;
+          const photoX = canvas.width - photoWidth - 145; // Adjusted to center better
+          const photoY = POS_Y_START - 20; // Adjusted vertically
+
+          // Fill with white first to cover the template's rectangle
+          ctx.fillStyle = "#FFFFFF";
+          ctx.fillRect(photoX - 2, photoY - 2, photoWidth + 4, photoHeight + 4);
+
+          ctx.drawImage(studentImg, photoX, photoY, photoWidth, photoHeight);
+        }
+      } catch (error) {
+        console.error("Error drawing student photo:", error);
+      }
+    }
 
     // --- Draw Student Details ---
     ctx.textAlign = "left";
+    ctx.fillStyle = COLOR_PRIMARY; // IMPORTANT: Reset to black
     ctx.font = `25px ${FONT_PRIMARY}`;
     ctx.fillText(ticket.registerNo, POS_X_CONTENT, POS_Y_START);
     ctx.fillText(ticket.studentName, POS_X_CONTENT, POS_Y_START + 50);
@@ -61,7 +90,7 @@ const generateHallTicketImage = (ticket, examName, backgroundImage) => {
     const tableWidth = canvas.width - 200;
     const colWidth = tableWidth / 5;
     const headerHeight = 35;
-    const rowHeight = 40;
+    const rowHeight = 55;
     const tableHeaders = [
       "Date",
       "Subject",
@@ -91,14 +120,14 @@ const generateHallTicketImage = (ticket, examName, backgroundImage) => {
 
       // Set cell text style
       ctx.fillStyle = COLOR_PRIMARY;
-      ctx.font = `15px ${FONT_PRIMARY}`;
+      ctx.font = `bold 24px ${FONT_PRIMARY}`;
 
       // Date
       ctx.textAlign = "center";
       ctx.fillText(
         moment(subject?.date).format("DD-MM-YYYY"),
         tableStartX + colWidth * 0.5,
-        rowY + 25
+        rowY + 35
       );
 
       // Subject Name
@@ -106,7 +135,7 @@ const generateHallTicketImage = (ticket, examName, backgroundImage) => {
       ctx.fillText(
         subject?.subjectId?.subjectName,
         tableStartX + colWidth + 10,
-        rowY + 25
+        rowY + 35
       );
 
       // Subject Code
@@ -114,14 +143,14 @@ const generateHallTicketImage = (ticket, examName, backgroundImage) => {
       ctx.fillText(
         subject?.subjectId?.subjectCode,
         tableStartX + colWidth * 2.5,
-        rowY + 25
+        rowY + 35
       );
 
       // Time
       ctx.fillText(
         moment(subject?.time, "HH:mm").format("hh:mm A"),
         tableStartX + colWidth * 3.5,
-        rowY + 25
+        rowY + 35
       );
 
       // Draw horizontal line for each row
@@ -146,8 +175,8 @@ const generateHallTicketImage = (ticket, examName, backgroundImage) => {
       ctx.lineTo(
         tableStartX + colWidth * i,
         tableStartY +
-          headerHeight +
-          ticket.hallTicketDetails.subjects.length * rowHeight
+        headerHeight +
+        ticket.hallTicketDetails.subjects.length * rowHeight
       );
       ctx.stroke();
     }

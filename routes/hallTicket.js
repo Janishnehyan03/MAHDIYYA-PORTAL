@@ -126,7 +126,6 @@ router.post("/bulk-download", protect, async (req, res) => {
       if (!hallTicket) {
         return null; // Skip if no hall ticket found for the student
       }
-
       return {
         studentName: student.studentName,
         registerNo: student.registerNo,
@@ -134,6 +133,7 @@ router.post("/bulk-download", protect, async (req, res) => {
         institution: student.branch.studyCentreName,
         className: student.class.className,
         examName: hallTicket.exam.examName,
+        imageUrl: student.imageUrl,
       };
     });
 
