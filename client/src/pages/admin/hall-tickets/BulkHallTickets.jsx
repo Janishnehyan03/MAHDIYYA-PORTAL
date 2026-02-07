@@ -23,19 +23,22 @@ const generateHallTicketImage = (ticket, examName, backgroundImage) => {
     canvas.height = backgroundImage.height;
 
     // --- Drawing Constants ---
-    const FONT_PRIMARY = "Arial";
+    const FONT_PRIMARY = "'Minion Pro', serif";
     const COLOR_PRIMARY = "#000000";
-    const POS_X_CONTENT = canvas.width / 3;
-    const POS_Y_START = canvas.height * 0.3 + 50;
+    const CENTER_X = canvas.width / 2;
+    const POS_Y_START = canvas.height * 0.28;
 
     // --- Draw Background ---
     ctx.drawImage(backgroundImage, 0, 0);
 
     // --- Draw Header (Exam Name) ---
-    ctx.font = `bold 30px ${FONT_PRIMARY}`;
-    ctx.fillStyle = COLOR_PRIMARY;
+    const headerY = POS_Y_START - 120; // Slightly lower to center in box
+    ctx.font = `bold 33px ${FONT_PRIMARY}`;
     ctx.textAlign = "center";
-    ctx.fillText(examName, canvas.width / 2, POS_Y_START - 180);
+    ctx.fillText(examName?.toUpperCase(), CENTER_X, headerY);
+
+    // Note: "ADMIT CARD" is already in the background image.
+
     // --- Draw Student Photo ---
     if (ticket.imageUrl) {
       try {
@@ -50,16 +53,13 @@ const generateHallTicketImage = (ticket, examName, backgroundImage) => {
           };
         });
         if (studentImg.complete && studentImg.naturalWidth > 0) {
-          // Calculate dimensions and position to fit the background box
           const photoWidth = 210;
           const photoHeight = 270;
-          const photoX = canvas.width - photoWidth - 145; // Adjusted to center better
-          const photoY = POS_Y_START - 20; // Adjusted vertically
+          const photoX = canvas.width - photoWidth - 145;
+          const photoY = POS_Y_START + 25; // Adjusted down slightly
 
-          // Fill with white first to cover the template's rectangle
           ctx.fillStyle = "#FFFFFF";
           ctx.fillRect(photoX - 2, photoY - 2, photoWidth + 4, photoHeight + 4);
-
           ctx.drawImage(studentImg, photoX, photoY, photoWidth, photoHeight);
         }
       } catch (error) {
@@ -67,25 +67,41 @@ const generateHallTicketImage = (ticket, examName, backgroundImage) => {
       }
     }
 
-    // --- Draw Student Details ---
-    ctx.textAlign = "left";
-    ctx.fillStyle = COLOR_PRIMARY; // IMPORTANT: Reset to black
-    ctx.font = `25px ${FONT_PRIMARY}`;
-    ctx.fillText(ticket.registerNo, POS_X_CONTENT, POS_Y_START);
-    ctx.fillText(ticket.studentName, POS_X_CONTENT, POS_Y_START + 50);
+    // --- Draw Student Details (Values ONLY) ---
+    ctx.fillStyle = COLOR_PRIMARY;
 
-    // Handle multi-line institution name
-    ctx.font = `20px ${FONT_PRIMARY}`;
-    const institutionLines = ticket.institution.match(/.{1,35}/g) || [];
-    institutionLines.forEach((line, index) => {
-      ctx.fillText(line, POS_X_CONTENT, POS_Y_START + 100 + index * 25);
+    // 1. Exam Reg No (Positioned in the background's box)
+    const regNoX = CENTER_X + -120;  // Center in the box
+    const regNoY = POS_Y_START + 70; // Move down into the box
+    ctx.textAlign = "center";
+    ctx.font = `bold 32px ${FONT_PRIMARY}`;
+    ctx.fillText(ticket.registerNo, regNoX, regNoY);
+
+    // 2. Candidate details (Aligned with background labels)
+    const detailsX = canvas.width * 0.34; // Shift left closer to background colons
+    ctx.textAlign = "left";
+
+    // Candidate Name
+    let currentY = POS_Y_START + 145; // Move down to "Name of the Candidate" placeholder
+    ctx.font = `bold 30px ${FONT_PRIMARY}`;
+    ctx.fillText(ticket.studentName?.toUpperCase(), detailsX, currentY);
+
+    // Institution
+    currentY += 50; // Move down to "Name of the Institution" placeholder
+    ctx.font = `bold 22px ${FONT_PRIMARY}`;
+    // Limit line length to 45 chars to keep it within image bounds
+    const institutionLines = ticket.institution?.toUpperCase().match(/.{1,36}/g) || [];
+    institutionLines.forEach((line, i) => {
+      ctx.fillText(line, detailsX, currentY + i * 28);
     });
 
-    ctx.font = `25px ${FONT_PRIMARY}`;
-    ctx.fillText(ticket.className, POS_X_CONTENT, POS_Y_START + 210);
+    // Class
+    currentY += 85 + (institutionLines.length - 1) * 28; // Move down to "Name of the Class" placeholder
+    ctx.font = `bold 28px ${FONT_PRIMARY}`;
+    ctx.fillText(ticket.className?.toUpperCase(), detailsX, currentY);
 
     // --- Draw Subjects Table ---
-    const tableStartY = POS_Y_START + 310;
+    const tableStartY = currentY + 80;
     const tableStartX = (canvas.width - (canvas.width - 200)) / 2;
     const tableWidth = canvas.width - 200;
     const colWidth = tableWidth / 5;
@@ -181,8 +197,12 @@ const generateHallTicketImage = (ticket, examName, backgroundImage) => {
       ctx.stroke();
     }
 
-    // --- Resolve with Blob ---
-    canvas.toBlob((blob) => resolve(blob), "image/jpeg", 0.95);
+    // --- Resolve with data URL for preview if needed, or Blob ---
+    canvas.toBlob((blob) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve({ blob, dataUrl: reader.result });
+      reader.readAsDataURL(blob);
+    }, "image/jpeg", 0.95);
   });
 };
 
@@ -191,16 +211,39 @@ function BulkHallTickets() {
   const [classes, setClasses] = useState([]);
   const [isDownloading, setIsDownloading] = useState(false);
   const [downloadProgress, setDownloadProgress] = useState(0);
-  const [activeClassId, setActiveClassId] = useState(null); // Track which class is downloading
+  const [activeClassId, setActiveClassId] = useState(null);
+  const [previewDataUrl, setPreviewDataUrl] = useState(null);
+  const [isPreviewLoading, setIsPreviewLoading] = useState(false);
 
   // --- API Calls ---
-  const getAllClasses = useCallback(async () => {
+  const loadPreview = useCallback(async (classesList) => {
+    if (!classesList || classesList.length === 0) return;
+    setIsPreviewLoading(true);
     try {
-      const { data } = await Axios.get("/class");
-      setClasses(data);
+      const firstClass = classesList[0];
+      const { data } = await Axios.post("/hall-ticket/bulk-download", {
+        class: firstClass._id,
+      });
+
+      if (data.hallTickets && data.hallTickets.length > 0) {
+        const bgResponse = await axios.get("/HallTicketBG.jpg", {
+          responseType: "arraybuffer",
+        });
+        const backgroundImage = new Image();
+        backgroundImage.src = URL.createObjectURL(new Blob([bgResponse.data]));
+        await new Promise((resolve) => (backgroundImage.onload = resolve));
+
+        const { dataUrl } = await generateHallTicketImage(
+          data.hallTickets[0],
+          data.hallTickets[0]?.examName,
+          backgroundImage
+        );
+        setPreviewDataUrl(dataUrl);
+      }
     } catch (error) {
-      console.error("Failed to fetch classes:", error);
-      toast.error("Could not fetch class list.");
+      console.error("Failed to load preview:", error);
+    } finally {
+      setIsPreviewLoading(false);
     }
   }, []);
 
@@ -237,7 +280,7 @@ function BulkHallTickets() {
             data.hallTickets[0]?.examName,
             backgroundImage
           )
-            .then((blob) => {
+            .then(({ blob }) => {
               return new Promise((resolve) => {
                 const reader = new FileReader();
                 reader.onload = () => resolve(reader.result); // result is a base64 data URL
@@ -298,14 +341,28 @@ function BulkHallTickets() {
   };
   // --- Effects ---
   useEffect(() => {
-    getAllClasses();
-  }, [getAllClasses]);
+    const init = async () => {
+      try {
+        const { data } = await Axios.get("/class");
+        setClasses(data);
+        if (data.length > 0) {
+          loadPreview(data);
+        }
+      } catch (error) {
+        console.error("Failed to fetch classes:", error);
+        toast.error("Could not fetch class list.");
+      }
+    };
+    init();
+  }, [loadPreview]);
 
   // --- Render ---
   return (
     <div className="p-4 sm:p-6 bg-gray-50 min-h-screen">
       <div className="max-w-4xl mx-auto">
         <div className="bg-white p-6 sm:p-8 rounded-xl shadow-md">
+
+
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 text-center mb-6">
             Download Bulk Hall Tickets
           </h1>
