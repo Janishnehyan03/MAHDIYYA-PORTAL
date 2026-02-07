@@ -90,7 +90,7 @@ const generateHallTicketImage = (ticket, examName, backgroundImage) => {
     currentY += 50; // Move down to "Name of the Institution" placeholder
     ctx.font = `bold 22px ${FONT_PRIMARY}`;
     // Limit line length to 45 chars to keep it within image bounds
-    const institutionLines = ticket.institution?.toUpperCase().match(/.{1,36}/g) || [];
+    const institutionLines = ticket.institution?.toUpperCase().match(/.{1,25}/g) || [];
     institutionLines.forEach((line, i) => {
       ctx.fillText(line, detailsX, currentY + i * 28);
     });
