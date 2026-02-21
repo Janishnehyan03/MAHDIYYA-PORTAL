@@ -21,6 +21,8 @@ import TimeTables from "./pages/superAdmin/Timetables";
 import UploadedFiles from "./pages/superAdmin/UploadedFiles";
 import Configurations from "./pages/superAdmin/configurations/Configurations";
 import CreateNotification from "./pages/superAdmin/notification/CreateNotification";
+import SupplementaryExam from "./pages/superAdmin/SupplementaryExam";
+import SupplementaryExamCentre from "./pages/admin/SupplementaryExamCentre";
 
 export const SuperAdminRoutes = [
   {
@@ -136,6 +138,11 @@ export const SuperAdminRoutes = [
     component: <PreviousExamManagement />,
     role: "superAdmin",
   },
+  {
+    route: "/supplementary-exam",
+    component: <SupplementaryExam />,
+    role: "superAdmin",
+  }
 ];
 
 export const AdminRoutes = [
@@ -215,11 +222,9 @@ export const AdminRoutes = [
     route: "/view-cce-mark/",
     component: <CceMark.ViewCceMarks />,
   },
-  {
-    route: "/add-cce-mark/",
-    component: <CceMark.AddCceMark />,
-  },
+  { route: "/add-cce-mark/", component: <CceMark.AddCceMark /> },
   { route: "/add-result", component: <Result.AddResult /> },
   { route: "/previous-results/admin", component: <PreviousExamTable /> },
   { route: "/hall-tickets", component: <BulkHallTickets /> },
+  { route: "/centre-supplementary-exam", component: <SupplementaryExamCentre /> }
 ];

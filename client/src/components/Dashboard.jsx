@@ -84,6 +84,12 @@ const superAdminDashboardConfig = {
       link: "/previous-results",
       description: "Access archived results",
     },
+    {
+      text: "Supplementary Exam",
+      icon: faFileArchive,
+      link: "/supplementary-exam",
+      description: "Manage supplementary exams",
+    },
   ],
   "System & Utilities": [
     {
@@ -147,6 +153,12 @@ const adminDashboardConfig = {
       icon: faCheckDouble,
       link: "/previous-results/admin",
       description: "Access past results",
+    },
+    {
+      text: "Supplementary Exam",
+      icon: faFileArchive,
+      link: "/centre-supplementary-exam",
+      description: "Enter supplementary marks",
     },
   ],
   "Branch Utilities": [

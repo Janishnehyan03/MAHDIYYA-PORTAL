@@ -28,6 +28,10 @@ const configurationSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    supplementaryExam: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,

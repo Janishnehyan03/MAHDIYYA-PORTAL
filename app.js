@@ -56,6 +56,7 @@ app.use("/api/configurations", require("./routes/configurationRoute"));
 app.use("/api/academic-year", require("./routes/academicYearRoute"));
 app.use('/api/admission', require('./routes/admissionRoute'));
 app.use('/api/previous-exam', require('./routes/previousExamRoute'));
+app.use('/api/supplementary-exam', require('./routes/supplementaryExamRoute'));
 
 
 process.env.PWD = process.cwd();
