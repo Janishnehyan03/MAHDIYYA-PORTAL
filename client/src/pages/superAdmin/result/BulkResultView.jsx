@@ -57,7 +57,7 @@ const StudentResultRow = ({ result, subjects, onEdit, onDelete, index, role }) =
         <td className="p-2 text-center font-black text-red-500 border-r border-slate-100">{result.noOfFailed || "0"}</td>
         <td className={`p-2 text-center font-black border-r border-slate-100 ${result.semStatus?.toString().toUpperCase() === 'FAILED' ? 'text-red-600' : 'text-slate-600'}`}>{result.semStatus || "-"}</td>
         <td className="p-2 text-center font-black text-slate-900 bg-slate-50 border-r border-slate-100">{result.gTotal || "0"}</td>
-        <td className="p-2 text-center font-bold text-indigo-600 border-r border-slate-100">{Number(result.percentage).toFixed(2)}%</td>
+        <td className="p-2 text-center font-bold text-indigo-600 border-r border-slate-100">{(Number(result.percentage) / 100).toFixed(2)}%</td>
         <td className="p-2 text-center font-black text-slate-700 bg-indigo-50/10 border-r border-slate-100">{result.className || "-"}</td>
         {role === 'superAdmin' && (
             <td className="p-2 text-center">
@@ -169,7 +169,7 @@ const VerticalStudentReport = ({ result, subjects }) => (
                     <tr>
                         <td className="p-1.5 border-r border-slate-600 text-xs">{result.noOfFailed}</td>
                         <td className={`p-1.5 border-r border-slate-600 text-xs ${result.semStatus?.toString().toUpperCase() === 'FAILED' ? 'text-red-700' : 'text-slate-800'}`}>{result.semStatus}</td>
-                        <td className="p-1.5 border-r border-slate-600 text-xs">{Number(result.percentage).toFixed(2)}%</td>
+                        <td className="p-1.5 border-r border-slate-600 text-xs">{(Number(result.percentage) / 100).toFixed(2)}%</td>
                         <td className="p-1.5 text-base bg-slate-50">{result.gTotal}</td>
                     </tr>
                 </tbody>
