@@ -107,6 +107,16 @@ export const SuperAdminRoutes = [
     component: <Result.ResultHome />,
     role: "superAdmin",
   },
+  {
+    route: "/bulk-mark-upload",
+    component: <Result.BulkMarkUpload />,
+    role: "superAdmin",
+  },
+  {
+    route: "/bulk-result-view",
+    component: <Result.BulkResultView />,
+    role: "superAdmin",
+  },
 
   {
     route: "/study-centre/:centreId",
@@ -209,6 +219,10 @@ export const AdminRoutes = [
   {
     route: "/result-view/",
     component: <Result.ResultView />,
+  },
+  {
+    route: "/bulk-result-view/",
+    component: <Result.BulkResultView />,
   },
   {
     route: "/study-centre-profile/",

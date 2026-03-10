@@ -3,7 +3,9 @@ import {
   faChartSimple,
   faCheck,
   faChevronDown,
+  faFileUpload,
   faSpinner,
+  faTableList,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { BarChart } from "@mui/x-charts/BarChart";
@@ -190,7 +192,7 @@ function ResultHome() {
         />
 
         {/* Action Cards Grid - more responsive and centered */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
           <ActionCard
             to="/result-view"
             icon={faCheck}
@@ -202,6 +204,18 @@ function ResultHome() {
             icon={faAdd}
             title="Add New Result"
             colorClass={{ bg: "bg-blue-100", text: "text-blue-600" }}
+          />
+          <ActionCard
+            to="/bulk-mark-upload"
+            icon={faFileUpload}
+            title="Bulk Mark Upload"
+            colorClass={{ bg: "bg-purple-100", text: "text-purple-600" }}
+          />
+          <ActionCard
+            to="/bulk-result-view"
+            icon={faTableList}
+            title="Bulk Result View"
+            colorClass={{ bg: "bg-amber-100", text: "text-amber-600" }}
           />
         </div>
 

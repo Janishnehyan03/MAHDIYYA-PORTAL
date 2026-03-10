@@ -14,6 +14,7 @@ import {
   faMarker,
   faPenAlt,
   faSchool,
+  faTableList,
   faToolbox,
   faUpload,
   faUser,
@@ -147,6 +148,12 @@ const adminDashboardConfig = {
       icon: faCheckDouble,
       link: "/result-view",
       description: "View current results",
+    },
+    {
+      text: "Bulk Exam Results",
+      icon: faTableList,
+      link: "/bulk-result-view",
+      description: "View aggregated results",
     },
     {
       text: "Previous Results",

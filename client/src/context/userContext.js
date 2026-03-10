@@ -1,4 +1,4 @@
-import { createContext, useEffect, useState } from "react";
+import { createContext, useEffect, useState, useCallback, useMemo } from "react";
 import { useLocation } from "react-router-dom";
 import Axios from "../Axios";
 
@@ -8,17 +8,18 @@ export const UserAuthProvider = (props) => {
   const [authData, setAuthData] = useState(null);
   const { pathname } = useLocation();
 
-  const checkUserLogin = async () => {
+  const checkUserLogin = useCallback(async () => {
     try {
       const res = await Axios.post("/auth/checkLogin");
       if (res.status === 200) {
         setAuthData(res.data.user);
       }
     } catch (error) {
-      console.log(error.response.data);
+      console.log(error.response?.data);
     }
-  };
-  const logout = async () => {
+  }, []);
+
+  const logout = useCallback(async () => {
     try {
       const res = await Axios.post("/auth/logout");
       if (res.data.success) {
@@ -28,17 +29,19 @@ export const UserAuthProvider = (props) => {
     } catch (error) {
       console.log(error.response);
     }
-  };
+  }, []);
 
-  const value = {
+  const value = useMemo(() => ({
     checkUserLogin,
     authData,
     setAuthData,
     logout,
-  };
+  }), [checkUserLogin, authData, logout]);
+
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [pathname]);
+
   return (
     <UserAuthContext.Provider value={value}>
       {props.children}

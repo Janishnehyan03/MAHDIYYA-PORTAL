@@ -23,6 +23,8 @@ import EditStudyCentre from "./superAdmin/study-centre/EditStudyCentre.jsx";
 import StudyCentreTeachers from "./superAdmin/study-centre/StudyCentreTeachers.jsx";
 import StudyCentreView from "./superAdmin/study-centre/StudyCentreView.jsx";
 import AllMAHDIYYAHTeachers from "./superAdmin/teacher/AllMahdiyyaTeachers.jsx";
+import BulkMarkUpload from "./superAdmin/result/BulkMarkUpload.jsx";
+import BulkResultView from "./superAdmin/result/BulkResultView.jsx";
 
 import EditCceMark from "./admin/cce-mark/EditCceMark.jsx";
 import ViewCceMarks from "./admin/cce-mark/ViewCceMarks.jsx";
@@ -67,6 +69,8 @@ export const Result = {
   AddResult,
   ResultHome,
   ResultView,
+  BulkMarkUpload,
+  BulkResultView,
 };
 export const CceMark = {
   AddCceMark,
