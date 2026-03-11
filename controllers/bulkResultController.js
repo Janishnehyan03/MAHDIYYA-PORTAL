@@ -213,7 +213,7 @@ exports.exportBulkResults = catchAsync(async (req, res, next) => {
             const mark = res.marks.find(m => m.subject?._id.toString() === sub._id.toString()) || {};
             row.push(mark.fa || "", mark.sa || "", mark.tenPercent || "", mark.tl || "", mark.status || "");
         });
-        row.push(res.noOfFailed || "0", res.semStatus || "", res.gTotal || "0", res.percentage || "0", res.className || "");
+        row.push(res.noOfFailed || "0", res.semStatus || "", res.gTotal || "0", res.percentage ? `${Number(res.percentage).toFixed(2)} %` : "0 %", res.className || "");
         return row;
     });
 
