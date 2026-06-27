@@ -23,6 +23,8 @@ import Configurations from "./pages/superAdmin/configurations/Configurations";
 import CreateNotification from "./pages/superAdmin/notification/CreateNotification";
 import SupplementaryExam from "./pages/superAdmin/SupplementaryExam";
 import SupplementaryExamCentre from "./pages/admin/SupplementaryExamCentre";
+import ManageDownloads from "./pages/superAdmin/ManageDownloads";
+import SharedDownloads from "./pages/admin/SharedDownloads";
 
 export const SuperAdminRoutes = [
   {
@@ -152,6 +154,11 @@ export const SuperAdminRoutes = [
     route: "/supplementary-exam",
     component: <SupplementaryExam />,
     role: "superAdmin",
+  },
+  {
+    route: "/manage-downloads",
+    component: <ManageDownloads />,
+    role: "superAdmin",
   }
 ];
 
@@ -240,5 +247,6 @@ export const AdminRoutes = [
   { route: "/add-result", component: <Result.AddResult /> },
   { route: "/previous-results/admin", component: <PreviousExamTable /> },
   { route: "/hall-tickets", component: <BulkHallTickets /> },
-  { route: "/centre-supplementary-exam", component: <SupplementaryExamCentre /> }
+  { route: "/centre-supplementary-exam", component: <SupplementaryExamCentre /> },
+  { route: "/shared-downloads", component: <SharedDownloads /> }
 ];

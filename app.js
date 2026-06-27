@@ -46,6 +46,7 @@ app.use("/api/subject", require("./routes/subject"));
 app.use("/api/class", require("./routes/class"));
 app.use("/api/exam", require("./routes/exam"));
 app.use("/api/downloads", require("./routes/downloads"));
+app.use("/api/resources", require("./routes/resourceRoute"));
 app.use("/api/uploads", require("./routes/uploads"));
 app.use("/api/messages", require("./routes/message"));
 app.use("/api/hall-ticket", require("./routes/hallTicket"));

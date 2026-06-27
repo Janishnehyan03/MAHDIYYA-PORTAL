@@ -100,6 +100,12 @@ const superAdminDashboardConfig = {
       description: "Manage downloadable files",
     },
     {
+      text: "SHARED FILES",
+      icon: faDownload,
+      link: "/manage-downloads",
+      description: "Share files with admins",
+    },
+    {
       text: "Configurations",
       icon: faCog,
       link: "/configurations",
@@ -174,6 +180,12 @@ const adminDashboardConfig = {
       icon: faUpload,
       link: "/my-uploads",
       description: "Your centre's uploads",
+    },
+    {
+      text: "Downloads",
+      icon: faDownload,
+      link: "/shared-downloads",
+      description: "Files shared with you",
     },
     {
       text: "Profile",
