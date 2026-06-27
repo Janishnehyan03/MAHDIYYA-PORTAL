@@ -72,7 +72,7 @@ function ManageDownloads() {
     setIsLoading(true);
     try {
       const { data } = await Axios.get("/resources");
-      setResources(data);
+      setResources(Array.isArray(data) ? data : []);
     } catch (error) {
       toast.error("Could not load the downloads list.");
     } finally {
@@ -83,7 +83,7 @@ function ManageDownloads() {
   const getUsers = useCallback(async () => {
     try {
       const { data } = await Axios.get("/auth/users");
-      setUsers(data);
+      setUsers(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error("Failed to load users", error);
     }

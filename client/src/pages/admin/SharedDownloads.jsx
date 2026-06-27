@@ -45,7 +45,7 @@ function SharedDownloads() {
     setLoading(true);
     try {
       const { data } = await Axios.get("/resources/my");
-      setResources(data);
+      setResources(Array.isArray(data) ? data : []);
     } catch (error) {
       toast.error("Could not load downloads.");
     } finally {
