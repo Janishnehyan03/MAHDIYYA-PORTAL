@@ -57,6 +57,23 @@ function SharedDownloads() {
     getResources();
   }, [getResources]);
 
+  const handleDownload = async (url, fileName) => {
+    try {
+      const response = await fetch(url);
+      const blob = await response.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = blobUrl;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(blobUrl);
+    } catch (err) {
+      toast.error("Download failed. Please try again.");
+    }
+  };
+
   const filtered = resources.filter((r) =>
     r.title?.toLowerCase().includes(search.toLowerCase())
   );
@@ -123,15 +140,13 @@ function SharedDownloads() {
                       )}
                     </div>
                   </div>
-                  <a
-                    href={r.fileUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                  <button
+                    onClick={() => handleDownload(r.fileUrl, r.fileName || r.title)}
                     className="w-full inline-flex items-center justify-center gap-2 py-2 px-4 text-sm font-medium rounded-md text-blue-700 bg-blue-100 hover:bg-blue-200"
                   >
                     <FontAwesomeIcon icon={faDownload} />
                     Download
-                  </a>
+                  </button>
                 </div>
               );
             })}
