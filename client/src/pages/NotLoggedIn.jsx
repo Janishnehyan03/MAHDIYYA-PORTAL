@@ -1,8 +1,17 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faLock } from "@fortawesome/free-solid-svg-icons";
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
+import { useContext } from "react";
+import { UserAuthContext } from "../context/userContext";
 
 function NotLoggedIn() {
+  const { authData } = useContext(UserAuthContext);
+
+  // If the user is already logged in, send them to the dashboard.
+  if (authData) {
+    return <Navigate to="/" replace />;
+  }
+
   return (
     // Main container with a soft off-white background
     <main className="flex min-h-screen flex-col items-center justify-center bg-gray-50 p-4">

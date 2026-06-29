@@ -1,3 +1,11 @@
+import {
+  faArrowUpRightDots,
+  faPenToSquare,
+  faPlus,
+  faUserGraduate,
+  faUserSlash,
+} from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useState } from "react";
 import { ExcelRenderer } from "react-excel-renderer";
 import { Link, useParams } from "react-router-dom";
@@ -8,25 +16,29 @@ import { toast } from "react-toastify";
 
 function LoadingSpinner() {
   return (
-    <div className="flex justify-center items-center h-full py-20">
-      <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500"></div>
+    <div className="flex h-full items-center justify-center py-20">
+      <div className="h-16 w-16 animate-spin rounded-full border-b-2 border-t-2 border-indigo-500"></div>
     </div>
   );
 }
 
 function EmptyState({ onAddClick, showAdd }) {
   return (
-    <div className="text-center py-16 px-6 bg-white rounded-lg shadow-md">
-      <h3 className="text-xl font-semibold text-gray-800">No Students Found</h3>
-      <p className="mt-2 text-gray-500">
+    <div className="rounded-2xl border border-slate-200/80 bg-white px-6 py-16 text-center shadow-sm">
+      <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200 text-2xl text-slate-400">
+        <FontAwesomeIcon icon={faUserGraduate} />
+      </div>
+      <h3 className="text-xl font-semibold text-slate-800">No Students Found</h3>
+      <p className="mt-2 text-slate-500">
         Get started by adding students to this class.
       </p>
       {showAdd && (
         <div className="mt-6">
           <button
             onClick={onAddClick}
-            className="inline-flex items-center px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 px-5 py-2.5 text-sm font-semibold text-white shadow-md shadow-indigo-500/20 transition hover:from-indigo-600 hover:to-purple-700"
           >
+            <FontAwesomeIcon icon={faPlus} />
             Add Students
           </button>
         </div>
@@ -40,72 +52,92 @@ function StudentsTable({ students, selectedStudents, onSelect, onSelectAll }) {
     students.length > 0 && selectedStudents.length === students.length;
 
   return (
-    <div className="bg-white rounded-lg shadow-md overflow-hidden">
-      <table className="min-w-full divide-y divide-gray-200">
-        <thead className="bg-gray-50">
-          <tr>
-            <th className="px-6 py-3">
-              <input
-                type="checkbox"
-                checked={allSelected}
-                onChange={(e) => onSelectAll(e.target.checked)}
-              />
-            </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-              #
-            </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-              Name
-            </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-              Register No
-            </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-              Place
-            </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-              District
-            </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-              Phone
-            </th>
-            <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">
-              Actions
-            </th>
-          </tr>
-        </thead>
-        <tbody className="bg-white divide-y divide-gray-200">
-          {students.map((student, index) => (
-            <tr key={student._id} className="hover:bg-gray-50">
-              <td className="px-6 py-4">
+    <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm">
+      <div className="overflow-x-auto">
+        <table className="min-w-full">
+          <thead className="border-b border-slate-200 bg-slate-50/80">
+            <tr>
+              <th className="px-6 py-3.5">
                 <input
                   type="checkbox"
-                  checked={selectedStudents.includes(student._id)}
-                  onChange={(e) => onSelect(student._id, e.target.checked)}
+                  checked={allSelected}
+                  onChange={(e) => onSelectAll(e.target.checked)}
+                  className="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
                 />
-              </td>
-              <td className="px-6 py-4">{index + 1}</td>
-              <td className="px-6 py-4 font-semibold text-blue-600">
-                <Link to={`/profile/${student._id}`}>
-                  {student.studentName}
-                </Link>
-              </td>
-              <td className="px-6 py-4">{student.registerNo}</td>
-              <td className="px-6 py-4">{student.place}</td>
-              <td className="px-6 py-4">{student.district}</td>
-              <td className="px-6 py-4">{student.phone}</td>
-              <td className="px-6 py-4 text-right">
-                <Link
-                  to={`/edit-student/${student._id}`}
-                  className="text-indigo-600 hover:text-indigo-900"
-                >
-                  Edit
-                </Link>
-              </td>
+              </th>
+              {["#", "Name", "Register No", "Place", "District", "Phone"].map(
+                (h) => (
+                  <th
+                    key={h}
+                    className="px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wide text-slate-500"
+                  >
+                    {h}
+                  </th>
+                )
+              )}
+              <th className="px-6 py-3.5 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">
+                Actions
+              </th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody className="divide-y divide-slate-100">
+            {students.map((student, index) => (
+              <tr
+                key={student._id}
+                className="group transition-colors hover:bg-indigo-50/40"
+              >
+                <td className="px-6 py-3.5">
+                  <input
+                    type="checkbox"
+                    checked={selectedStudents.includes(student._id)}
+                    onChange={(e) => onSelect(student._id, e.target.checked)}
+                    className="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                  />
+                </td>
+                <td className="px-6 py-3.5 text-sm text-slate-400">
+                  {index + 1}
+                </td>
+                <td className="px-6 py-3.5">
+                  <Link
+                    to={`/profile/${student._id}`}
+                    className="flex items-center gap-3"
+                  >
+                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 text-xs font-bold text-white">
+                      {student.studentName?.charAt(0)?.toUpperCase() || "?"}
+                    </span>
+                    <span className="text-sm font-semibold text-slate-800 group-hover:text-indigo-600">
+                      {student.studentName}
+                    </span>
+                  </Link>
+                </td>
+                <td className="px-6 py-3.5">
+                  <span className="rounded-md bg-slate-100 px-2 py-1 font-mono text-xs font-medium text-slate-600">
+                    {student.registerNo}
+                  </span>
+                </td>
+                <td className="px-6 py-3.5 text-sm text-slate-600">
+                  {student.place}
+                </td>
+                <td className="px-6 py-3.5 text-sm text-slate-600">
+                  {student.district}
+                </td>
+                <td className="px-6 py-3.5 text-sm text-slate-600">
+                  {student.phone}
+                </td>
+                <td className="px-6 py-3.5 text-right">
+                  <Link
+                    to={`/edit-student/${student._id}`}
+                    className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium text-indigo-600 transition hover:bg-indigo-50"
+                  >
+                    <FontAwesomeIcon icon={faPenToSquare} />
+                    Edit
+                  </Link>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
@@ -229,7 +261,7 @@ function UploadModal({ isOpen, onClose, classId, onUploadSuccess }) {
           {isUploading && (
             <div className="flex items-center justify-center mt-4">
               <svg
-                className="animate-spin h-6 w-6 text-blue-600 mr-2"
+                className="animate-spin h-6 w-6 text-indigo-600 mr-2"
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"
@@ -248,7 +280,7 @@ function UploadModal({ isOpen, onClose, classId, onUploadSuccess }) {
                   d="M4 12a8 8 0 018-8v8z"
                 ></path>
               </svg>
-              <span className="text-blue-600 font-medium">
+              <span className="text-indigo-600 font-medium">
                 Uploading data, please wait...
               </span>
             </div>
@@ -268,13 +300,13 @@ function UploadModal({ isOpen, onClose, classId, onUploadSuccess }) {
             <button
               onClick={handleUpload}
               disabled={isUploading || !file}
-              className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 disabled:bg-blue-300 disabled:cursor-not-allowed"
+              className="rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 px-4 py-2 text-sm font-semibold text-white shadow-md shadow-indigo-500/20 transition hover:from-indigo-600 hover:to-purple-700 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              Upload & Save
+              Upload &amp; Save
             </button>
           )}
           {isUploading && (
-            <span className="px-4 py-2 bg-blue-300 text-white rounded-md text-sm font-medium flex items-center">
+            <span className="flex items-center rounded-xl bg-indigo-300 px-4 py-2 text-sm font-medium text-white">
               <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2 align-middle"></span>
               Uploading...
             </span>
@@ -407,57 +439,71 @@ function AllStudents() {
 
   return (
     <>
-      <main className="bg-gray-100 min-h-screen p-4 sm:p-6 lg:p-8">
-        <div className="max-w-7xl mx-auto">
-          {/* Page Header */}
-          <div className="mb-6 flex items-center justify-between">
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900">
-                {className?.className || "Loading Class..."}
-              </h2>
-              <p className="mt-1 text-sm text-gray-500">
-                Manage students for this class.
-              </p>
-            </div>
-            <div className="flex gap-2">
-              <select
-                value={selectedClass}
-                onChange={(e) => setSelectedClass(e.target.value)}
-                className="border rounded-md px-3 py-2 text-sm"
-              >
-                <option value="">-- Select Class to Promote --</option>
-                {classes.map((c) => (
-                  <option key={c._id} value={c._id}>
-                    {c.className}
-                  </option>
-                ))}
-              </select>
-              <button
-                onClick={handlePromote}
-                disabled={selectedStudents.length === 0 || !selectedClass}
-                className="px-4 py-2 bg-green-600 text-white rounded-md disabled:bg-gray-300"
-              >
-                Promote
-              </button>
-              {!selectedClass && (
-                <button
-                  onClick={handleDropOut}
-                  disabled={selectedStudents.length === 0}
-                  className="px-4 py-2 bg-red-600 text-white rounded-md disabled:bg-gray-300"
+      <main className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100">
+        <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-10 lg:py-12">
+          {/* Hero Header */}
+          <header className="relative mb-8 overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-900 p-8 shadow-xl">
+            <div className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-indigo-500/20 blur-3xl" />
+            <div className="relative flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+              <div className="flex items-center gap-4">
+                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/10 ring-1 ring-inset ring-white/20">
+                  <FontAwesomeIcon
+                    icon={faUserGraduate}
+                    className="text-2xl text-white"
+                  />
+                </div>
+                <div>
+                  <h2 className="text-3xl font-bold tracking-tight text-white md:text-4xl">
+                    {className?.className || "Loading Class..."}
+                  </h2>
+                  <p className="mt-1 text-slate-300">
+                    Manage students for this class.
+                  </p>
+                </div>
+              </div>
+              <div className="flex flex-wrap items-center gap-2">
+                <select
+                  value={selectedClass}
+                  onChange={(e) => setSelectedClass(e.target.value)}
+                  className="rounded-xl border border-white/15 bg-white/10 px-3 py-2.5 text-sm text-white backdrop-blur transition focus:outline-none focus:ring-2 focus:ring-indigo-400 [&>option]:text-slate-800"
                 >
-                  Drop Out
-                </button>
-              )}
-              {showAddStudents && (
+                  <option value="">Select Class to Promote</option>
+                  {classes.map((c) => (
+                    <option key={c._id} value={c._id}>
+                      {c.className}
+                    </option>
+                  ))}
+                </select>
                 <button
-                  onClick={() => setShowUploadModal(true)}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md"
+                  onClick={handlePromote}
+                  disabled={selectedStudents.length === 0 || !selectedClass}
+                  className="inline-flex items-center gap-2 rounded-xl bg-emerald-500 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-emerald-900/30 transition hover:bg-emerald-600 disabled:opacity-40 disabled:shadow-none"
                 >
-                  Add Students
+                  <FontAwesomeIcon icon={faArrowUpRightDots} />
+                  Promote
                 </button>
-              )}
+                {!selectedClass && (
+                  <button
+                    onClick={handleDropOut}
+                    disabled={selectedStudents.length === 0}
+                    className="inline-flex items-center gap-2 rounded-xl bg-rose-500 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-rose-900/30 transition hover:bg-rose-600 disabled:opacity-40 disabled:shadow-none"
+                  >
+                    <FontAwesomeIcon icon={faUserSlash} />
+                    Drop Out
+                  </button>
+                )}
+                {showAddStudents && (
+                  <button
+                    onClick={() => setShowUploadModal(true)}
+                    className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-indigo-900/40 transition hover:from-indigo-600 hover:to-purple-700"
+                  >
+                    <FontAwesomeIcon icon={faPlus} />
+                    Add Students
+                  </button>
+                )}
+              </div>
             </div>
-          </div>
+          </header>
 
           {/* Main Content */}
           <div>

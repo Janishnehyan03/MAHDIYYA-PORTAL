@@ -1,3 +1,5 @@
+import { faRightLeft } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -51,18 +53,27 @@ const TransferStudent = () => {
   };
 
   return (
-    // Main container with a light background for a clean, airy feel
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
-      <div className="max-w-4xl w-full mx-auto p-8 bg-white shadow-lg rounded-xl">
-        {/* Page Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-slate-800">
-            Student Transfer
-          </h1>
-          <p className="text-slate-500 mt-1">
-            Manage student relocation between study centres.
-          </p>
-        </div>
+    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100 p-4 sm:p-6 lg:p-10">
+      <div className="mx-auto w-full max-w-4xl">
+        {/* Hero Header */}
+        <header className="relative mb-6 overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-900 p-8 shadow-xl">
+          <div className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-indigo-500/20 blur-3xl" />
+          <div className="relative flex items-center gap-4">
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/10 ring-1 ring-inset ring-white/20">
+              <FontAwesomeIcon icon={faRightLeft} className="text-2xl text-white" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight text-white md:text-4xl">
+                Student Transfer
+              </h1>
+              <p className="mt-1 text-slate-300">
+                Manage student relocation between study centres.
+              </p>
+            </div>
+          </div>
+        </header>
+
+        <div className="rounded-2xl border border-slate-200/80 bg-white p-8 shadow-sm">
 
         {student ? (
           <div className="space-y-10">
@@ -121,7 +132,7 @@ const TransferStudent = () => {
                 <div className="relative mt-2">
                   <select
                     id="study-centre"
-                    className="block w-full appearance-none rounded-md border-0 py-2.5 pl-3 pr-10 text-slate-900 ring-1 ring-inset ring-slate-300 placeholder:text-slate-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6 transition"
+                    className="block w-full appearance-none rounded-md border-0 py-2.5 pl-3 pr-10 text-slate-900 ring-1 ring-inset ring-slate-300 placeholder:text-slate-400 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6 transition"
                     value={selectedCentre}
                     onChange={(e) => setSelectedCentre(e.target.value)}
                   >
@@ -165,7 +176,7 @@ const TransferStudent = () => {
                 <div className="mt-2">
                   <textarea
                     id="transfer-reason"
-                    className="block w-full rounded-md border-0 py-2.5 px-3 text-slate-900 shadow-sm ring-1 ring-inset ring-slate-300 placeholder:text-slate-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6 transition"
+                    className="block w-full rounded-md border-0 py-2.5 px-3 text-slate-900 shadow-sm ring-1 ring-inset ring-slate-300 placeholder:text-slate-400 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6 transition"
                     rows={4}
                     value={transferReason}
                     onChange={(e) => setTransferReason(e.target.value)}
@@ -179,7 +190,7 @@ const TransferStudent = () => {
             <div className="pt-6 border-t border-slate-200">
               <button
                 onClick={handleTransfer}
-                className="w-full flex justify-center items-center bg-blue-600 text-white py-3 px-5 rounded-lg font-semibold text-base shadow-sm hover:bg-blue-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 transition-colors duration-150 disabled:bg-slate-400 disabled:cursor-not-allowed"
+                className="flex w-full items-center justify-center rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 px-5 py-3 text-base font-semibold text-white shadow-lg shadow-indigo-500/25 transition hover:from-indigo-600 hover:to-purple-700 disabled:cursor-not-allowed disabled:opacity-60"
                 disabled={loading || !selectedCentre}
               >
                 {loading ? (
@@ -215,7 +226,7 @@ const TransferStudent = () => {
         ) : (
           <div className="flex flex-col items-center justify-center text-center py-20">
             <svg
-              className="animate-spin h-8 w-8 text-blue-500 mb-4"
+              className="animate-spin h-8 w-8 text-indigo-500 mb-4"
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
               viewBox="0 0 24 24"
@@ -237,6 +248,7 @@ const TransferStudent = () => {
             <p className="text-slate-500">Loading student details...</p>
           </div>
         )}
+        </div>
       </div>
     </div>
   );

@@ -2,6 +2,7 @@ const router = require("express").Router();
 const { default: mongoose } = require("mongoose");
 const multer = require("multer");
 const cloudinary = require("cloudinary");
+const { Readable } = require("stream");
 const dotenv = require("dotenv");
 const { deleteOne } = require("../utils/globalFuctions");
 
@@ -16,6 +17,7 @@ cloudinary.v2.config({
 const storage = new multer.memoryStorage();
 const upload = multer({
   storage,
+  limits: { fileSize: 50 * 1024 * 1024 }, // 50MB max upload size
 });
 
 const downloadSchema = new mongoose.Schema({
@@ -25,21 +27,22 @@ const downloadSchema = new mongoose.Schema({
 });
 const Download = mongoose.model("Download", downloadSchema);
 
-async function uploadFile(file) {
-  try {
-    const res = await cloudinary.uploader.upload(file, {
-      resource_type: "auto",
-    });
-    return res;
-  } catch (error) {
-    console.log(error);
-  }
+// Chunked upload bypasses Cloudinary's 10MB limit on the regular upload endpoint.
+function uploadFile(buffer) {
+  return new Promise((resolve, reject) => {
+    const uploadStream = cloudinary.v2.uploader.upload_chunked_stream(
+      { resource_type: "auto", chunk_size: 6 * 1024 * 1024 },
+      (error, result) => {
+        if (error) return reject(error);
+        resolve(result);
+      }
+    );
+    Readable.from(buffer).pipe(uploadStream);
+  });
 }
 router.post("/", upload.single("file"), async (req, res, next) => {
   try {
-    const b64 = Buffer.from(req.file.buffer).toString("base64");
-    let dataURI = "data:" + req.file.mimetype + ";base64," + b64;
-    const cldRes = await uploadFile(dataURI);
+    const cldRes = await uploadFile(req.file.buffer);
 
     let data = await Download.create({
       title: req.body.title,

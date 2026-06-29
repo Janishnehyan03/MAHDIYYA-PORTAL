@@ -29,19 +29,31 @@ const upload = multer({
 // Stream the raw file buffer straight to Cloudinary.
 // This avoids base64-encoding the whole file (which inflates the payload by
 // ~33% and buffers it in memory), so uploads are noticeably faster.
+// Uses chunked upload so files larger than Cloudinary's 10MB single-request
+// limit (e.g. raw documents) can be uploaded up to the 50MB cap.
 function streamUpload(buffer) {
   return new Promise((resolve, reject) => {
     const startedAt = Date.now();
     const cfg = cloudinary.config();
-    log("Cloudinary upload_stream: opening stream... config in use:", {
+    log("Cloudinary upload_chunked_stream: opening stream... config in use:", {
       cloud_name: cfg.cloud_name || "MISSING",
       api_key: cfg.api_key ? "set" : "MISSING",
       api_secret: cfg.api_secret ? "set" : "MISSING",
     });
     let stream;
     try {
-      stream = cloudinary.uploader.upload_stream(
-        { resource_type: "auto", folder: "resources" },
+      stream = cloudinary.uploader.upload_chunked_stream(
+        {
+          resource_type: "auto",
+          folder: "resources",
+          chunk_size: 6 * 1024 * 1024,
+          // Keep the original filename + extension in the public_id so the
+          // delivered URL ends with e.g. ".pptx". Without this, raw files
+          // (PPT, DOCX, ...) get an extensionless URL and download as an
+          // unrecognized file type.
+          use_filename: true,
+          unique_filename: true,
+        },
         (error, result) => {
           if (error) {
             log("Cloudinary upload FAILED after", Date.now() - startedAt, "ms:");

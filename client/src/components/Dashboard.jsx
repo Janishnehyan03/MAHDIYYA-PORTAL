@@ -196,66 +196,112 @@ const adminDashboardConfig = {
   ],
 };
 
-// --- Reusable Component: DashboardCard with "Glassmorphism" effect ---
-const DashboardCard = ({ item, notificationCount }) => (
+// --- Color themes (full class strings so Tailwind can detect them) ---
+const cardThemes = [
+  {
+    iconGradient: "from-blue-500 to-indigo-600",
+    hoverBorder: "hover:border-blue-300",
+    glow: "bg-blue-400/30",
+    arrowBg: "bg-blue-50 group-hover:bg-blue-600",
+    arrowText: "text-blue-600 group-hover:text-white",
+    bar: "from-blue-500 to-indigo-600",
+  },
+  {
+    iconGradient: "from-emerald-500 to-teal-600",
+    hoverBorder: "hover:border-emerald-300",
+    glow: "bg-emerald-400/30",
+    arrowBg: "bg-emerald-50 group-hover:bg-emerald-600",
+    arrowText: "text-emerald-600 group-hover:text-white",
+    bar: "from-emerald-500 to-teal-600",
+  },
+  {
+    iconGradient: "from-violet-500 to-purple-600",
+    hoverBorder: "hover:border-violet-300",
+    glow: "bg-violet-400/30",
+    arrowBg: "bg-violet-50 group-hover:bg-violet-600",
+    arrowText: "text-violet-600 group-hover:text-white",
+    bar: "from-violet-500 to-purple-600",
+  },
+  {
+    iconGradient: "from-amber-500 to-orange-600",
+    hoverBorder: "hover:border-amber-300",
+    glow: "bg-amber-400/30",
+    arrowBg: "bg-amber-50 group-hover:bg-amber-600",
+    arrowText: "text-amber-600 group-hover:text-white",
+    bar: "from-amber-500 to-orange-600",
+  },
+];
+
+// --- Reusable Component: Modern DashboardCard ---
+const DashboardCard = ({ item, notificationCount, theme }) => (
   <Link
     to={item.link}
-    // CHANGED: Added bg-white/60, backdrop-blur-sm and border-transparent for a modern look
-    className="group relative flex flex-col justify-between bg-white/60 backdrop-blur-sm p-5 rounded-xl shadow-md border border-transparent hover:shadow-xl hover:border-blue-500 hover:-translate-y-1.5 transition-all duration-300"
+    className={`group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl ${theme.hoverBorder}`}
   >
+    {/* Soft glow that appears on hover */}
+    <div
+      className={`pointer-events-none absolute -right-10 -top-10 h-28 w-28 rounded-full opacity-0 blur-2xl transition-opacity duration-300 group-hover:opacity-100 ${theme.glow}`}
+    />
+
     {/* Notification Badge */}
     {notificationCount > 0 && (
-      <div className="absolute top-3 right-3 bg-red-500 text-white w-6 h-6 flex items-center justify-center rounded-full text-xs font-bold ring-2 ring-white animate-pulse">
+      <div className="absolute right-3 top-3 z-10 flex h-6 min-w-[1.5rem] items-center justify-center rounded-full bg-red-500 px-1.5 text-xs font-bold text-white ring-2 ring-white animate-pulse">
         {notificationCount}
       </div>
     )}
 
     {/* Top section: Icon and Title */}
-    <div className="flex items-center space-x-4">
-      <div className="flex-shrink-0 p-3 rounded-full bg-blue-100 text-blue-600 transition-colors duration-300 group-hover:bg-blue-600 group-hover:text-white">
-        <FontAwesomeIcon icon={item.icon} className="h-6 w-6" />
+    <div className="relative flex items-center gap-4">
+      <div
+        className={`flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br text-white shadow-md transition-transform duration-300 group-hover:scale-110 ${theme.iconGradient}`}
+      >
+        <FontAwesomeIcon icon={item.icon} className="h-5 w-5" />
       </div>
-      <h3 className="text-md font-semibold text-slate-800 group-hover:text-blue-600 transition-colors duration-300">
+      <h3 className="text-base font-semibold leading-tight text-slate-800">
         {item.text}
       </h3>
     </div>
 
     {/* Bottom section: Description and Action Arrow */}
-    <div className="mt-4 flex items-end justify-between">
-      <p className="text-xs text-slate-500 pr-4">
+    <div className="relative mt-5 flex items-end justify-between">
+      <p className="pr-4 text-xs leading-relaxed text-slate-500">
         {item.description || "Click to manage"}
       </p>
-      <FontAwesomeIcon
-        icon={faArrowRight}
-        className="h-4 w-4 text-slate-400 opacity-0 group-hover:opacity-100 transform -translate-x-2 group-hover:translate-x-0 transition-all duration-300"
-      />
+      <span
+        className={`flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full transition-all duration-300 group-hover:translate-x-0.5 ${theme.arrowBg} ${theme.arrowText}`}
+      >
+        <FontAwesomeIcon icon={faArrowRight} className="h-3.5 w-3.5" />
+      </span>
     </div>
   </Link>
 );
 
 // --- Skeleton Loader Component ---
 const SkeletonCard = () => (
-  // CHANGED: Added bg-white/60 and backdrop-blur-sm to match the card style
-  <div className="bg-white/60 backdrop-blur-sm p-5 rounded-xl shadow-md border border-slate-200 animate-pulse">
-    <div className="flex items-center space-x-4">
-      <div className="h-12 w-12 rounded-full bg-slate-200"></div>
+  <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm animate-pulse">
+    <div className="flex items-center gap-4">
+      <div className="h-12 w-12 rounded-xl bg-slate-200"></div>
       <div className="h-4 w-2/3 rounded bg-slate-200"></div>
     </div>
     <div className="mt-6">
       <div className="h-3 w-full rounded bg-slate-200"></div>
-      <div className="h-3 w-1/2 mt-2 rounded bg-slate-200"></div>
+      <div className="mt-2 h-3 w-1/2 rounded bg-slate-200"></div>
     </div>
   </div>
 );
 
 // --- Section Component for Grouping ---
-const DashboardSection = ({ title, children }) => (
-  // CHANGED: Increased bottom margin from mb-12 to mb-16 for more vertical space
-  <section className="mb-16">
-    <h2 className="text-xl font-semibold text-slate-700 mb-5 pb-3 border-b border-slate-300/70">
-      {title}
-    </h2>
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3  gap-6">
+const DashboardSection = ({ title, theme, children }) => (
+  <section className="mb-12">
+    <div className="mb-6 flex items-center gap-3">
+      <span
+        className={`h-7 w-1.5 rounded-full bg-gradient-to-b ${theme.bar}`}
+      />
+      <h2 className="text-lg font-bold uppercase tracking-wide text-slate-700">
+        {title}
+      </h2>
+    </div>
+    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
       {children}
     </div>
   </section>
@@ -305,40 +351,59 @@ function Dashboard() {
     ? "Oversee and manage all system-wide operations."
     : `Welcome back! Manage your branch activities from here.`;
 
-  // --- Render Logic (This is where the main layout changes are) ---
+  // --- Render Logic ---
   return (
-    // CHANGED: This outer div now sets the background color for the whole page.
-    <div className="w-full min-h-screen bg-slate-100">
-      {/* CHANGED: This new inner div centers the content, sets a max-width, and adds responsive padding */}
-      <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-12 py-8 md:py-12">
-        {/* --- Header --- */}
-        <header className="mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold text-slate-900 tracking-tight">
-            {dashboardTitle}
-          </h1>
-          <p className="mt-3 text-lg text-slate-600">{dashboardSubtitle}</p>
+    <div className="w-full min-h-screen bg-gradient-to-b from-slate-50 to-slate-100">
+      <div className="w-full px-4 sm:px-6 lg:px-10 py-8 md:py-12">
+        {/* --- Hero Header --- */}
+        <header className="relative mb-12 overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-900 p-8 shadow-xl md:p-10">
+          {/* Decorative glows */}
+          <div className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-indigo-500/20 blur-3xl" />
+          <div className="pointer-events-none absolute -bottom-20 left-10 h-48 w-48 rounded-full bg-blue-500/20 blur-3xl" />
+
+          <div className="relative">
+            <span className="inline-flex items-center rounded-full bg-white/10 px-3 py-1 text-xs font-medium uppercase tracking-wider text-indigo-200 ring-1 ring-inset ring-white/20">
+              {isSuperAdmin ? "Super Admin" : "Branch Admin"}
+            </span>
+            <h1 className="mt-4 text-3xl font-bold tracking-tight text-white md:text-4xl lg:text-5xl">
+              {dashboardTitle}
+            </h1>
+            <p className="mt-3 max-w-2xl text-base text-slate-300 md:text-lg">
+              {dashboardSubtitle}
+            </p>
+          </div>
         </header>
 
         {/* --- Main Dashboard Sections --- */}
         <main>
           {isLoading ? (
-            <DashboardSection title="Loading Dashboard...">
+            <DashboardSection title="Loading Dashboard..." theme={cardThemes[0]}>
               {Array.from({ length: 8 }).map((_, i) => (
                 <SkeletonCard key={i} />
               ))}
             </DashboardSection>
           ) : (
-            Object.entries(dashboardConfig).map(([sectionTitle, items]) => (
-              <DashboardSection key={sectionTitle} title={sectionTitle}>
-                {items.map((item, index) => (
-                  <DashboardCard
-                    key={index}
-                    item={item}
-                    notificationCount={item.isNotification ? admissionCount : 0}
-                  />
-                ))}
-              </DashboardSection>
-            ))
+            Object.entries(dashboardConfig).map(([sectionTitle, items], idx) => {
+              const theme = cardThemes[idx % cardThemes.length];
+              return (
+                <DashboardSection
+                  key={sectionTitle}
+                  title={sectionTitle}
+                  theme={theme}
+                >
+                  {items.map((item, index) => (
+                    <DashboardCard
+                      key={index}
+                      item={item}
+                      theme={theme}
+                      notificationCount={
+                        item.isNotification ? admissionCount : 0
+                      }
+                    />
+                  ))}
+                </DashboardSection>
+              );
+            })
           )}
         </main>
       </div>

@@ -1,170 +1,198 @@
 import {
-  faArrowRightFromBracket, // A more intuitive icon for logout
+  faAward,
   faBars,
   faBell,
-  faBookOpen,
-  faBookOpenReader,
-  faBuildingCircleArrowRight,
-  faClose,
-  faHome,
-  faMarker,
-  faMessage,
-  faPersonChalkboard,
-  faRecycle,
+  faChalkboardUser,
+  faEnvelope,
+  faGaugeHigh,
+  faGraduationCap,
+  faPenToSquare,
+  faRightFromBracket,
+  faSchool,
   faUser,
-  faUserCheck
+  faUserGraduate,
+  faXmark,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useContext, useState } from "react";
 import { Link, NavLink } from "react-router-dom";
-import { UserAuthContext } from "./../context/userContext"; // Assuming path is correct
+import { UserAuthContext } from "./../context/userContext";
 
-// --- Helper Components for a Cleaner Structure ---
-
-// A dedicated Logo component for reusability
-const Logo = () => (
-  <Link to="/" className="flex items-center gap-2 px-4">
- 
-    <h1 className="text-xl font-bold text-slate-800">MAHDIYYAH Portal</h1>
+// --- Brand logo: gradient mark + wordmark ---
+const Logo = ({ dark = true }) => (
+  <Link to="/" className="flex items-center gap-3">
+    <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 shadow-lg shadow-indigo-900/30">
+      <FontAwesomeIcon icon={faGraduationCap} className="h-5 w-5 text-white" />
+    </span>
+    <div className="leading-tight">
+      <h1
+        className={`text-base font-bold tracking-tight ${
+          dark ? "text-white" : "text-slate-800"
+        }`}
+      >
+        MAHDIYYAH
+      </h1>
+      <p className={`text-[11px] ${dark ? "text-slate-400" : "text-slate-500"}`}>
+        Portal
+      </p>
+    </div>
   </Link>
 );
 
-// A dedicated NavItem component for cleaner mapping and styling
+// --- Single navigation item with gradient active state ---
 const NavItem = ({ nav, onClick }) => (
   <NavLink
     to={nav.route}
     onClick={onClick}
+    end={nav.route === "/"}
     className={({ isActive }) =>
-      `flex items-center gap-4 p-3 rounded-lg transition-all duration-200 ease-in-out ${
+      `group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 ${
         isActive
-          ? "bg-indigo-600 text-white shadow-lg"
-          : "text-slate-600 hover:bg-indigo-100 hover:text-indigo-600 hover:translate-x-1"
+          ? "bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-lg shadow-indigo-900/40"
+          : "text-slate-400 hover:bg-white/5 hover:text-white"
       }`
     }
   >
-    <FontAwesomeIcon icon={nav.icon} className="w-5 h-5" />
-    <span className="font-medium">{nav.name}</span>
+    {({ isActive }) => (
+      <>
+        <span
+          className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-colors ${
+            isActive
+              ? "bg-white/20 text-white"
+              : "bg-white/5 text-slate-400 group-hover:text-white"
+          }`}
+        >
+          <FontAwesomeIcon icon={nav.icon} className="h-4 w-4" />
+        </span>
+        <span>{nav.name}</span>
+      </>
+    )}
   </NavLink>
 );
 
-// A dedicated User Profile component for the bottom section
+// --- Bottom user card ---
 const UserProfile = ({ authData, onLogout }) => (
-  <div className="mt-auto pt-4 border-t border-slate-200">
-    <div className="flex items-center justify-between p-2 rounded-lg hover:bg-slate-200">
-      <Link to="/profile" className="flex items-center gap-3">
-        {/* Placeholder for a user avatar */}
-        <div className="w-10 h-10 rounded-full bg-indigo-200 flex items-center justify-center">
-          <FontAwesomeIcon icon={faUser} className="text-indigo-600" />
+  <div className="mt-auto pt-4">
+    <div className="flex items-center gap-3 rounded-2xl bg-white/5 p-3 ring-1 ring-white/10">
+      <Link to="/profile" className="flex min-w-0 flex-1 items-center gap-3">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-sm font-bold text-white">
+          {authData.username?.charAt(0)?.toUpperCase() || (
+            <FontAwesomeIcon icon={faUser} />
+          )}
         </div>
-        <div>
-          <p className="font-semibold text-sm text-slate-800">
+        <div className="min-w-0">
+          <p className="truncate text-sm font-semibold text-white">
             {authData.username}
           </p>
-          <p className="text-xs text-slate-500 capitalize">{authData.role}</p>
+          <p className="truncate text-xs capitalize text-slate-400">
+            {authData.role}
+          </p>
         </div>
       </Link>
       <button
         onClick={onLogout}
         title="Logout"
-        className="p-2 rounded-full text-slate-500 hover:bg-red-100 hover:text-red-600 transition-colors"
+        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-red-500/20 hover:text-red-400"
       >
-        <FontAwesomeIcon icon={faArrowRightFromBracket} />
+        <FontAwesomeIcon icon={faRightFromBracket} />
       </button>
     </div>
   </div>
 );
 
-
 function Sidebar() {
   const { authData, logout } = useContext(UserAuthContext);
   const [openSidebar, setOpenSidebar] = useState(false);
 
-  // --- Navigation Data (Unchanged) ---
+  // --- Navigation Data ---
   const adminNavigations = [
-    { name: "Dashboard", route: "/", icon: faHome },
-    { name: "Teachers", route: "/all-teachers", icon: faPersonChalkboard },
-    { name: "Mark Entry", route: "/mark-entry", icon: faBookOpen },
-    { name: "My Messages", route: "/my-messages", icon: faMessage },
+    { name: "Dashboard", route: "/", icon: faGaugeHigh },
+    { name: "Teachers", route: "/all-teachers", icon: faChalkboardUser },
+    { name: "Mark Entry", route: "/mark-entry", icon: faPenToSquare },
+    { name: "My Messages", route: "/my-messages", icon: faEnvelope },
   ];
 
   const superAdminNavigations = [
-    { name: "Dashboard", route: "/", icon: faHome },
-    { name: "Study Centers", route: "/study-centres", icon: faBuildingCircleArrowRight },
-    { name: "Students", route: "/all-centre-students", icon: faBookOpenReader },
-    { name: "Teachers", route: "/all-MAHDIYYAH-teachers", icon: faUserCheck },
+    { name: "Dashboard", route: "/", icon: faGaugeHigh },
+    { name: "Study Centers", route: "/study-centres", icon: faSchool },
+    { name: "Students", route: "/all-centre-students", icon: faUserGraduate },
+    { name: "Teachers", route: "/all-MAHDIYYAH-teachers", icon: faChalkboardUser },
     { name: "Notifications", route: "/create-notification", icon: faBell },
-    { name: "Messages", route: "/create-messages", icon: faMessage },
-    { name: "Results", route: "/result-section", icon: faMarker },
+    { name: "Messages", route: "/create-messages", icon: faEnvelope },
+    { name: "Results", route: "/result-section", icon: faAward },
   ];
 
-  const navigations = authData?.role === "admin" ? adminNavigations :
-                      authData?.role === "superAdmin" ? superAdminNavigations : [];
+  const navigations =
+    authData?.role === "admin"
+      ? adminNavigations
+      : authData?.role === "superAdmin"
+      ? superAdminNavigations
+      : [];
 
   const handleLinkClick = () => {
-    // Close sidebar on mobile link click
-    if (openSidebar) {
-      setOpenSidebar(false);
-    }
+    if (openSidebar) setOpenSidebar(false);
   };
 
   return (
     <>
       {/* --- Mobile Header --- */}
-      <div className="lg:hidden flex justify-between items-center p-4 bg-slate-50 border-b border-slate-200 sticky top-0 z-30">
-        <Logo />
+      <div className="sticky top-0 z-30 flex items-center justify-between border-b border-slate-200 bg-white px-4 py-3 lg:hidden">
+        <Logo dark={false} />
         <button
           onClick={() => setOpenSidebar(true)}
-          className="text-slate-600"
+          className="flex h-10 w-10 items-center justify-center rounded-lg text-slate-600 hover:bg-slate-100"
           aria-label="Open sidebar"
         >
-          <FontAwesomeIcon icon={faBars} className="h-6 w-6" />
+          <FontAwesomeIcon icon={faBars} className="h-5 w-5" />
         </button>
       </div>
 
-      {/* --- Sidebar Overlay for Mobile --- */}
+      {/* --- Mobile Overlay --- */}
       {openSidebar && (
         <div
           onClick={() => setOpenSidebar(false)}
-          className="fixed inset-0 bg-black/60 z-40 lg:hidden"
+          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden"
         />
       )}
 
       {/* --- Main Sidebar --- */}
-      {/* Use <aside> for semantic meaning. Notice the softer bg-slate-50 */}
       <aside
-        className={`fixed top-0 left-0 h-full bg-slate-50 border-r border-slate-200 z-50
-                   w-72 transform transition-transform duration-300 ease-in-out
-                   lg:translate-x-0 ${
-                     openSidebar ? "translate-x-0" : "-translate-x-full"
-                   } flex flex-col`}
+        className={`fixed left-0 top-0 z-50 flex h-full w-72 transform flex-col bg-slate-900 transition-transform duration-300 ease-in-out lg:translate-x-0 ${
+          openSidebar ? "translate-x-0" : "-translate-x-full"
+        }`}
       >
-        <div className="flex flex-col h-full p-5">
-          {/* Sidebar Header */}
-          <div className="flex items-center justify-between mb-8">
+        <div className="flex h-full flex-col p-5">
+          {/* Header */}
+          <div className="mb-8 flex items-center justify-between">
             <Logo />
             <button
               onClick={() => setOpenSidebar(false)}
-              className="lg:hidden text-slate-500 hover:text-slate-800"
+              className="flex h-9 w-9 items-center justify-center rounded-lg text-slate-400 hover:bg-white/5 hover:text-white lg:hidden"
               aria-label="Close sidebar"
             >
-              <FontAwesomeIcon icon={faClose} className="h-6 w-6" />
+              <FontAwesomeIcon icon={faXmark} className="h-5 w-5" />
             </button>
           </div>
 
-          {/* Navigation Links - much cleaner now! */}
-          <nav className="flex-grow flex flex-col gap-y-2">
+          {/* Section label */}
+          <p className="mb-3 px-3 text-[11px] font-semibold uppercase tracking-widest text-slate-500">
+            Menu
+          </p>
+
+          {/* Navigation */}
+          <nav className="flex flex-grow flex-col gap-1.5">
             {navigations.map((nav, index) => (
               <NavItem key={index} nav={nav} onClick={handleLinkClick} />
             ))}
           </nav>
 
-          {/* User/Auth Section at the bottom */}
+          {/* Auth section */}
           {authData ? (
             <UserProfile authData={authData} onLogout={logout} />
           ) : (
             <Link
               to="/login"
-              className="flex items-center justify-center p-3 mt-auto rounded-lg bg-indigo-600 text-white font-semibold hover:bg-indigo-700"
+              className="mt-auto flex items-center justify-center rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 p-3 font-semibold text-white shadow-lg shadow-indigo-900/40 transition hover:from-indigo-600 hover:to-purple-700"
             >
               <span>Login</span>
             </Link>

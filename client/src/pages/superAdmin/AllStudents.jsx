@@ -1,3 +1,5 @@
+import { faFileImport } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Axios from "../../Axios";
@@ -158,29 +160,32 @@ function AllStudents() {
   ];
 
   return (
-    <div className="bg-slate-50 p-4 sm:p-6 lg:p-8">
-      <div>
-        {/* --- Header --- */}
-        <header className="mb-8 ml-6 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2">
-          <div>
-            <h1 className="text-3xl font-bold text-slate-800">All Students</h1>
-            <p className="text-slate-500 mt-1">
-              Search, filter, import, and manage all student records.
-            </p>
-          </div>
-          <div>
+    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100">
+      <div className="mx-auto max-w-screen-2xl px-4 py-8 sm:px-6 lg:px-10 lg:py-12">
+        {/* --- Hero Header --- */}
+        <header className="relative mb-8 overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-900 p-8 shadow-xl">
+          <div className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-indigo-500/20 blur-3xl" />
+          <div className="pointer-events-none absolute -bottom-24 left-10 h-48 w-48 rounded-full bg-blue-500/20 blur-3xl" />
+
+          <div className="relative flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight text-white md:text-4xl">
+                All Students
+              </h1>
+              <p className="mt-1 text-slate-300">
+                Search, filter, import, and manage all student records.
+              </p>
+            </div>
             <button
               type="button"
-              className={`inline-flex items-center px-4 py-2 rounded-md font-semibold text-sm transition-colors shadow-sm border ${
+              className={`inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold shadow-lg transition ${
                 showBulkImport
-                  ? "bg-green-50 border-green-400 text-green-700"
-                  : "bg-white border-slate-300 text-slate-700 hover:bg-green-100"
+                  ? "bg-emerald-500 text-white shadow-emerald-900/30 hover:bg-emerald-600"
+                  : "bg-white/10 text-white ring-1 ring-inset ring-white/20 backdrop-blur hover:bg-white/20"
               }`}
               onClick={() => setShowBulkImport((v) => !v)}
             >
-              <span className="material-icons mr-2" aria-hidden>
-                upload_file
-              </span>
+              <FontAwesomeIcon icon={faFileImport} />
               {showBulkImport ? "Hide Bulk Import" : "Bulk Import Students"}
             </button>
           </div>
@@ -188,7 +193,7 @@ function AllStudents() {
 
         {/* --- Bulk Import Toggle Section --- */}
         {showBulkImport && (
-          <div className="mb-5 bg-white border border-green-200 rounded-lg shadow px-6 py-5">
+          <div className="mb-5 rounded-2xl border border-emerald-200 bg-white px-6 py-5 shadow-sm">
             <BulkImportStudents classId={filters.classId} onSuccess={fetchStudents} />
             <div className="text-xs text-green-700 mt-3">
               <strong>Instructions:</strong>
@@ -219,7 +224,7 @@ function AllStudents() {
         />
 
         {/* --- Table Section --- */}
-        <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+        <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm">
           <StudentsTable
             loading={loading}
             columns={columns}

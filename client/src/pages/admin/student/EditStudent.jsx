@@ -1,3 +1,5 @@
+import { faPenToSquare } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom"; // Use useNavigate
 import { toast } from "react-toastify";
@@ -21,7 +23,7 @@ const FormField = ({ id, label, type = "text", ...props }) => (
         id={id}
         name={id}
         type={type}
-        className="block w-full rounded-md border-0 py-2.5 px-3 text-slate-900 shadow-sm ring-1 ring-inset ring-slate-300 placeholder:text-slate-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6 transition"
+        className="block w-full rounded-md border-0 py-2.5 px-3 text-slate-900 shadow-sm ring-1 ring-inset ring-slate-300 placeholder:text-slate-400 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6 transition"
         {...props}
       />
     </div>
@@ -43,7 +45,7 @@ const SelectField = ({ id, label, value, onChange, options, placeholder }) => (
         name={id}
         value={value}
         onChange={onChange}
-        className="block w-full appearance-none rounded-md border-0 py-2.5 pl-3 pr-10 text-slate-900 ring-1 ring-inset ring-slate-300 placeholder:text-slate-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6 transition"
+        className="block w-full appearance-none rounded-md border-0 py-2.5 pl-3 pr-10 text-slate-900 ring-1 ring-inset ring-slate-300 placeholder:text-slate-400 focus:ring-2 focus:ring-inset focus:ring-indigo-500 sm:text-sm sm:leading-6 transition"
       >
         <option value="" disabled>
           {placeholder || "Select an option..."}
@@ -156,20 +158,31 @@ function EditStudent() {
   }));
 
   return (
-    <div className="min-h-screen bg-slate-50 p-4 sm:p-6 lg:p-8">
-      <div className="max-w-4xl mx-auto bg-white shadow-lg rounded-xl">
-        <form onSubmit={handleSubmit}>
-          {/* Form Header */}
-          <div className="p-6 sm:p-8 border-b border-slate-200">
-            <h1 className="text-2xl font-bold text-slate-800">
-              Edit Student Information
-            </h1>
-            <p className="mt-1 text-sm text-slate-500">
-              Update the details for {formData.studentName || "the student"}.
-            </p>
+    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100 p-4 sm:p-6 lg:p-10">
+      <div className="mx-auto max-w-4xl">
+        {/* Hero Header */}
+        <header className="relative mb-6 overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-900 p-8 shadow-xl">
+          <div className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-indigo-500/20 blur-3xl" />
+          <div className="relative flex items-center gap-4">
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/10 ring-1 ring-inset ring-white/20">
+              <FontAwesomeIcon icon={faPenToSquare} className="text-2xl text-white" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight text-white md:text-4xl">
+                Edit Student
+              </h1>
+              <p className="mt-1 text-slate-300">
+                Update the details for {formData.studentName || "the student"}.
+              </p>
+            </div>
           </div>
+        </header>
 
-          <div className="p-6 sm:p-8 space-y-8">
+        <form
+          onSubmit={handleSubmit}
+          className="rounded-2xl border border-slate-200/80 bg-white shadow-sm"
+        >
+          <div className="space-y-8 p-6 sm:p-8">
             {/* Section 1: Personal Information */}
             <div className="space-y-6">
               <h2 className="text-lg font-semibold text-slate-700 border-b border-slate-200 pb-3">
@@ -298,11 +311,11 @@ function EditStudent() {
           </div>
 
           {/* Form Actions / Footer */}
-          <div className="px-6 sm:px-8 py-4 bg-slate-50 border-t border-slate-200 rounded-b-xl flex justify-end">
+          <div className="flex justify-end rounded-b-2xl border-t border-slate-200 bg-slate-50 px-6 py-4 sm:px-8">
             <button
               type="submit"
               disabled={loading}
-              className="inline-flex justify-center items-center bg-blue-600 text-white py-2.5 px-6 rounded-lg font-semibold text-sm shadow-sm hover:bg-blue-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 transition-colors duration-150 disabled:bg-slate-400 disabled:cursor-not-allowed"
+              className="inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-indigo-500/25 transition hover:from-indigo-600 hover:to-purple-700 disabled:cursor-not-allowed disabled:opacity-70"
             >
               {loading ? (
                 <>

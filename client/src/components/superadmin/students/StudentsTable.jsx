@@ -1,4 +1,5 @@
 import {
+  faFileExport,
   faSort,
   faSortDown,
   faSortUp,
@@ -61,8 +62,8 @@ function StudentsTable({
 
   return (
     <>
-      <div className="p-4 flex justify-between items-center border-b border-slate-200">
-        <p className="text-sm font-semibold text-slate-600">
+      <div className="flex items-center justify-between border-b border-slate-200 p-4">
+        <p className="text-sm font-medium text-slate-500">
           Showing{" "}
           <span className="font-bold text-slate-800">
             {paginatedStudents.length}
@@ -70,14 +71,16 @@ function StudentsTable({
           of{" "}
           <span className="font-bold text-slate-800">
             {sortedStudents.length}
-          </span>
+          </span>{" "}
+          students
         </p>
         {sortedStudents.length > 0 && (
           <button
-            className="px-4 py-2 bg-indigo-600 text-white text-sm font-semibold rounded-md hover:bg-indigo-700 transition-colors flex items-center gap-2"
+            className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 px-4 py-2 text-sm font-semibold text-white shadow-md shadow-indigo-500/20 transition hover:from-indigo-600 hover:to-purple-700"
             onClick={handleExport}
             type="button"
           >
+            <FontAwesomeIcon icon={faFileExport} />
             Export to Excel
           </button>
         )}
@@ -87,18 +90,18 @@ function StudentsTable({
         {loading ? (
           <TableSkeleton rows={10} cols={6} />
         ) : (
-          <table className="w-full text-sm text-left">
-            <thead className="bg-slate-100 text-slate-600 uppercase">
+          <table className="w-full text-left text-sm">
+            <thead className="border-b border-slate-200 bg-slate-50/80">
               <tr>
                 {columns.map((col) => (
                   <th
                     key={col.key}
                     scope="col"
-                    className={`px-6 py-3 ${col.class}`}
+                    className={`px-6 py-3.5 text-xs font-semibold uppercase tracking-wide text-slate-500 ${col.class}`}
                   >
                     <div
                       onClick={() => requestSort(col.key)}
-                      className="flex items-center gap-2 cursor-pointer select-none"
+                      className="flex cursor-pointer select-none items-center gap-2 hover:text-indigo-600"
                     >
                       {col.label}
                       <FontAwesomeIcon
@@ -110,22 +113,33 @@ function StudentsTable({
                 ))}
               </tr>
             </thead>
-            <tbody>
+            <tbody className="divide-y divide-slate-100">
               {paginatedStudents.length > 0 ? (
                 paginatedStudents.map((student) => (
                   <tr
                     key={student._id}
                     onClick={() => navigate(`/profile/${student._id}`)}
-                    className="bg-white border-b border-slate-200 hover:bg-slate-50 cursor-pointer transition-colors"
+                    className="group cursor-pointer bg-white transition-colors hover:bg-indigo-50/40"
                   >
-                    <td className="px-6 py-4 font-medium text-slate-900">
-                      {student.registerNo}
+                    <td className="px-6 py-3.5">
+                      <span className="rounded-md bg-slate-100 px-2 py-1 font-mono text-xs font-medium text-slate-600">
+                        {student.registerNo}
+                      </span>
                     </td>
-                    <td className="px-6 py-4">{student.studentName}</td>
-                    <td className="px-6 py-4">
+                    <td className="px-6 py-3.5">
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 text-xs font-bold text-white">
+                          {student.studentName?.charAt(0)?.toUpperCase() || "?"}
+                        </div>
+                        <span className="font-semibold text-slate-800 group-hover:text-indigo-600">
+                          {student.studentName}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-3.5 text-slate-600">
                       {student.class?.className || "N/A"}
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-6 py-3.5 text-slate-600">
                       {student.branch?.studyCentreName || "N/A"}
                     </td>
                   </tr>
@@ -134,7 +148,7 @@ function StudentsTable({
                 <tr>
                   <td
                     colSpan={columns.length}
-                    className="text-center py-10 text-slate-500"
+                    className="py-12 text-center text-slate-500"
                   >
                     No students found matching your criteria.
                   </td>
@@ -147,21 +161,22 @@ function StudentsTable({
 
       {/* Pagination */}
       {totalPages > 1 && !loading && (
-        <div className="p-4 flex justify-between items-center border-t border-slate-200">
+        <div className="flex items-center justify-between border-t border-slate-200 p-4">
           <button
             onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
             disabled={currentPage === 1}
-            className="px-4 py-2 text-sm font-medium border border-slate-300 rounded-md disabled:opacity-50"
+            className="rounded-xl border border-slate-300 px-4 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-50 disabled:opacity-50"
           >
             Previous
           </button>
           <span className="text-sm text-slate-600">
-            Page {currentPage} of {totalPages}
+            Page <span className="font-semibold text-slate-800">{currentPage}</span> of{" "}
+            {totalPages}
           </span>
           <button
             onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
             disabled={currentPage === totalPages}
-            className="px-4 py-2 text-sm font-medium border border-slate-300 rounded-md disabled:opacity-50"
+            className="rounded-xl border border-slate-300 px-4 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-50 disabled:opacity-50"
           >
             Next
           </button>

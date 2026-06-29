@@ -399,19 +399,20 @@ function StudentProfile() {
         type={modalState.type === "verify" ? "success" : "danger"}
       />
 
-      <div className="w-full min-h-screen bg-slate-50 p-4 md:p-8">
+      <div className="w-full min-h-screen bg-gradient-to-b from-slate-50 to-slate-100 p-4 md:p-8">
         {/* --- Profile Card --- */}
-        <div className="max-w-4xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden">
+        <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-lg overflow-hidden border border-slate-200/80">
           {/* Card Header */}
-          <div className="bg-slate-50 p-6 md:p-8 border-b border-slate-200">
-            <div className="flex flex-col sm:flex-row items-center gap-6">
+          <div className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-900 p-6 md:p-8">
+            <div className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-indigo-500/20 blur-3xl" />
+            <div className="relative flex flex-col sm:flex-row items-center gap-6">
               {/* --- Image Upload and Avatar --- */}
               <div className="relative group">
                 {student.imageUrl || previewUrl ? (
                   <img
                     src={previewUrl || student.imageUrl}
                     alt={student.studentName}
-                    className="w-24 h-24 object-cover rounded-full border-4 border-white shadow-md"
+                    className="w-24 h-24 object-cover rounded-full border-4 border-white/80 shadow-md"
                   />
                 ) : (
                   <ProfileAvatar name={student.studentName} />
@@ -420,7 +421,7 @@ function StudentProfile() {
                 <button
                   type="button"
                   onClick={triggerFileInput}
-                  className="absolute bottom-0 right-0 bg-indigo-600 text-white p-2 rounded-full shadow-lg opacity-80 hover:opacity-100 transition group-hover:opacity-100"
+                  className="absolute bottom-0 right-0 bg-indigo-600 text-white p-2 rounded-full shadow-lg ring-2 ring-white/80 opacity-90 hover:opacity-100 transition group-hover:opacity-100"
                   disabled={uploading}
                   title="Change Profile Photo"
                 >
@@ -441,18 +442,18 @@ function StudentProfile() {
                 )}
               </div>
               <div className="text-center sm:text-left">
-                <h1 className="text-3xl font-extrabold text-slate-800">
+                <h1 className="text-3xl font-extrabold text-white">
                   {student.studentName}
                 </h1>
-                <p className="text-md text-slate-500 mt-1">
+                <p className="text-md text-slate-300 mt-1">
                   Reg. No: {student.registerNo}
                 </p>
                 {student.verified ? (
-                  <span className="mt-2 inline-flex items-center gap-2 px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-semibold">
+                  <span className="mt-2 inline-flex items-center gap-2 px-3 py-1 bg-emerald-400/20 text-emerald-300 ring-1 ring-inset ring-emerald-400/30 rounded-full text-sm font-semibold">
                     <FontAwesomeIcon icon={faCheckCircle} /> Verified
                   </span>
                 ) : (
-                  <span className="mt-2 inline-flex items-center gap-2 px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-sm font-semibold">
+                  <span className="mt-2 inline-flex items-center gap-2 px-3 py-1 bg-amber-400/20 text-amber-300 ring-1 ring-inset ring-amber-400/30 rounded-full text-sm font-semibold">
                     <FontAwesomeIcon icon={faExclamationTriangle} /> Needs
                     Verification
                   </span>
@@ -661,8 +662,8 @@ function StudentProfile() {
           </div>
 
           {/* Card Footer - Actions */}
-          <div className="bg-slate-50 p-6 flex flex-col sm:flex-row justify-between items-center gap-4">
-            <div className="flex gap-3">
+          <div className="flex flex-col gap-4 border-t border-slate-200 bg-slate-50 p-6 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex flex-wrap gap-3">
               {!student.verified && (
                 <button
                   onClick={() =>
@@ -672,53 +673,52 @@ function StudentProfile() {
                       studentId: student._id,
                     })
                   }
-                  className="px-5 py-2.5 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition shadow-sm disabled:opacity-50"
+                  className="inline-flex items-center gap-2 rounded-xl bg-emerald-500 px-5 py-2.5 font-semibold text-white shadow-md shadow-emerald-500/20 transition hover:bg-emerald-600 disabled:opacity-50"
                   disabled={loading}
                 >
-                  Verify Admission
+                  <FontAwesomeIcon icon={faCheckCircle} /> Verify Admission
                 </button>
               )}
               {authData?.role === "superAdmin" && (
                 <Link
                   to={`/transfer-student/${student._id}`}
-                  className="px-5 py-2.5 bg-white border border-slate-300 text-slate-700 font-semibold rounded-lg hover:bg-slate-100 transition shadow-sm"
+                  className="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-5 py-2.5 font-semibold text-slate-700 shadow-sm transition hover:bg-slate-100"
                 >
-                  <FontAwesomeIcon icon={faArrowRight} className="mr-2" />{" "}
-                  Transfer
+                  <FontAwesomeIcon icon={faArrowRight} /> Transfer
                 </Link>
               )}
               {authData?.role === "superAdmin" && (
                 <Link
                   to={`/edit-student/${student._id}`}
-                  className="px-5 py-2.5 bg-white border border-slate-300 text-slate-700 font-semibold rounded-lg hover:bg-slate-100 transition shadow-sm"
+                  className="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-5 py-2.5 font-semibold text-slate-700 shadow-sm transition hover:bg-slate-100"
                 >
-                  <FontAwesomeIcon icon={faEdit} className="mr-2" /> Edit
+                  <FontAwesomeIcon icon={faEdit} /> Edit
                 </Link>
               )}
             </div>
 
-            <div className="flex gap-3">
+            <div className="flex flex-wrap gap-3">
               <button
                 onClick={() => handleDropOut(student._id)}
-                className="px-5 py-2.5 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 transition shadow-sm disabled:opacity-50"
+                className="inline-flex items-center gap-2 rounded-xl bg-white px-5 py-2.5 font-semibold text-rose-600 shadow-sm ring-1 ring-inset ring-rose-200 transition hover:bg-rose-50 disabled:opacity-50"
                 disabled={loading}
               >
-                <FontAwesomeIcon icon={faUserSlash} className="mr-2" /> Drop Out
+                <FontAwesomeIcon icon={faUserSlash} /> Drop Out
+              </button>
+              <button
+                onClick={() =>
+                  setModalState({
+                    isOpen: true,
+                    type: "delete",
+                    studentId: student._id,
+                  })
+                }
+                className="inline-flex items-center gap-2 rounded-xl bg-rose-600 px-5 py-2.5 font-semibold text-white shadow-md shadow-rose-500/20 transition hover:bg-rose-700 disabled:opacity-50"
+                disabled={loading}
+              >
+                <FontAwesomeIcon icon={faTrash} /> Delete
               </button>
             </div>
-            <button
-              onClick={() =>
-                setModalState({
-                  isOpen: true,
-                  type: "delete",
-                  studentId: student._id,
-                })
-              }
-              className="px-5 py-2.5 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 transition shadow-sm disabled:opacity-50"
-              disabled={loading}
-            >
-              <FontAwesomeIcon icon={faTrash} className="mr-2" /> Delete
-            </button>
           </div>
         </div>
       </div>

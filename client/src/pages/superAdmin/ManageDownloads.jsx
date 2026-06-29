@@ -26,7 +26,7 @@ import {
 import Axios from "../../Axios";
 
 // Keep this in sync with the multer limit in routes/resourceRoute.js
-const MAX_FILE_MB = 50;
+const MAX_FILE_MB = 10;
 
 const getFileIcon = (fileType) => {
   switch ((fileType || "").toLowerCase()) {
@@ -190,6 +190,26 @@ function ManageDownloads() {
     }
   };
 
+  // Fetch the file as a blob and save it with its original name so the
+  // extension is preserved (Cloudinary raw URLs have no extension, which makes
+  // browsers download an unrecognized "special" file type otherwise).
+  const handleDownload = async (url, fileName) => {
+    try {
+      const response = await fetch(url);
+      const blob = await response.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = blobUrl;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(blobUrl);
+    } catch (error) {
+      toast.error("Download failed. Please try again.");
+    }
+  };
+
   const filteredUsers = users.filter((u) => {
     const q = userSearch.toLowerCase();
     return (
@@ -202,8 +222,10 @@ function ManageDownloads() {
   return (
     <div className="min-h-screen bg-slate-50 pb-12">
       {/* Hero header */}
-      <div className="bg-gradient-to-r from-indigo-600 to-blue-600 text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+      <div className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-900 text-white">
+        <div className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-indigo-500/20 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-24 left-10 h-48 w-48 rounded-full bg-blue-500/20 blur-3xl" />
+        <div className="relative max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-10 py-10">
           <div className="flex items-center gap-4">
             <div className="h-14 w-14 rounded-2xl bg-white/15 flex items-center justify-center">
               <FontAwesomeIcon icon={faFolderOpen} className="text-2xl" />
@@ -238,7 +260,7 @@ function ManageDownloads() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-6">
+      <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-10 py-8">
         {/* File limit banner */}
         <div className="flex items-center gap-3 bg-amber-50 border border-amber-200 text-amber-800 rounded-xl px-4 py-3 mb-8 shadow-sm">
           <FontAwesomeIcon icon={faCircleInfo} className="text-amber-500" />
@@ -253,7 +275,9 @@ function ManageDownloads() {
           <div className="lg:col-span-2">
             <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 lg:sticky lg:top-6">
               <h2 className="text-lg font-semibold text-slate-800 mb-5 flex items-center gap-2">
-                <FontAwesomeIcon icon={faCloudArrowUp} className="text-blue-600" />
+                <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 text-white">
+                  <FontAwesomeIcon icon={faCloudArrowUp} className="text-sm" />
+                </span>
                 Upload a New File
               </h2>
               <form onSubmit={handleUpload} className="space-y-5">
@@ -266,7 +290,7 @@ function ManageDownloads() {
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
                     placeholder="e.g., Exam Timetable 2026"
-                    className="block w-full px-3 py-2 bg-white border border-slate-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="block w-full px-3 py-2 bg-white border border-slate-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                   />
                 </div>
 
@@ -279,7 +303,7 @@ function ManageDownloads() {
                   </label>
                   <label
                     htmlFor="resource-file"
-                    className="flex flex-col items-center justify-center w-full px-4 py-6 border-2 border-dashed border-slate-300 rounded-lg cursor-pointer bg-slate-50 hover:bg-slate-100 hover:border-blue-400 transition"
+                    className="flex flex-col items-center justify-center w-full px-4 py-6 border-2 border-dashed border-slate-300 rounded-lg cursor-pointer bg-slate-50 hover:bg-slate-100 hover:border-indigo-400 transition"
                   >
                     <FontAwesomeIcon
                       icon={faCloudArrowUp}
@@ -317,11 +341,11 @@ function ManageDownloads() {
                       onClick={() => setAudience("all")}
                       className={`flex items-center gap-3 p-3 rounded-lg border text-left transition ${
                         audience === "all"
-                          ? "border-blue-500 bg-blue-50 ring-1 ring-blue-500"
+                          ? "border-indigo-500 bg-indigo-50 ring-1 ring-indigo-500"
                           : "border-slate-300 hover:border-slate-400"
                       }`}
                     >
-                      <FontAwesomeIcon icon={faGlobe} className="text-blue-600" />
+                      <FontAwesomeIcon icon={faGlobe} className="text-indigo-600" />
                       <div>
                         <p className="text-sm font-semibold text-slate-800">All Users</p>
                         <p className="text-xs text-slate-500">Every admin</p>
@@ -332,11 +356,11 @@ function ManageDownloads() {
                       onClick={() => setAudience("selected")}
                       className={`flex items-center gap-3 p-3 rounded-lg border text-left transition ${
                         audience === "selected"
-                          ? "border-blue-500 bg-blue-50 ring-1 ring-blue-500"
+                          ? "border-indigo-500 bg-indigo-50 ring-1 ring-indigo-500"
                           : "border-slate-300 hover:border-slate-400"
                       }`}
                     >
-                      <FontAwesomeIcon icon={faUserCheck} className="text-blue-600" />
+                      <FontAwesomeIcon icon={faUserCheck} className="text-indigo-600" />
                       <div>
                         <p className="text-sm font-semibold text-slate-800">Selected</p>
                         <p className="text-xs text-slate-500">Specific admins</p>
@@ -372,7 +396,7 @@ function ManageDownloads() {
                         value={userSearch}
                         onChange={(e) => setUserSearch(e.target.value)}
                         placeholder="Search by name or centre code"
-                        className="w-full pl-9 pr-3 py-2 text-sm border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        className="w-full pl-9 pr-3 py-2 text-sm border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                       />
                     </div>
                     <div className="max-h-56 overflow-y-auto divide-y divide-slate-100 bg-white rounded-md border border-slate-100">
@@ -390,7 +414,7 @@ function ManageDownloads() {
                               type="checkbox"
                               checked={selectedUsers.includes(u._id)}
                               onChange={() => toggleUser(u._id)}
-                              className="h-4 w-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500"
+                              className="h-4 w-4 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500"
                             />
                             <div className="min-w-0">
                               <p className="text-sm font-medium text-slate-800 truncate">
@@ -414,7 +438,7 @@ function ManageDownloads() {
                   <div>
                     <div className="w-full bg-slate-200 rounded-full h-2.5 overflow-hidden">
                       <div
-                        className="bg-blue-600 h-2.5 rounded-full transition-all duration-200"
+                        className="bg-gradient-to-r from-indigo-500 to-purple-600 h-2.5 rounded-full transition-all duration-200"
                         style={{ width: `${uploadProgress}%` }}
                       />
                     </div>
@@ -429,7 +453,7 @@ function ManageDownloads() {
                 <button
                   type="submit"
                   disabled={isUploading}
-                  className="w-full inline-flex justify-center items-center gap-2 py-2.5 px-4 text-sm font-semibold rounded-lg shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-blue-400 disabled:cursor-not-allowed transition"
+                  className="w-full inline-flex justify-center items-center gap-2 py-2.5 px-4 text-sm font-semibold rounded-lg shadow-md shadow-indigo-500/20 text-white bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-70 disabled:cursor-not-allowed transition"
                 >
                   <FontAwesomeIcon icon={isUploading ? faSpinner : faUpload} spin={isUploading} />
                   {isUploading ? "Uploading..." : "Upload File"}
@@ -446,7 +470,7 @@ function ManageDownloads() {
             </h2>
             {isLoading ? (
               <div className="text-center p-10">
-                <FontAwesomeIcon icon={faSpinner} spin size="2x" className="text-blue-500" />
+                <FontAwesomeIcon icon={faSpinner} spin size="2x" className="text-indigo-500" />
                 <p className="mt-2 text-slate-600">Loading files...</p>
               </div>
             ) : resources.length === 0 ? (
@@ -463,7 +487,7 @@ function ManageDownloads() {
                     <div
                       key={r._id}
                       onClick={() => setDetailResource(r)}
-                      className="group bg-white rounded-2xl border border-slate-100 shadow-sm p-5 flex flex-col justify-between hover:shadow-md hover:border-blue-200 transition cursor-pointer"
+                      className="group bg-white rounded-2xl border border-slate-100 shadow-sm p-5 flex flex-col justify-between hover:shadow-md hover:border-indigo-200 transition cursor-pointer"
                     >
                       <div>
                         <div className="flex items-center justify-between mb-4">
@@ -515,16 +539,17 @@ function ManageDownloads() {
                           </div>
                         </div>
                       </div>
-                      <a
-                        href={r.fileUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        onClick={(e) => e.stopPropagation()}
-                        className="w-full inline-flex items-center justify-center gap-2 py-2 px-4 text-sm font-medium rounded-lg text-blue-700 bg-blue-50 hover:bg-blue-100 transition"
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDownload(r.fileUrl, r.fileName || r.title);
+                        }}
+                        className="w-full inline-flex items-center justify-center gap-2 py-2 px-4 text-sm font-medium rounded-lg text-indigo-700 bg-indigo-50 hover:bg-indigo-100 transition"
                       >
                         <FontAwesomeIcon icon={faDownload} />
                         Download
-                      </a>
+                      </button>
                     </div>
                   );
                 })}
@@ -633,15 +658,19 @@ function ManageDownloads() {
 
             {/* Modal footer */}
             <div className="p-5 border-t border-slate-100 flex gap-3">
-              <a
-                href={detailResource.fileUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex-1 inline-flex items-center justify-center gap-2 py-2.5 px-4 text-sm font-semibold rounded-lg text-white bg-blue-600 hover:bg-blue-700 transition"
+              <button
+                type="button"
+                onClick={() =>
+                  handleDownload(
+                    detailResource.fileUrl,
+                    detailResource.fileName || detailResource.title
+                  )
+                }
+                className="flex-1 inline-flex items-center justify-center gap-2 py-2.5 px-4 text-sm font-semibold rounded-lg text-white bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 shadow-md shadow-indigo-500/20 transition"
               >
                 <FontAwesomeIcon icon={faDownload} />
                 Download
-              </a>
+              </button>
               <button
                 onClick={() => handleDelete(detailResource._id)}
                 disabled={deletingId === detailResource._id}

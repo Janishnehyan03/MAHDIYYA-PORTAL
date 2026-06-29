@@ -1,7 +1,12 @@
+import { faSpinner, faUserPlus } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useContext, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import Axios from "../../../Axios";
 import { UserAuthContext } from "../../../context/userContext";
+
+const inputClass =
+  "block w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-800 shadow-sm transition placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/40";
 
 const AddStudent = () => {
   const { authData } = useContext(UserAuthContext);
@@ -186,67 +191,102 @@ const AddStudent = () => {
   }, []);
 
   return (
-    <div className="max-w-3xl mx-auto mt-10 bg-white p-8 rounded-2xl shadow-xl border border-gray-100">
-      <h1 className="text-3xl font-bold text-blue-700 mb-8 text-center tracking-wide">Add New Student</h1>
-      <form onSubmit={handleSubmit} autoComplete="off">
-        {/* Select Class */}
-        <div className="mb-8">
-          <label htmlFor="class" className="block text-sm font-semibold text-blue-800 mb-2">
-            Select Class
-          </label>
-          <select
-            id="class"
-            name="class"
-            value={formData.class}
-            onChange={onChange}
-            required
-            className="block w-full px-4 py-2 border border-gray-300 bg-white text-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 sm:text-base"
-          >
-            <option value="" disabled>
-              Select a class
-            </option>
-            {classes.map((item) => (
-              <option value={item._id} key={item._id}>
-                {item.className}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {/* Dynamic Form Fields in Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
-          {forms.map((form, key) => (
-            <div key={key}>
-              <label htmlFor={form.name} className="block text-sm font-semibold text-blue-800 mb-1">
-                {form.labelName}
-              </label>
-              <input
-                id={form.name}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-400 sm:text-base"
-                type={form.type}
-                onChange={onChange}
-                required={form.required}
-                placeholder={form.placeholder}
-                name={form.name}
-                value={form.value}
-                autoComplete="off"
-              />
+    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100">
+      <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-10 lg:py-12">
+        {/* Hero Header */}
+        <header className="relative mb-8 overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-900 p-8 shadow-xl">
+          <div className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-indigo-500/20 blur-3xl" />
+          <div className="relative flex items-center gap-4">
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/10 ring-1 ring-inset ring-white/20">
+              <FontAwesomeIcon icon={faUserPlus} className="text-2xl text-white" />
             </div>
-          ))}
-        </div>
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight text-white md:text-4xl">
+                Add New Student
+              </h1>
+              <p className="mt-1 text-slate-300">
+                Register a new student to your study centre.
+              </p>
+            </div>
+          </div>
+        </header>
 
-        {/* Submit Button */}
-        <div className="mt-8">
-          <button
-            type="submit"
-            className={`w-full px-5 py-2.5 text-white font-semibold rounded-lg shadow-md transition-all duration-200 
-            ${loading ? "bg-blue-300 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700 focus:ring-2 focus:ring-blue-400"}`}
-            disabled={loading}
-          >
-            {loading ? "Submitting..." : "Submit"}
-          </button>
-        </div>
-      </form>
+        <form
+          onSubmit={handleSubmit}
+          autoComplete="off"
+          className="rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm sm:p-8"
+        >
+          {/* Select Class */}
+          <div className="mb-6">
+            <label
+              htmlFor="class"
+              className="mb-1.5 block text-sm font-medium text-slate-700"
+            >
+              Select Class<span className="ml-0.5 text-rose-500">*</span>
+            </label>
+            <select
+              id="class"
+              name="class"
+              value={formData.class}
+              onChange={onChange}
+              required
+              className={inputClass}
+            >
+              <option value="" disabled>
+                Select a class
+              </option>
+              {classes.map((item) => (
+                <option value={item._id} key={item._id}>
+                  {item.className}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Dynamic Form Fields in Grid */}
+          <div className="grid grid-cols-1 gap-x-6 gap-y-5 md:grid-cols-2">
+            {forms.map((form, key) => (
+              <div key={key}>
+                <label
+                  htmlFor={form.name}
+                  className="mb-1.5 block text-sm font-medium text-slate-700"
+                >
+                  {form.labelName}
+                  {form.required && (
+                    <span className="ml-0.5 text-rose-500">*</span>
+                  )}
+                </label>
+                <input
+                  id={form.name}
+                  className={inputClass}
+                  type={form.type}
+                  onChange={onChange}
+                  required={form.required}
+                  placeholder={form.placeholder}
+                  name={form.name}
+                  value={form.value}
+                  autoComplete="off"
+                />
+              </div>
+            ))}
+          </div>
+
+          {/* Submit Button */}
+          <div className="mt-8 flex justify-end">
+            <button
+              type="submit"
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 px-8 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-500/25 transition hover:from-indigo-600 hover:to-purple-700 disabled:cursor-not-allowed disabled:opacity-70"
+              disabled={loading}
+            >
+              <FontAwesomeIcon
+                icon={loading ? faSpinner : faUserPlus}
+                spin={loading}
+              />
+              {loading ? "Submitting..." : "Add Student"}
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 };

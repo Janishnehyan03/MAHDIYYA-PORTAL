@@ -1,4 +1,5 @@
 import {
+  faArrowLeft,
   faBookReader,
   faBuilding,
   faChalkboardTeacher,
@@ -14,32 +15,51 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import Axios from "../../../Axios";
-import Loading from "../../../components/Loading"; // Assuming you have a standard Loading component
+import Loading from "../../../components/Loading";
+
+// Full class strings per theme (Tailwind can't see dynamically built names).
+const STAT_THEMES = {
+  indigo: {
+    gradient: "from-indigo-500 to-indigo-600",
+    tint: "bg-indigo-50 text-indigo-600",
+  },
+  sky: {
+    gradient: "from-sky-500 to-cyan-600",
+    tint: "bg-sky-50 text-sky-600",
+  },
+};
 
 // --- Reusable Component: StatCard ---
-const StatCard = ({ title, value, icon, color }) => (
-  <div
-    className={`p-5 rounded-xl bg-white shadow-sm flex items-center gap-5 border-l-4 border-${color}-500`}
-  >
-    <div className={`p-4 rounded-full bg-${color}-100`}>
-      <FontAwesomeIcon icon={icon} className={`h-6 w-6 text-${color}-600`} />
+const StatCard = ({ title, value, icon, color = "indigo" }) => {
+  const theme = STAT_THEMES[color] || STAT_THEMES.indigo;
+  return (
+    <div className="flex items-center gap-5 rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm transition hover:shadow-md">
+      <div
+        className={`flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br text-white shadow-md ${theme.gradient}`}
+      >
+        <FontAwesomeIcon icon={icon} className="h-6 w-6" />
+      </div>
+      <div>
+        <p className="text-3xl font-bold text-slate-800">{value ?? 0}</p>
+        <p className="text-sm font-medium text-slate-500">{title}</p>
+      </div>
     </div>
-    <div>
-      <p className="text-3xl font-bold text-slate-800">{value ?? 0}</p>
-      <p className="text-sm font-medium text-slate-500">{title}</p>
-    </div>
-  </div>
-);
+  );
+};
 
 // --- Reusable Component: DetailItem ---
 const DetailItem = ({ icon, label, value }) => (
   <div className="flex items-start gap-4 py-3">
-    <FontAwesomeIcon icon={icon} className="h-5 w-5 text-slate-400 mt-1" />
-    <div>
-      <p className="text-sm font-medium text-slate-500">{label}</p>
-      <p className="text-base text-slate-700 font-semibold">
+    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-500">
+      <FontAwesomeIcon icon={icon} className="h-4 w-4" />
+    </div>
+    <div className="min-w-0">
+      <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
+        {label}
+      </p>
+      <p className="mt-0.5 text-base font-semibold text-slate-700">
         {value || (
-          <span className="text-slate-400 font-normal">Not Provided</span>
+          <span className="font-normal text-slate-400">Not Provided</span>
         )}
       </p>
     </div>
@@ -79,13 +99,8 @@ function StudyCentreView() {
         setStudentCount(data.students);
         setTeacherCount(data.teachers);
       } catch (err) {
-        console.error(
-          "Failed to fetch study centre details:",
-          err.response || err
-        );
-        setError(
-          "Could not load study centre details. Please try again later."
-        );
+        console.error("Failed to fetch study centre details:", err.response || err);
+        setError("Could not load study centre details. Please try again later.");
       } finally {
         setIsLoading(false);
       }
@@ -95,7 +110,7 @@ function StudyCentreView() {
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center h-screen">
+      <div className="flex h-screen items-center justify-center">
         <Loading />
       </div>
     );
@@ -103,7 +118,7 @@ function StudyCentreView() {
 
   if (error) {
     return (
-      <div className="p-8 text-center text-red-600 bg-red-50 rounded-lg">
+      <div className="m-8 rounded-2xl border border-rose-200 bg-rose-50 p-8 text-center text-rose-600">
         {error}
       </div>
     );
@@ -118,20 +133,60 @@ function StudyCentreView() {
   }
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 bg-slate-50 min-h-screen">
-      <div className="max-w-7xl mx-auto">
-        {/* --- Header --- */}
-        <header className="mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold text-indigo-600 tracking-tight">
-            {studyCentre.studyCentreName}
-          </h1>
-          <p className="mt-1 text-md text-slate-500">
-            Affiliated Year: {studyCentre.affiliatedYear}
-          </p>
+    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100">
+      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-10 lg:py-12">
+        <Link
+          to="/study-centres"
+          className="mb-5 inline-flex items-center gap-2 text-sm font-medium text-slate-500 transition hover:text-indigo-600"
+        >
+          <FontAwesomeIcon icon={faArrowLeft} />
+          Back to Study Centres
+        </Link>
+
+        {/* --- Hero Header --- */}
+        <header className="relative mb-8 overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-900 p-8 shadow-xl">
+          <div className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-indigo-500/20 blur-3xl" />
+          <div className="pointer-events-none absolute -bottom-24 left-10 h-48 w-48 rounded-full bg-blue-500/20 blur-3xl" />
+
+          <div className="relative flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+            <div className="flex items-start gap-4">
+              <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-white/10 text-2xl font-bold text-white ring-1 ring-inset ring-white/20">
+                {studyCentre.studyCentreName?.charAt(0)?.toUpperCase() || "?"}
+              </div>
+              <div>
+                <div className="flex flex-wrap items-center gap-3">
+                  <h1 className="text-3xl font-bold tracking-tight text-white md:text-4xl">
+                    {studyCentre.studyCentreName}
+                  </h1>
+                  {studyCentre.isActive ? (
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-400/20 px-3 py-1 text-xs font-semibold text-emerald-300 ring-1 ring-inset ring-emerald-400/30">
+                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                      Active
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-rose-400/20 px-3 py-1 text-xs font-semibold text-rose-300 ring-1 ring-inset ring-rose-400/30">
+                      <span className="h-1.5 w-1.5 rounded-full bg-rose-400" />
+                      Inactive
+                    </span>
+                  )}
+                </div>
+                <p className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-slate-300">
+                  {studyCentre.studyCentreCode && (
+                    <span className="font-mono">
+                      Code: {studyCentre.studyCentreCode}
+                    </span>
+                  )}
+                  {studyCentre.affiliatedYear && (
+                    <span>Affiliated: {studyCentre.affiliatedYear}</span>
+                  )}
+                </p>
+              </div>
+            </div>
+          </div>
         </header>
 
         {/* --- Stats Section --- */}
-        <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+        <section className="mb-8 grid grid-cols-1 gap-6 sm:grid-cols-2">
           <StatCard
             title="Students"
             value={studentCount}
@@ -147,104 +202,115 @@ function StudyCentreView() {
         </section>
 
         {/* --- Main Content Grid --- */}
-        <main className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <main className="grid grid-cols-1 gap-8 lg:grid-cols-3">
           {/* Left Column: Details */}
-          <div className="lg:col-span-2 bg-white p-6 sm:p-8 rounded-xl shadow-sm border border-slate-200">
-            <h2 className="text-xl font-bold text-slate-800 mb-6">
+          <div className="rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm sm:p-8 lg:col-span-2">
+            <h2 className="mb-6 text-xl font-bold text-slate-800">
               Centre Details
             </h2>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
+            <div className="grid grid-cols-1 gap-x-8 gap-y-2 md:grid-cols-2">
               <div>
-                <h3 className="text-lg font-semibold text-indigo-600 mb-2">
+                <h3 className="mb-2 text-xs font-bold uppercase tracking-wider text-indigo-600">
                   Contact Information
                 </h3>
-                <DetailItem
-                  icon={faUserTie}
-                  label="Principal"
-                  value={studyCentre.currentPrincipal}
-                />
-                <DetailItem
-                  icon={faPhone}
-                  label="Phone"
-                  value={studyCentre.phone}
-                />
-                <DetailItem
-                  icon={faEnvelope}
-                  label="Email"
-                  value={studyCentre.email}
-                />
+                <div className="divide-y divide-slate-100">
+                  <DetailItem
+                    icon={faUserTie}
+                    label="Principal"
+                    value={studyCentre.currentPrincipal}
+                  />
+                  <DetailItem
+                    icon={faPhone}
+                    label="Phone"
+                    value={studyCentre.phone}
+                  />
+                  <DetailItem
+                    icon={faEnvelope}
+                    label="Email"
+                    value={studyCentre.email}
+                  />
+                </div>
               </div>
 
               <div>
-                <h3 className="text-lg font-semibold text-indigo-600 mb-2">
+                <h3 className="mb-2 text-xs font-bold uppercase tracking-wider text-indigo-600">
                   Location Details
                 </h3>
-                <DetailItem
-                  icon={faBuilding}
-                  label="Place"
-                  value={studyCentre.place}
-                />
-                <DetailItem
-                  icon={faMapPin}
-                  label="District & State"
-                  value={`${studyCentre.district}, ${studyCentre.state}`}
-                />
-                <DetailItem
-                  icon={faMapLocationDot}
-                  label="Post Office & Pin"
-                  value={`${studyCentre.postOffice} - ${studyCentre.pinCode}`}
-                />
+                <div className="divide-y divide-slate-100">
+                  <DetailItem
+                    icon={faBuilding}
+                    label="Place"
+                    value={studyCentre.place}
+                  />
+                  <DetailItem
+                    icon={faMapPin}
+                    label="District & State"
+                    value={`${studyCentre.district || ""}${
+                      studyCentre.state ? `, ${studyCentre.state}` : ""
+                    }`.replace(/^,\s*/, "")}
+                  />
+                  <DetailItem
+                    icon={faMapLocationDot}
+                    label="Post Office & Pin"
+                    value={`${studyCentre.postOffice || ""}${
+                      studyCentre.pinCode ? ` - ${studyCentre.pinCode}` : ""
+                    }`}
+                  />
+                </div>
               </div>
             </div>
           </div>
 
           {/* Right Column: Image and Actions */}
-          <div className="lg:col-span-1 flex flex-col gap-6">
-            <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-              <h3 className="text-lg font-semibold text-slate-700 mb-4">
+          <div className="flex flex-col gap-6 lg:col-span-1">
+            <div className="rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm">
+              <h3 className="mb-4 text-sm font-bold uppercase tracking-wide text-slate-500">
                 Centre Photo
               </h3>
               {studyCentre.imageCover ? (
                 <img
                   src={studyCentre.imageCover}
                   alt={`${studyCentre.studyCentreName} cover`}
-                  className="w-full h-48 object-cover rounded-lg bg-slate-100"
+                  className="h-48 w-full rounded-xl bg-slate-100 object-cover"
                 />
               ) : (
-                <div className="w-full h-48 flex items-center justify-center bg-slate-100 rounded-lg text-slate-400">
-                  No Image Available
+                <div className="flex h-48 w-full flex-col items-center justify-center rounded-xl bg-slate-50 text-slate-400">
+                  <FontAwesomeIcon icon={faBuilding} className="mb-2 text-2xl" />
+                  <span className="text-sm">No Image Available</span>
                 </div>
               )}
             </div>
-            <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 flex flex-col gap-3">
-              <h3 className="text-lg font-semibold text-slate-700 mb-2">
+
+            <div className="flex flex-col gap-3 rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm">
+              <h3 className="mb-1 text-sm font-bold uppercase tracking-wide text-slate-500">
                 Actions
               </h3>
               <Link
                 to={`/edit-branch/${centreId}`}
-                className="w-full text-center bg-indigo-600 text-white font-semibold py-2.5 px-4 rounded-lg shadow-sm hover:bg-indigo-700 transition-colors flex items-center justify-center gap-2"
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 px-4 py-2.5 font-semibold text-white shadow-md shadow-indigo-500/20 transition hover:from-indigo-600 hover:to-purple-700"
               >
                 <FontAwesomeIcon icon={faEdit} />
                 Edit Centre
               </Link>
-              <button
-                onClick={deleteStudyCentre}
-              className="w-full text-center bg-red-600 text-white font-semibold py-2.5 px-4 rounded-lg shadow-sm hover:bg-red-700 transition-colors flex items-center justify-center gap-2">
-                <FontAwesomeIcon icon={faTrashCan} />
-                Delete Centre
-              </button>
               {studyCentre.googleMapUrl && (
                 <a
                   href={studyCentre.googleMapUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-full text-center bg-slate-100 text-slate-700 font-semibold py-2.5 px-4 rounded-lg hover:bg-slate-200 transition-colors flex items-center justify-center gap-2"
+                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-slate-100 px-4 py-2.5 font-semibold text-slate-700 transition hover:bg-slate-200"
                 >
                   <FontAwesomeIcon icon={faMapLocationDot} />
                   View on Google Maps
                 </a>
               )}
+              <button
+                onClick={deleteStudyCentre}
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-rose-50 px-4 py-2.5 font-semibold text-rose-600 transition hover:bg-rose-100"
+              >
+                <FontAwesomeIcon icon={faTrashCan} />
+                Delete Centre
+              </button>
             </div>
           </div>
         </main>

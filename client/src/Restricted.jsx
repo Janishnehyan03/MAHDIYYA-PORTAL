@@ -8,7 +8,7 @@ function ProtectedRoutes({ children, role }) {
   const navigate = useNavigate();
   if (authData?.role === role) {
     return (
-      <div className="lg:ml-[250px]">
+      <div className="lg:ml-72">
         <Sidebar />
         {children}
       </div>

@@ -1,10 +1,14 @@
+import { faPenToSquare, faSpinner } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import Axios from "../../../Axios";
 import { DISTRICT } from "../../../Consts";
 
-// Update requirements based on your backend model's required fields.
+const inputClass =
+  "block w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-800 shadow-sm transition placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/40";
+
 function EditStudyCentre() {
   const initialState = {
     studyCentreName: "",
@@ -77,188 +81,142 @@ function EditStudyCentre() {
     }
   };
 
-  // Set required based on model: true = required, false = optional
   const fields = [
-    {
-      label: "Study Centre Name",
-      name: "studyCentreName",
-      type: "text",
-      required: true,
-    },
-    {
-      label: "Study Centre Code",
-      name: "studyCentreCode",
-      type: "text",
-      required: true,
-    },
-    {
-      label: "Panchayath",
-      name: "panchayath",
-      type: "text",
-      required: false,
-    },
-    {
-      label: "Affiliated Year",
-      name: "affiliatedYear",
-      type: "text",
-      required: false,
-    },
-    {
-      label: "Email",
-      name: "email",
-      type: "email",
-      required: false,
-    },
-    {
-      label: "Phone Number",
-      name: "phone",
-      type: "text",
-      required: false,
-    },
-    {
-      label: "Place",
-      name: "place",
-      type: "text",
-      required: false,
-    },
-    {
-      label: "Post Office",
-      name: "postOffice",
-      type: "text",
-      required: false,
-    },
-    {
-      label: "Pin Code",
-      name: "pinCode",
-      type: "text",
-      required: false,
-    },
-    {
-      label: "State",
-      name: "state",
-      type: "text",
-      required: false,
-    },
-    {
-      label: "District",
-      name: "district",
-      type: "select",
-      required: false,
-      options: DISTRICT,
-    },
-    {
-      label: "Principal's Name",
-      name: "currentPrincipal",
-      type: "text",
-      required: false,
-    },
-    {
-      label: "Principal Contact Number",
-      name: "principalContactNumber",
-      type: "text",
-      required: false,
-    },
-    {
-      label: "Admin Username",
-      name: "username",
-      type: "text",
-      required: false,
-    },
-    {
-      label: "Admin Password",
-      name: "password",
-      type: "text",
-      required: false,
-    },
+    { label: "Study Centre Name", name: "studyCentreName", type: "text", required: true },
+    { label: "Study Centre Code", name: "studyCentreCode", type: "text", required: true },
+    { label: "Panchayath", name: "panchayath", type: "text" },
+    { label: "Affiliated Year", name: "affiliatedYear", type: "text" },
+    { label: "Email", name: "email", type: "email" },
+    { label: "Phone Number", name: "phone", type: "text" },
+    { label: "Place", name: "place", type: "text" },
+    { label: "Post Office", name: "postOffice", type: "text" },
+    { label: "Pin Code", name: "pinCode", type: "text" },
+    { label: "State", name: "state", type: "text" },
+    { label: "District", name: "district", type: "select", options: DISTRICT },
+    { label: "Principal's Name", name: "currentPrincipal", type: "text" },
+    { label: "Principal Contact Number", name: "principalContactNumber", type: "text" },
+    { label: "Admin Username", name: "username", type: "text" },
+    { label: "Admin Password", name: "password", type: "text" },
   ];
 
   return (
-    <section className="mt-8 p-6 max-w-3xl mx-auto bg-white shadow rounded-lg">
-      <h2 className="text-2xl font-bold text-indigo-900 mb-6 text-center">
-        Edit Branch
-      </h2>
-      <form onSubmit={handleSubmit} className="grid gap-6 grid-cols-1 sm:grid-cols-2">
-        {fields.map((field) =>
-          field.type === "select" ? (
-            <div key={field.name}>
-              <label className="block font-semibold mb-1" htmlFor={field.name}>
-                {field.label}
-                {errors[field.name] && (
-                  <span className="text-red-500 text-xs ml-1">
-                    {errors[field.name]}
-                  </span>
-                )}
-              </label>
-              <select
-                id={field.name}
-                name={field.name}
-                value={inputData[field.name] || ""}
-                onChange={onChange}
-                required={field.required}
-                className="block w-full px-3 py-2 border rounded focus:outline-none focus:ring focus:border-indigo-300 bg-gray-50"
-              >
-                <option value="" hidden>
-                  Select {field.label}
-                </option>
-                {field.options &&
-                  field.options.map((opt, idx) => (
-                    <option value={opt} key={idx}>
-                      {opt}
+    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100">
+      <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-10 lg:py-12">
+        {/* --- Hero Header --- */}
+        <header className="relative mb-8 overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-900 p-8 shadow-xl">
+          <div className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-indigo-500/20 blur-3xl" />
+          <div className="relative flex items-center gap-4">
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/10 ring-1 ring-inset ring-white/20">
+              <FontAwesomeIcon icon={faPenToSquare} className="text-2xl text-white" />
+            </div>
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight text-white md:text-4xl">
+                Edit Study Centre
+              </h1>
+              <p className="mt-1 text-slate-300">
+                {inputData.studyCentreName || "Update centre information."}
+              </p>
+            </div>
+          </div>
+        </header>
+
+        <form
+          onSubmit={handleSubmit}
+          className="rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm sm:p-8"
+        >
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {fields.map((field) => (
+              <div key={field.name}>
+                <label
+                  htmlFor={field.name}
+                  className="mb-1.5 block text-sm font-medium text-slate-700"
+                >
+                  {field.label}
+                  {field.required && (
+                    <span className="ml-0.5 text-rose-500">*</span>
+                  )}
+                  {errors[field.name] && (
+                    <span className="ml-1 text-xs font-medium text-rose-500">
+                      {errors[field.name]}
+                    </span>
+                  )}
+                </label>
+                {field.type === "select" ? (
+                  <select
+                    id={field.name}
+                    name={field.name}
+                    value={inputData[field.name] || ""}
+                    onChange={onChange}
+                    required={field.required}
+                    className={inputClass}
+                  >
+                    <option value="" hidden>
+                      Select {field.label}
                     </option>
-                  ))}
-              </select>
-            </div>
-          ) : (
-            <div key={field.name}>
-              <label className="block font-semibold mb-1" htmlFor={field.name}>
-                {field.label}
-                {errors[field.name] && (
-                  <span className="text-red-500 text-xs ml-1">
-                    {errors[field.name]}
-                  </span>
+                    {field.options?.map((opt, idx) => (
+                      <option value={opt} key={idx}>
+                        {opt}
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  <input
+                    id={field.name}
+                    name={field.name}
+                    type={field.type}
+                    value={inputData[field.name] || ""}
+                    onChange={onChange}
+                    required={field.required}
+                    className={inputClass}
+                    placeholder={field.label}
+                  />
                 )}
-              </label>
-              <input
-                id={field.name}
-                name={field.name}
-                type={field.type}
-                value={inputData[field.name] || ""}
-                onChange={onChange}
-                required={field.required}
-                className="block w-full px-3 py-2 border rounded focus:outline-none focus:ring focus:border-indigo-300 bg-gray-50"
-                placeholder={field.label}
-              />
+              </div>
+            ))}
+          </div>
+
+          {/* Active toggle */}
+          <div className="mt-6 flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
+            <div>
+              <p className="text-sm font-semibold text-slate-700">
+                Active Status
+              </p>
+              <p className="text-xs text-slate-500">
+                {inputData.isActive
+                  ? "This centre is currently active."
+                  : "This centre is currently inactive."}
+              </p>
             </div>
-          )
-        )}
-        {/* isActive Switch */}
-        <div className="flex items-center mt-1">
-          <label htmlFor="isActive" className="mr-3 font-semibold">
-            Active Status:
-          </label>
-          <input
-            id="isActive"
-            name="isActive"
-            type="checkbox"
-            checked={!!inputData.isActive}
-            onChange={onChange}
-            className="h-5 w-5 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-          />
-          <span className="ml-2 text-sm">
-            {inputData.isActive ? "Active" : "Inactive"}
-          </span>
-        </div>
-        <div className="sm:col-span-2">
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-indigo-900 hover:bg-indigo-800 text-white font-semibold py-2 rounded mt-2 transition"
-          >
-            {loading ? "Processing..." : "Edit"}
-          </button>
-        </div>
-      </form>
-    </section>
+            <label className="relative inline-flex cursor-pointer items-center">
+              <input
+                id="isActive"
+                name="isActive"
+                type="checkbox"
+                checked={!!inputData.isActive}
+                onChange={onChange}
+                className="peer sr-only"
+              />
+              <div className="peer h-6 w-11 rounded-full bg-slate-300 after:absolute after:left-[2px] after:top-[2px] after:h-5 after:w-5 after:rounded-full after:bg-white after:transition-all after:content-[''] peer-checked:bg-indigo-600 peer-checked:after:translate-x-full" />
+            </label>
+          </div>
+
+          {/* Actions */}
+          <div className="mt-6 flex justify-end">
+            <button
+              type="submit"
+              disabled={loading}
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 px-8 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-500/25 transition hover:from-indigo-600 hover:to-purple-700 disabled:cursor-not-allowed disabled:opacity-70"
+            >
+              <FontAwesomeIcon
+                icon={loading ? faSpinner : faPenToSquare}
+                spin={loading}
+              />
+              {loading ? "Processing..." : "Save Changes"}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
   );
 }
 
