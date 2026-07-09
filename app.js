@@ -34,7 +34,7 @@ app.use(express.json({ limit: "50mb" }));
 app.use(bodyParser.urlencoded({ extended: false, limit: "50mb" }));
 app.use(cookieParser());
 app.use(morgan("dev"));
-app.use(express.static("uploads"));
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 app.use("/api/auth", require("./routes/auth"));
 app.use("/api/student", require("./routes/student"));
