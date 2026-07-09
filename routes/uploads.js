@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const { protect } = require("../controllers/authController");
 const multer = require("multer");
 const fs = require("fs");
-const { dirname } = require("path");
+const path = require("path");
 const { deleteOne } = require("../utils/globalFuctions");
 
 const uploadSchema = new mongoose.Schema(
@@ -32,9 +32,12 @@ const uploadSchema = new mongoose.Schema(
 );
 const Upload = mongoose.model("Upload", uploadSchema);
 
+const uploadsDir = path.join(__dirname, "..", "uploads");
+fs.mkdirSync(uploadsDir, { recursive: true });
+
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, "./uploads");
+    cb(null, uploadsDir);
   },
   filename: (req, file, cb) => {
     cb(null, Date.now() + file.originalname);

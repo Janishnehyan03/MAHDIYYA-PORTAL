@@ -116,7 +116,7 @@ function UploadedFiles() {
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{upload?.uploadedBy?.studyCentreCode}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         <a
-                          href={`/${upload.fileName}`}
+                          href={`/uploads/${upload.fileName}`}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="inline-flex items-center gap-3 text-blue-600 hover:text-blue-800 font-medium"
