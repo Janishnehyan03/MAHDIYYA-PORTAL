@@ -39,7 +39,15 @@ function FileUpload() {
   // --- Event Handlers ---
   const handleFileChange = (e) => {
     if (e.target.files && e.target.files[0]) {
-      setFile(e.target.files[0]);
+      const selectedFile = e.target.files[0];
+      const maxLimit = 50 * 1024 * 1024; // 50 MB
+      if (selectedFile.size > maxLimit) {
+        toast.error("File is too large. Maximum size is 50 MB.");
+        e.target.value = null; // Clear the input
+        setFile(null);
+        return;
+      }
+      setFile(selectedFile);
     }
   };
 
@@ -111,7 +119,7 @@ function FileUpload() {
                 <p className="mb-2 text-sm text-gray-500">
                   <span className="font-semibold">Click to upload</span> or drag and drop
                 </p>
-                <p className="text-xs text-gray-500">Any file type (PDF, DOCX, JPG, etc.)</p>
+                <p className="text-xs text-gray-500">Any file type (PDF, DOCX, JPG, etc.) up to 50 MB</p>
               </div>
               <input id="dropzone-file" type="file" className="hidden" onChange={handleFileChange} />
             </label>

@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import Axios from "../../Axios";
 import TableSkeleton from "../../components/skeletons/TableSkeleton.jsx";
 import BulkDeleteModal from "../../components/superadmin/students/BulkDeleteModal.jsx";
+import BulkPromoteModal from "../../components/superadmin/students/BulkPromoteModal.jsx";
 import StudentsExportTable from "../../components/superadmin/students/StudentsExportTable.jsx";
 import StudentsTable from "../../components/superadmin/students/StudentsTable.jsx";
 import StudentsToolbar from "../../components/superadmin/students/StudentsToolbar.jsx";
@@ -37,6 +38,7 @@ function AllStudents() {
 
   // Modal States
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isPromoteModalOpen, setIsPromoteModalOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [downloaded, setDownloaded] = useState(false);
   const [showBulkImport, setShowBulkImport] = useState(false);
@@ -221,7 +223,20 @@ function AllStudents() {
           handleFilterChange={handleFilterChange}
           setCurrentPage={setCurrentPage}
           setIsDeleteModalOpen={setIsDeleteModalOpen}
+          setIsPromoteModalOpen={setIsPromoteModalOpen}
         />
+
+        {!filters.classId && (
+          <div className="mb-6 rounded-2xl border border-indigo-100 bg-indigo-50/50 p-4 text-sm text-indigo-800 flex items-center gap-3">
+            <span className="text-xl">💡</span>
+            <div>
+              <p className="font-semibold">Bulk Actions Guide</p>
+              <p className="text-indigo-700/90 text-xs mt-0.5">
+                To perform bulk operations such as <strong>Bulk Promote Class</strong> or <strong>Bulk Delete Class</strong>, please select a specific <strong>Class</strong> from the filter dropdown above.
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* --- Table Section --- */}
         <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm">
@@ -257,6 +272,18 @@ function AllStudents() {
           handleBulkDelete={handleBulkDelete}
           deleting={deleting}
           filters={filters}
+        />
+
+        {/* --- Bulk Promote Modal --- */}
+        <BulkPromoteModal
+          isOpen={isPromoteModalOpen}
+          setIsOpen={setIsPromoteModalOpen}
+          filteredStudents={filteredStudents}
+          classes={classes}
+          currentClassId={filters.classId}
+          fetchStudents={fetchStudents}
+          filters={filters}
+          studyCentres={studyCentres}
         />
       </div>
     </div>

@@ -1,7 +1,7 @@
 // src/components/UploadedFiles.jsx
 import React, { useState, useEffect, useCallback } from "react";
 import { useParams, Link } from "react-router-dom";
-import Axios from "../../Axios";
+import Axios, { getUploadsUrl } from "../../Axios";
 import moment from "moment";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -116,7 +116,7 @@ function UploadedFiles() {
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{upload?.uploadedBy?.studyCentreCode}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         <a
-                          href={`/uploads/${upload.fileName}`}
+                          href={getUploadsUrl(upload.fileName)}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="inline-flex items-center gap-3 text-blue-600 hover:text-blue-800 font-medium"

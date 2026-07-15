@@ -2,9 +2,11 @@ const router = require("express").Router();
 const { default: mongoose } = require("mongoose");
 const multer = require("multer");
 const cloudinary = require("cloudinary");
-const { Readable } = require("stream");
 const dotenv = require("dotenv");
 const { deleteOne } = require("../utils/globalFuctions");
+const fs = require("fs");
+const path = require("path");
+const os = require("os");
 
 dotenv.config();
 
@@ -24,30 +26,70 @@ const downloadSchema = new mongoose.Schema({
   fileName: { type: String, required: [true, "File is required"] },
   title: { type: String, required: [true, '"download" title is required'] },
   type: { type: String, required: true, enum: ["student", "admin"] },
+  originalName: { type: String },
 });
 const Download = mongoose.model("Download", downloadSchema);
 
-// Chunked upload bypasses Cloudinary's 10MB limit on the regular upload endpoint.
-function uploadFile(buffer) {
+function getResourceType(fileName) {
+  const ext = (fileName || "").split(".").pop().toLowerCase();
+  const imageExtensions = ["jpg", "jpeg", "png", "gif", "webp", "bmp", "tiff"];
+  if (imageExtensions.includes(ext)) {
+    return "image";
+  }
+  return "raw";
+}
+
+// Upload file to Cloudinary using a temporary disk file to avoid memory stream chunking corruption.
+function uploadFile(buffer, originalname) {
   return new Promise((resolve, reject) => {
-    const uploadStream = cloudinary.v2.uploader.upload_chunked_stream(
-      { resource_type: "auto", chunk_size: 6 * 1024 * 1024 },
-      (error, result) => {
-        if (error) return reject(error);
-        resolve(result);
-      }
-    );
-    Readable.from(buffer).pipe(uploadStream);
+    const tempDir = os.tmpdir();
+    
+    // Check resource type
+    const isImage = getResourceType(originalname) === "image";
+    
+    // Enforce extensionless local file on disk for non-images to bypass Cloudinary's strict PDF/ZIP content restrictions
+    let tempFileName = Date.now() + "_";
+    if (isImage) {
+      tempFileName += originalname;
+    } else {
+      const nameWithoutExt = originalname.substring(0, originalname.lastIndexOf('.'));
+      tempFileName += nameWithoutExt.replace(/[^a-zA-Z0-9_]/g, "_");
+    }
+
+    const tempFilePath = path.join(tempDir, tempFileName);
+
+    fs.writeFile(tempFilePath, buffer, (writeErr) => {
+      if (writeErr) return reject(writeErr);
+
+      cloudinary.v2.uploader.upload(
+        tempFilePath,
+        {
+          resource_type: isImage ? "image" : "raw",
+          folder: "downloads",
+        },
+        (uploadErr, result) => {
+          // Cleanup temp file
+          fs.unlink(tempFilePath, (unlinkErr) => {
+            if (unlinkErr) console.error("Temp file cleanup failed:", unlinkErr);
+          });
+
+          if (uploadErr) return reject(uploadErr);
+          resolve(result);
+        }
+      );
+    });
   });
 }
+
 router.post("/", upload.single("file"), async (req, res, next) => {
   try {
-    const cldRes = await uploadFile(req.file.buffer);
+    const cldRes = await uploadFile(req.file.buffer, req.file.originalname);
 
     let data = await Download.create({
       title: req.body.title,
       fileName: cldRes.secure_url,
       type: req.body.type,
+      originalName: req.file.originalname,
     });
     res.status(200).json(data);
   } catch (error) {

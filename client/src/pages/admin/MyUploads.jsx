@@ -2,7 +2,7 @@
 import React, { useEffect, useState, useMemo, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify";
-import Axios from "../../Axios";
+import Axios, { getUploadsUrl } from "../../Axios";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faUpload, faCheckCircle, faClock, faTrash, faDownload, faSpinner, faExclamationTriangle,
@@ -131,7 +131,7 @@ function MyUploads() {
                     </div>
                     <div className="flex items-center gap-4">
                       <a
-                        href={`/uploads/${upload.fileName}`}
+                        href={getUploadsUrl(upload.fileName)}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-blue-600 hover:text-blue-800"

@@ -100,7 +100,28 @@ function Downloads() {
       }
     }
   };
-  
+  const [downloadingId, setDownloadingId] = useState(null);
+
+  const handleDownload = async (id, url, originalName, title) => {
+    setDownloadingId(id);
+    try {
+      const response = await fetch(url);
+      const blob = await response.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = blobUrl;
+      a.download = originalName || title || "download";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(blobUrl);
+    } catch (error) {
+      window.open(url, "_blank");
+    } finally {
+      setDownloadingId(null);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 p-4 sm:p-6 lg:p-8">
       <div className="max-w-7xl mx-auto">
@@ -198,15 +219,14 @@ function Downloads() {
                         </div>
                         <p className="text-lg font-semibold text-gray-800 mb-4">{download.title}</p>
                         </div>
-                        <a
-                        href={download.fileName}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="w-full mt-2 inline-flex items-center justify-center gap-2 py-2 px-4 text-sm font-medium rounded-md text-blue-700 bg-blue-100 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                        <button
+                          onClick={() => handleDownload(download._id, download.fileName, download.originalName, download.title)}
+                          disabled={downloadingId === download._id}
+                          className="w-full mt-2 inline-flex items-center justify-center gap-2 py-2 px-4 text-sm font-medium rounded-md text-blue-700 bg-blue-100 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                        <FontAwesomeIcon icon={faDownload} />
-                        Download
-                        </a>
+                          <FontAwesomeIcon icon={downloadingId === download._id ? faSpinner : faDownload} spin={downloadingId === download._id} />
+                          {downloadingId === download._id ? "Downloading..." : "Download"}
+                        </button>
                     </div>
                     ))}
                 </div>

@@ -1,4 +1,4 @@
-import { faMagnifyingGlass, faTrash } from "@fortawesome/free-solid-svg-icons";
+import { faMagnifyingGlass, faTrash, faArrowUpRightDots } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 const selectClass =
@@ -13,6 +13,7 @@ function StudentsToolbar({
   handleFilterChange,
   setCurrentPage,
   setIsDeleteModalOpen,
+  setIsPromoteModalOpen,
 }) {
   return (
     <div className="mb-6 flex flex-wrap items-center gap-3 rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm">
@@ -66,6 +67,16 @@ function StudentsToolbar({
         >
           <FontAwesomeIcon icon={faTrash} />
           Bulk Delete Class
+        </button>
+      )}
+      {/* Bulk Promote Button */}
+      {filters.classId && (
+        <button
+          onClick={() => setIsPromoteModalOpen(true)}
+          className="inline-flex items-center gap-2 rounded-xl bg-emerald-50 px-4 py-2.5 text-sm font-semibold text-emerald-600 transition hover:bg-emerald-100"
+        >
+          <FontAwesomeIcon icon={faArrowUpRightDots} />
+          Bulk Promote Class
         </button>
       )}
     </div>

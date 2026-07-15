@@ -26,7 +26,7 @@ import {
 import Axios from "../../Axios";
 
 // Keep this in sync with the multer limit in routes/resourceRoute.js
-const MAX_FILE_MB = 10;
+const MAX_FILE_MB = 50;
 
 const getFileIcon = (fileType) => {
   switch ((fileType || "").toLowerCase()) {
