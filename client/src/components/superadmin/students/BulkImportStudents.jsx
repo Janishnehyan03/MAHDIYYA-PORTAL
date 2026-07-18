@@ -1,6 +1,42 @@
 import { useRef, useState } from "react";
-import { Upload, FileCheck2, Loader2, XCircle } from "lucide-react";
+import { Upload, FileCheck2, Loader2, XCircle, Download } from "lucide-react";
+import * as XLSX from "xlsx";
 import Axios from "../../../Axios";
+
+// Columns expected by the bulk-import backend (must match parseExcelFile in studentController)
+const SAMPLE_HEADERS = [
+  "REG. NO",
+  "NAME",
+  "FATHER",
+  "HOUSE",
+  "PLACE",
+  "PO",
+  "PINCODE",
+  "DISTRICT",
+  "STATE",
+  "PHONE",
+  "DOB",
+  "CLASS",
+  "STUDY CENTRE",
+  "CENTRE CODE",
+];
+
+const SAMPLE_ROW = {
+  "REG. NO": "1001",
+  NAME: "Student Name",
+  FATHER: "Father Name",
+  HOUSE: "House Name",
+  PLACE: "Place",
+  PO: "Post Office",
+  PINCODE: "670001",
+  DISTRICT: "District",
+  STATE: "State",
+  PHONE: "9000000000",
+  DOB: "01-01-2010",
+  CLASS: "Class Name",
+  "STUDY CENTRE": "Study Centre Name",
+  "CENTRE CODE": "101",
+};
 
 function BulkImportStudents({ classId, onSuccess }) {
   const [importing, setImporting] = useState(false);
@@ -14,6 +50,15 @@ function BulkImportStudents({ classId, onSuccess }) {
     fileInputRef.current.value = "";
     setImportedRows([]);
     setShowImported(false);
+  };
+
+  const handleDownloadSample = () => {
+    const worksheet = XLSX.utils.json_to_sheet([SAMPLE_ROW], {
+      header: SAMPLE_HEADERS,
+    });
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Students");
+    XLSX.writeFile(workbook, "student_bulk_import_sample.xlsx");
   };
 
   const handleImport = async (e) => {
@@ -108,7 +153,14 @@ function BulkImportStudents({ classId, onSuccess }) {
           )}
         </button>
 
- 
+        {/* Download Sample Button */}
+        <button
+          type="button"
+          onClick={handleDownloadSample}
+          className="flex items-center gap-2 px-3 py-2 border border-emerald-300 text-emerald-700 rounded-md text-sm hover:bg-emerald-50 transition"
+        >
+          <Download size={16} /> Download Sample
+        </button>
       </form>
 
       {/* Status Messages */}

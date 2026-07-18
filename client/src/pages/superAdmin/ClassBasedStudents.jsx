@@ -6,11 +6,12 @@ import {
   faUserSlash,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { ExcelRenderer } from "react-excel-renderer";
 import { Link, useParams } from "react-router-dom";
 import Axios from "../../Axios";
 import { toast } from "react-toastify";
+import { UserAuthContext } from "../../context/userContext";
 
 // --- Helper Components ---
 
@@ -321,6 +322,8 @@ function UploadModal({ isOpen, onClose, classId, onUploadSuccess }) {
 
 function AllStudents() {
   const { classId } = useParams();
+  const { authData } = useContext(UserAuthContext);
+  const isSuperAdmin = authData?.role === "superAdmin";
   const [students, setStudents] = useState([]);
   const [className, setClassName] = useState(null);
   const [classes, setClasses] = useState([]);
@@ -462,26 +465,30 @@ function AllStudents() {
                 </div>
               </div>
               <div className="flex flex-wrap items-center gap-2">
-                <select
-                  value={selectedClass}
-                  onChange={(e) => setSelectedClass(e.target.value)}
-                  className="rounded-xl border border-white/15 bg-white/10 px-3 py-2.5 text-sm text-white backdrop-blur transition focus:outline-none focus:ring-2 focus:ring-indigo-400 [&>option]:text-slate-800"
-                >
-                  <option value="">Select Class to Promote</option>
-                  {classes.map((c) => (
-                    <option key={c._id} value={c._id}>
-                      {c.className}
-                    </option>
-                  ))}
-                </select>
-                <button
-                  onClick={handlePromote}
-                  disabled={selectedStudents.length === 0 || !selectedClass}
-                  className="inline-flex items-center gap-2 rounded-xl bg-emerald-500 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-emerald-900/30 transition hover:bg-emerald-600 disabled:opacity-40 disabled:shadow-none"
-                >
-                  <FontAwesomeIcon icon={faArrowUpRightDots} />
-                  Promote
-                </button>
+                {isSuperAdmin && (
+                  <>
+                    <select
+                      value={selectedClass}
+                      onChange={(e) => setSelectedClass(e.target.value)}
+                      className="rounded-xl border border-white/15 bg-white/10 px-3 py-2.5 text-sm text-white backdrop-blur transition focus:outline-none focus:ring-2 focus:ring-indigo-400 [&>option]:text-slate-800"
+                    >
+                      <option value="">Select Class to Promote</option>
+                      {classes.map((c) => (
+                        <option key={c._id} value={c._id}>
+                          {c.className}
+                        </option>
+                      ))}
+                    </select>
+                    <button
+                      onClick={handlePromote}
+                      disabled={selectedStudents.length === 0 || !selectedClass}
+                      className="inline-flex items-center gap-2 rounded-xl bg-emerald-500 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-emerald-900/30 transition hover:bg-emerald-600 disabled:opacity-40 disabled:shadow-none"
+                    >
+                      <FontAwesomeIcon icon={faArrowUpRightDots} />
+                      Promote
+                    </button>
+                  </>
+                )}
                 {!selectedClass && (
                   <button
                     onClick={handleDropOut}
