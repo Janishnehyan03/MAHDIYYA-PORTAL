@@ -35,10 +35,9 @@ function Login() {
       <div className="flex max-w-5xl w-full bg-white rounded-2xl shadow-xl overflow-hidden">
         {/* Left Image Section */}
         <div className="hidden md:block md:w-1/2 relative">
-          <div className="absolute inset-0 bg-blue-600 opacity-20"></div>
           <img
             className="object-cover w-full h-full"
-            src="/images/6.jpeg"
+            src="/images/login.jpeg"
             alt="Admin login illustration"
           />
           <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/60 to-transparent">
