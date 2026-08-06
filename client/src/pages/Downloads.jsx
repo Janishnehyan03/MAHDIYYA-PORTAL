@@ -1,6 +1,7 @@
 import React, { useContext, useEffect, useState, useCallback } from "react";
 import { toast } from "react-toastify";
 import Axios from "../Axios";
+import { downloadFile } from "../utils/downloadHelper";
 import { UserAuthContext } from "../context/userContext";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTrash, faUpload, faDownload, faSpinner } from "@fortawesome/free-solid-svg-icons";
@@ -105,18 +106,9 @@ function Downloads() {
   const handleDownload = async (id, url, originalName, title) => {
     setDownloadingId(id);
     try {
-      const response = await fetch(url);
-      const blob = await response.blob();
-      const blobUrl = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = blobUrl;
-      a.download = originalName || title || "download";
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(blobUrl);
+      await downloadFile(url, originalName || title || "download");
     } catch (error) {
-      window.open(url, "_blank");
+      toast.error("Download failed. Please try again.");
     } finally {
       setDownloadingId(null);
     }

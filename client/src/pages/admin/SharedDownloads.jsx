@@ -18,6 +18,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import moment from "moment";
 import Axios from "../../Axios";
+import { downloadFile } from "../../utils/downloadHelper";
 
 // Rich metadata per file type: gradient tile + tinted badge.
 const getFileMeta = (fileType) => {
@@ -109,16 +110,7 @@ function SharedDownloads() {
   const handleDownload = async (resource) => {
     setDownloadingId(resource._id);
     try {
-      const response = await fetch(resource.fileUrl);
-      const blob = await response.blob();
-      const blobUrl = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = blobUrl;
-      a.download = resource.fileName || resource.title;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(blobUrl);
+      await downloadFile(resource.fileUrl, resource.fileName || resource.title);
     } catch (err) {
       toast.error("Download failed. Please try again.");
     } finally {

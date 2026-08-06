@@ -312,11 +312,13 @@ const AddCceMark = () => {
               }}
             >
               <option value="">select study centre</option>
-              {branches.map((branch) => (
-                <option value={branch._id} key={branch._id}>
-                  {branch.studyCentreName}
-                </option>
-              ))}
+              {branches
+                .filter((branch) => branch.isActive !== false)
+                .map((branch) => (
+                  <option value={branch._id} key={branch._id}>
+                    {branch.studyCentreName}
+                  </option>
+                ))}
             </select>
           </div>
 

@@ -115,10 +115,12 @@ const FilterBar = ({
           onChange={(e) =>
             setFilters({ ...filters, studyCentreId: e.target.value })
           }
-          options={branches.map((b) => ({
-            value: b._id,
-            label: b.studyCentreName,
-          }))}
+          options={branches
+            .filter((b) => b.isActive !== false)
+            .map((b) => ({
+              value: b._id,
+              label: b.studyCentreName,
+            }))}
           placeholder="-- Select Study Centre --"
         />
       )}
