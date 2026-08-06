@@ -77,6 +77,20 @@ router.post("/", protect, (req, res, next) => {
   });
 });
 
+router.get("/file/:fileName", protect, (req, res) => {
+  try {
+    const safeFileName = path.basename(req.params.fileName);
+    const filePath = path.join(uploadsDir, safeFileName);
+    if (fs.existsSync(filePath)) {
+      return res.sendFile(filePath);
+    } else {
+      return res.status(404).json({ message: "File not found." });
+    }
+  } catch (error) {
+    return res.status(500).json({ message: "Error serving file." });
+  }
+});
+
 router.get("/:referenceId", protect, async (req, res, next) => {
   try {
     let data = await Upload.find({

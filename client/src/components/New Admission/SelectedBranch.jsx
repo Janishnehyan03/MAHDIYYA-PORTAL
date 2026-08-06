@@ -69,7 +69,8 @@ function SelectedBranch({
   const getAllBranches = async () => {
     try {
       let { data } = await Axios.get(`/study-centre?district=${selectedBranch}`);
-      setBranches(data.docs);
+      const activeBranches = (data.docs || []).filter((b) => b.isActive !== false);
+      setBranches(activeBranches);
     } catch (error) {
       console.log(error.response);
     }

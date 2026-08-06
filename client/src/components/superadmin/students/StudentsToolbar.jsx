@@ -40,11 +40,13 @@ function StudentsToolbar({
         className={selectClass}
       >
         <option value="">All Study Centres</option>
-        {studyCentres.map((c) => (
-          <option key={c._id} value={c._id}>
-            {c.studyCentreName}
-          </option>
-        ))}
+        {studyCentres
+          .filter((c) => c.isActive !== false)
+          .map((c) => (
+            <option key={c._id} value={c._id}>
+              {c.studyCentreName}
+            </option>
+          ))}
       </select>
       <select
         name="classId"

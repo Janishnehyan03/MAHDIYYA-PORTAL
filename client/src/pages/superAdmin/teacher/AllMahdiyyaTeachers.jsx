@@ -263,11 +263,13 @@ function AllMAHDIYYAHTeachers() {
             className="w-full bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 transition"
           >
             <option value="">All Study Centres</option>
-            {studyCentres.map((item) => (
-              <option key={item._id} value={item._id}>
-                {item.studyCentreName}
-              </option>
-            ))}
+            {studyCentres
+              .filter((item) => item.isActive !== false)
+              .map((item) => (
+                <option key={item._id} value={item._id}>
+                  {item.studyCentreName}
+                </option>
+              ))}
           </select>
           <select
             value={filters.gender}

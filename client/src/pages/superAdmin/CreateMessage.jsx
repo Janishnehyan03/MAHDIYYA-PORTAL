@@ -162,7 +162,11 @@ function CreateMessage() {
                   -- Choose a recipient to add --
                 </option>
                 {users
-                  .filter(user => !recipients.includes(user._id)) // Hide already selected users
+                  .filter(
+                    (user) =>
+                      !recipients.includes(user._id) &&
+                      (!user.branch || user.branch.isActive !== false)
+                  ) // Hide inactive study centres
                   .sort((a, b) => a.username.localeCompare(b.username))
                   .map((user) => (
                     <option key={user._id} value={user._id}>

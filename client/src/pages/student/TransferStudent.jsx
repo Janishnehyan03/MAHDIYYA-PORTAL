@@ -138,6 +138,7 @@ const TransferStudent = () => {
                   >
                     <option value="">Select a centre...</option>
                     {studyCentres
+                      .filter((c) => c.isActive !== false)
                       .sort((a, b) =>
                         a.studyCentreName.localeCompare(b.studyCentreName)
                       )

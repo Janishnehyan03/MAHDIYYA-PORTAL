@@ -14,16 +14,17 @@ const Axios = axios.create({
 
 export const getUploadsUrl = (fileName) => {
   if (!fileName) return "";
-  const baseURL = Axios.defaults.baseURL || "http://localhost:5003/api";
+  const encodedName = encodeURIComponent(fileName);
+  const baseURL = Axios.defaults.baseURL || "/api";
   try {
     if (baseURL.startsWith("http")) {
       const url = new URL(baseURL);
-      return `${url.origin}/uploads/${fileName}`;
+      return `${url.origin}/api/uploads/file/${encodedName}`;
     }
   } catch (e) {
     console.error(e);
   }
-  return `/uploads/${fileName}`;
+  return `/api/uploads/file/${encodedName}`;
 };
 
 export default Axios;

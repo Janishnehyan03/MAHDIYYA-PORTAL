@@ -24,6 +24,7 @@ import {
   faBuilding,
 } from "@fortawesome/free-solid-svg-icons";
 import Axios from "../../Axios";
+import { downloadFile } from "../../utils/downloadHelper";
 
 // Keep this in sync with the multer limit in routes/resourceRoute.js
 const MAX_FILE_MB = 50;
@@ -195,22 +196,14 @@ function ManageDownloads() {
   // browsers download an unrecognized "special" file type otherwise).
   const handleDownload = async (url, fileName) => {
     try {
-      const response = await fetch(url);
-      const blob = await response.blob();
-      const blobUrl = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = blobUrl;
-      a.download = fileName;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(blobUrl);
+      await downloadFile(url, fileName);
     } catch (error) {
       toast.error("Download failed. Please try again.");
     }
   };
 
   const filteredUsers = users.filter((u) => {
+    if (u.branch && u.branch.isActive === false) return false;
     const q = userSearch.toLowerCase();
     return (
       u.username?.toLowerCase().includes(q) ||
