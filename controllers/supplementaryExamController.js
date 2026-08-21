@@ -1,363 +1,421 @@
-const SupplementaryExam = require("../models/supplementaryExamModel");
-const Class = require("../models/classModel");
-const Subject = require("../models/subjectModel");
+const SupplementaryExamTemplate = require("../models/supplementaryExamTemplateModel");
+const SupplementaryApplication = require("../models/supplementaryApplicationModel");
 const Student = require("../models/studentModel");
 const Branch = require("../models/studyCentreModel");
 const catchAsync = require("../utils/catchAsync");
 const AppError = require("../utils/AppError");
 const xlsx = require("xlsx");
 
-exports.getTemplate = catchAsync(async (req, res, next) => {
-  const { classId } = req.params;
-  const currentClass = await Class.findById(classId);
-  if (!currentClass) {
-    return next(new AppError("Class not found", 404));
+// ==========================================
+// SUPER ADMIN: EXAM TEMPLATE MANAGEMENT
+// ==========================================
+
+// 1. Create a new Supplementary Exam Template
+exports.createTemplate = catchAsync(async (req, res, next) => {
+  const { title, semesters } = req.body;
+
+  if (!title || !title.trim()) {
+    return next(new AppError("Exam title is required", 400));
   }
 
-  const subjects = await Subject.find({ class: classId });
+  if (!semesters || !Array.isArray(semesters) || semesters.length === 0) {
+    return next(new AppError("At least one semester with subjects is required", 400));
+  }
 
-  // Basic headers based on user request ("Exam Reg. No.", "Student Name", "Study Centre Name", "Study Centre Code", "SEMESTER")
-  const headers = [
-    "Exam Reg. No.",
-    "Student Name",
-    "Study Centre Name",
-    "Study Centre Code",
-    "SEMESTER",
-  ];
-
-  // Append subject names to headers
-  subjects.forEach((subj) => {
-    headers.push(subj.subjectName);
+  const newTemplate = await SupplementaryExamTemplate.create({
+    title: title.trim(),
+    semesters,
+    createdBy: req.user?._id,
+    status: "open",
   });
 
-  const workbook = xlsx.utils.book_new();
-  const worksheet = xlsx.utils.aoa_to_sheet([headers]);
-
-  xlsx.utils.book_append_sheet(workbook, worksheet, "Supplementary Students");
-
-  const buffer = xlsx.write(workbook, { type: "buffer", bookType: "xlsx" });
-
-  res.setHeader(
-    "Content-Type",
-    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-  );
-  res.setHeader(
-    "Content-Disposition",
-    `attachment; filename=Supplementary_Template_${currentClass.className}.xlsx`
-  );
-
-  res.send(buffer);
+  res.status(201).json({
+    status: "success",
+    message: "Supplementary Exam Template created successfully",
+    data: { template: newTemplate },
+  });
 });
 
-exports.uploadInitialData = catchAsync(async (req, res, next) => {
-  if (!req.file) {
-    return next(new AppError("Please upload an excel file", 400));
-  }
-  const { classId } = req.body;
-  if (!classId) {
-    return next(new AppError("Class ID is required", 400));
-  }
+// 2. Get all Exam Templates (for Super Admin)
+exports.getTemplates = catchAsync(async (req, res, next) => {
+  const templates = await SupplementaryExamTemplate.find().sort({ createdAt: -1 });
 
-  const currentClass = await Class.findById(classId);
-  if (!currentClass) return next(new AppError("Class not found", 404));
+  res.status(200).json({
+    status: "success",
+    data: { templates },
+  });
+});
 
-  const subjects = await Subject.find({ class: classId });
-  const subjectNames = subjects.map((s) => s.subjectName.toUpperCase());
+// 3. Get only OPEN Exam Templates (for Study Centre Admin)
+exports.getOpenTemplates = catchAsync(async (req, res, next) => {
+  const templates = await SupplementaryExamTemplate.find({ status: "open" }).sort({ createdAt: -1 });
 
-  const workbook = xlsx.read(req.file.buffer, { type: "buffer" });
-  const sheetName = workbook.SheetNames[0];
-  const sheet = workbook.Sheets[sheetName];
-  const rows = xlsx.utils.sheet_to_json(sheet, { defval: "" });
+  res.status(200).json({
+    status: "success",
+    data: { templates },
+  });
+});
 
-  const errors = [];
-  const processedData = [];
-
-  for (let [index, row] of rows.entries()) {
-    const regNo = row["Exam Reg. No."]?.toString().trim() || "";
-    const studentName = row["Student Name"]?.toString().trim() || "";
-    const studyCentreName = row["Study Centre Name"]?.toString().trim() || "";
-    const studyCentreCode = row["Study Centre Code"]?.toString().trim() || "";
-    const semester = row["SEMESTER"]?.toString().trim() || "";
-
-    if (!regNo || !studentName || !studyCentreCode) {
-      continue; // Skip empty/invalid rows silently or track errors
-    }
-
-    // Attempt to find branch
-    const branch = await Branch.findOne({ studyCentreCode: new RegExp(`^${studyCentreCode}$`, 'i') });
-    if (!branch) {
-      errors.push(`Row ${index + 2}: Branch with code ${studyCentreCode} not found`);
-      continue;
-    }
-
-    // Attempt to find student by regNo
-    let student = await Student.findOne({
-      $or: [{ registerNo: new RegExp(`^${regNo}$`, 'i') }]
-    });
-
-    if (!student) {
-      // If student not found by regNo, we can either error out or just search by name + branch. Let's try name + branch.
-      student = await Student.findOne({
-        studentName: new RegExp(`^${studentName}$`, 'i'),
-        branch: branch._id,
-        class: classId
-      });
-    }
-
-    if (!student) {
-      errors.push(`Row ${index + 2}: Student ${studentName} (${regNo}) not found in the system for this class and branch`);
-      continue;
-    }
-
-    // Prepare subjects array
-    const subjectMarks = [];
-    for (const key of Object.keys(row)) {
-      const upperKey = key.trim().toUpperCase();
-      if (subjectNames.includes(upperKey)) {
-        subjectMarks.push({
-          subjectName: upperKey,
-          mark: row[key]?.toString().trim() || ""
-        });
-      }
-    }
-
-    processedData.push({
-      class: classId,
-      student: student._id,
-      branch: branch._id,
-      registerNo: regNo,
-      studentName: studentName,
-      studyCentreName: studyCentreName,
-      studyCentreCode: studyCentreCode,
-      semester: semester,
-      subjectMarks,
-      superAdminUploadedAt: new Date()
-    });
-  }
-
-  if (errors.length > 0) {
-    return res.status(400).json({ status: "fail", message: "Errors found in Excel file", errors });
-  }
-
-  // Insert or Update the records
-  for (const data of processedData) {
-    await SupplementaryExam.findOneAndUpdate(
-      { class: data.class, student: data.student },
-      data,
-      { upsert: true, new: true, setDefaultsOnInsert: true }
-    );
+// 4. Get specific Exam Template by ID
+exports.getTemplateById = catchAsync(async (req, res, next) => {
+  const template = await SupplementaryExamTemplate.findById(req.params.id);
+  if (!template) {
+    return next(new AppError("Exam template not found", 404));
   }
 
   res.status(200).json({
     status: "success",
-    message: "Data uploaded successfully and assigned to study centres.",
+    data: { template },
   });
 });
 
-exports.getSuperAdminRecords = catchAsync(async (req, res, next) => {
-  const { classId } = req.query;
+// 5. Update Exam Template
+exports.updateTemplate = catchAsync(async (req, res, next) => {
+  const { title, semesters } = req.body;
+
+  const template = await SupplementaryExamTemplate.findById(req.params.id);
+  if (!template) {
+    return next(new AppError("Exam template not found", 404));
+  }
+
+  if (title) template.title = title.trim();
+  if (semesters && Array.isArray(semesters)) template.semesters = semesters;
+
+  await template.save();
+
+  res.status(200).json({
+    status: "success",
+    message: "Exam template updated successfully",
+    data: { template },
+  });
+});
+
+// 6. Toggle Open/Close Status
+exports.toggleTemplateStatus = catchAsync(async (req, res, next) => {
+  const template = await SupplementaryExamTemplate.findById(req.params.id);
+  if (!template) {
+    return next(new AppError("Exam template not found", 404));
+  }
+
+  template.status = template.status === "open" ? "closed" : "open";
+  await template.save();
+
+  res.status(200).json({
+    status: "success",
+    message: `Supplementary Exam template status changed to ${template.status.toUpperCase()}`,
+    data: { template },
+  });
+});
+
+// 7. Delete Exam Template (Soft Delete)
+exports.deleteTemplate = catchAsync(async (req, res, next) => {
+  const template = await SupplementaryExamTemplate.findById(req.params.id);
+  if (!template) {
+    return next(new AppError("Exam template not found", 404));
+  }
+
+  template.deleted = true;
+  await template.save();
+
+  res.status(200).json({
+    status: "success",
+    message: "Exam template deleted successfully",
+  });
+});
+
+// ==========================================
+// STUDY CENTRE ADMIN: APPLICATIONS & STUDENT LOOKUP
+// ==========================================
+
+// 8. Search Student details by Register Number in DB
+exports.searchStudentByRegNo = catchAsync(async (req, res, next) => {
+  const { regNo } = req.params;
+  if (!regNo) {
+    return next(new AppError("Register number is required", 400));
+  }
+
+  const cleanRegNo = regNo.trim();
+  const student = await Student.findOne({
+    registerNo: new RegExp(`^${cleanRegNo}$`, "i"),
+  }).populate("branch");
+
+  if (!student) {
+    return res.status(200).json({
+      status: "success",
+      found: false,
+      message: "Student not found in database",
+    });
+  }
+
+  res.status(200).json({
+    status: "success",
+    found: true,
+    data: {
+      registerNo: student.registerNo,
+      studentName: student.studentName,
+      branchId: student.branch?._id || null,
+      studyCentreName: student.branch?.studyCentreName || "",
+      studyCentreCode: student.branch?.studyCentreCode || "",
+    },
+  });
+});
+
+// 9. Submit Supplementary Application
+exports.submitApplication = catchAsync(async (req, res, next) => {
+  const {
+    examTemplateId,
+    registerNo,
+    studentName,
+    semester,
+    subjects,
+    isManualStudent,
+    studyCentreName,
+    studyCentreCode,
+  } = req.body;
+
+  if (!examTemplateId) {
+    return next(new AppError("Exam template selection is required", 400));
+  }
+
+  const template = await SupplementaryExamTemplate.findById(examTemplateId);
+  if (!template) {
+    return next(new AppError("Exam template not found", 404));
+  }
+
+  if (template.status !== "open") {
+    return next(new AppError("This supplementary exam is currently closed for submission.", 400));
+  }
+
+  if (!registerNo || !registerNo.trim()) {
+    return next(new AppError("Register number is required", 400));
+  }
+
+  if (!studentName || !studentName.trim()) {
+    return next(new AppError("Student name is required", 400));
+  }
+
+  if (!semester) {
+    return next(new AppError("Semester selection is required", 400));
+  }
+
+  if (!subjects || !Array.isArray(subjects) || subjects.length === 0) {
+    return next(new AppError("At least one subject must be selected for supplementary", 400));
+  }
+
+  // Determine Branch / Study Centre details
+  let userBranch = null;
+  let finalCentreName = studyCentreName || "";
+  let finalCentreCode = studyCentreCode || "";
+
+  if (req.user && req.user.branch) {
+    const branchDoc = await Branch.findById(req.user.branch);
+    if (branchDoc) {
+      userBranch = branchDoc._id;
+      finalCentreName = branchDoc.studyCentreName;
+      finalCentreCode = branchDoc.studyCentreCode;
+    }
+  }
+
+  // Create Supplementary Application (store real values as strings)
+  const application = await SupplementaryApplication.create({
+    examTemplate: examTemplateId,
+    registerNo: registerNo.trim().toUpperCase(),
+    studentName: studentName.trim().toUpperCase(),
+    branch: userBranch,
+    studyCentreName: finalCentreName.toUpperCase(),
+    studyCentreCode: finalCentreCode.toUpperCase(),
+    semester: semester.trim(),
+    subjects: subjects.map((s) => s.trim().toUpperCase()),
+    isManualStudent: !!isManualStudent,
+    submittedBy: req.user?._id,
+  });
+
+  res.status(201).json({
+    status: "success",
+    message: "Supplementary application submitted successfully",
+    data: { application },
+  });
+});
+
+// 10. Get Study Centre Submitted Applications
+exports.getAdminApplications = catchAsync(async (req, res, next) => {
+  const { examTemplateId } = req.query;
   const query = {};
-  if (classId) query.class = classId;
 
-  const records = await SupplementaryExam.find(query).populate("class").populate("student").populate("branch").sort({ createdAt: -1 });
-
-  res.status(200).json({
-    status: "success",
-    data: { records }
-  });
-});
-
-exports.getStudyCentreRecords = catchAsync(async (req, res, next) => {
-  const branchId = req.user.branch || req.user._id; // Depending on how auth works for admin/study centre
-  const records = await SupplementaryExam.find({ branch: branchId }).populate("class").populate("student");
-
-  res.status(200).json({
-    status: "success",
-    data: { records }
-  });
-});
-
-exports.downloadCentreList = catchAsync(async (req, res, next) => {
-  const { classId } = req.params;
-  const branchId = req.user.branch || req.user._id;
-
-  const query = { branch: branchId };
-  if (classId) query.class = classId;
-
-  const records = await SupplementaryExam.find(query).populate("class");
-  if (!records || records.length === 0) {
-    return next(new AppError("No records found to download", 404));
+  if (req.user && req.user.branch) {
+    query.branch = req.user.branch;
+  } else if (req.user) {
+    query.submittedBy = req.user._id;
   }
 
-  // Find all subjects from these records to make columns
-  let subjectColumns = new Set();
-  records.forEach(r => {
-    r.subjectMarks.forEach(sm => subjectColumns.add(sm.subjectName));
-  });
-  const subjectArray = Array.from(subjectColumns);
-
-  const headers = [
-    "Exam Reg. No.",
-    "Student Name",
-    "Study Centre Name",
-    "Study Centre Code",
-    "SEMESTER",
-    ...subjectArray
-  ];
-
-  const workbook = xlsx.utils.book_new();
-  const rows = [];
-  rows.push(headers);
-
-  records.forEach(record => {
-    const row = [
-      record.registerNo,
-      record.studentName,
-      record.studyCentreName,
-      record.studyCentreCode,
-      record.semester
-    ];
-    // Add marks
-    subjectArray.forEach(subj => {
-      const match = record.subjectMarks.find(s => s.subjectName === subj);
-      row.push(match ? match.mark : "");
-    });
-    rows.push(row);
-  });
-
-  const worksheet = xlsx.utils.aoa_to_sheet(rows);
-  xlsx.utils.book_append_sheet(workbook, worksheet, "Marks Entry");
-
-  const buffer = xlsx.write(workbook, { type: "buffer", bookType: "xlsx" });
-
-  res.setHeader(
-    "Content-Type",
-    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-  );
-  res.setHeader(
-    "Content-Disposition",
-    `attachment; filename=Student_List_Marks_Entry.xlsx`
-  );
-
-  res.send(buffer);
-});
-
-exports.uploadMarks = catchAsync(async (req, res, next) => {
-  if (!req.file) {
-    return next(new AppError("Please upload an excel file", 400));
-  }
-  const branchId = req.user.branch || req.user._id;
-
-  const workbook = xlsx.read(req.file.buffer, { type: "buffer" });
-  const sheetName = workbook.SheetNames[0];
-  const sheet = workbook.Sheets[sheetName];
-  const rows = xlsx.utils.sheet_to_json(sheet, { defval: "" });
-
-  const errors = [];
-
-  for (let [index, row] of rows.entries()) {
-    const regNo = row["Exam Reg. No."]?.toString().trim() || "";
-    if (!regNo) continue;
-
-    const record = await SupplementaryExam.findOne({
-      registerNo: new RegExp(`^${regNo}$`, 'i'),
-      branch: branchId
-    });
-
-    if (!record) {
-      errors.push(`Row ${index + 2}: Assigned student with Reg No ${regNo} not found for your centre.`);
-      continue;
-    }
-
-    // Update marks
-    for (const key of Object.keys(row)) {
-      const upperKey = key.trim().toUpperCase();
-      const markIndex = record.subjectMarks.findIndex(s => s.subjectName === upperKey);
-      if (markIndex > -1) {
-        record.subjectMarks[markIndex].mark = row[key]?.toString().trim() || "";
-      }
-    }
-
-    record.studyCentreSubmitted = true;
-    record.centreSubmittedAt = new Date();
-    await record.save();
+  if (examTemplateId) {
+    query.examTemplate = examTemplateId;
   }
 
-  if (errors.length > 0) {
-    return res.status(400).json({ status: "fail", message: "Uploaded with some errors", errors });
-  }
-
-  res.status(200).json({
-    status: "success",
-    message: "Marks uploaded successfully.",
-  });
-});
-
-exports.downloadFinalData = catchAsync(async (req, res, next) => {
-  const { classId } = req.params;
-  const query = {};
-  if (classId) query.class = classId;
-
-  const records = await SupplementaryExam.find(query)
-    .populate("class")
-    .populate("branch")
+  const applications = await SupplementaryApplication.find(query)
+    .populate("examTemplate", "title status")
     .sort({ createdAt: -1 });
 
-  if (!records || records.length === 0) {
-    return next(new AppError("No records found to download", 404));
+  res.status(200).json({
+    status: "success",
+    data: { applications },
+  });
+});
+
+// 11. Delete/Cancel Application
+exports.deleteApplication = catchAsync(async (req, res, next) => {
+  const application = await SupplementaryApplication.findById(req.params.id);
+  if (!application) {
+    return next(new AppError("Application not found", 404));
   }
 
-  // Find all subjects from these records to make columns
-  let subjectColumns = new Set();
-  records.forEach((r) => {
-    r.subjectMarks.forEach((sm) => subjectColumns.add(sm.subjectName));
-  });
-  const subjectArray = Array.from(subjectColumns);
+  application.deleted = true;
+  await application.save();
 
+  res.status(200).json({
+    status: "success",
+    message: "Application deleted successfully",
+  });
+});
+
+// ==========================================
+// SUPER ADMIN: VIEW SUBMISSIONS & EXCEL EXPORT
+// ==========================================
+
+// 12. Get Super Admin Submissions for Exam Template
+exports.getSuperAdminApplications = catchAsync(async (req, res, next) => {
+  const { examTemplateId } = req.query;
+  const query = {};
+  if (examTemplateId) {
+    query.examTemplate = examTemplateId;
+  }
+
+  const applications = await SupplementaryApplication.find(query)
+    .populate("examTemplate", "title status")
+    .populate("branch", "studyCentreName studyCentreCode")
+    .sort({ createdAt: -1 });
+
+  res.status(200).json({
+    status: "success",
+    data: { applications },
+  });
+});
+
+// 13. Export Submitted Applications to Excel (Semester names as headers, multiple student rows for multiple subjects)
+exports.exportApplicationsExcel = catchAsync(async (req, res, next) => {
+  const { templateId } = req.params;
+  const query = {};
+  if (templateId && templateId !== "all") {
+    query.examTemplate = templateId;
+  }
+
+  const templateDoc =
+    templateId && templateId !== "all"
+      ? await SupplementaryExamTemplate.findById(templateId)
+      : null;
+
+  const applications = await SupplementaryApplication.find(query)
+    .populate("examTemplate", "title")
+    .sort({ createdAt: -1 });
+
+  if (!applications || applications.length === 0) {
+    return next(new AppError("No submitted applications found to export", 404));
+  }
+
+  // Collect all unique semester names to use as column headers
+  const semesterSet = new Set();
+
+  if (templateDoc && templateDoc.semesters) {
+    templateDoc.semesters.forEach((s) => {
+      if (s.semesterName) semesterSet.add(s.semesterName.trim());
+    });
+  }
+
+  // Also gather any semesters from actual application entries
+  applications.forEach((app) => {
+    if (app.semester) semesterSet.add(app.semester.trim());
+  });
+
+  const semesterNames = Array.from(semesterSet);
+
+  // Build Headers: Sl No, Register No, Student Name, Study Centre Code, Study Centre Name, [Semester 1], [Semester 2] ...
   const headers = [
-    "Exam Reg. No.",
+    "Sl No",
+    "Register No",
     "Student Name",
-    "Study Centre Name",
     "Study Centre Code",
-    "SEMESTER",
-    "Status",
-    ...subjectArray,
+    "Study Centre Name",
+    ...semesterNames,
   ];
 
-  const workbook = xlsx.utils.book_new();
-  const rows = [];
-  rows.push(headers);
+  const rows = [headers];
+  let slNo = 1;
 
-  records.forEach((record) => {
-    const row = [
-      record.registerNo,
-      record.studentName,
-      record.studyCentreName,
-      record.studyCentreCode,
-      record.semester,
-      record.studyCentreSubmitted ? "Completed" : "Pending",
-    ];
-    // Add marks
-    subjectArray.forEach((subj) => {
-      const match = record.subjectMarks.find((s) => s.subjectName === subj);
-      row.push(match ? match.mark : "");
+  applications.forEach((app) => {
+    const subjects =
+      Array.isArray(app.subjects) && app.subjects.length > 0
+        ? app.subjects
+        : [""];
+
+    subjects.forEach((subj) => {
+      const row = [
+        slNo++,
+        app.registerNo || "",
+        app.studentName || "",
+        app.studyCentreCode || "",
+        app.studyCentreName || "",
+      ];
+
+      // For each semester header column, put the subject name if it matches app.semester, else empty cell
+      semesterNames.forEach((semName) => {
+        if (
+          app.semester &&
+          semName.toUpperCase() === app.semester.trim().toUpperCase()
+        ) {
+          row.push(subj);
+        } else {
+          row.push("");
+        }
+      });
+
+      rows.push(row);
     });
-    rows.push(row);
   });
 
+  const workbook = xlsx.utils.book_new();
   const worksheet = xlsx.utils.aoa_to_sheet(rows);
-  xlsx.utils.book_append_sheet(workbook, worksheet, "All Marks");
+
+  // Column width styling
+  const colWidths = [
+    { wch: 8 },  // Sl No
+    { wch: 16 }, // Reg No
+    { wch: 25 }, // Student Name
+    { wch: 18 }, // Centre Code
+    { wch: 28 }, // Centre Name
+  ];
+  semesterNames.forEach(() => {
+    colWidths.push({ wch: 25 });
+  });
+  worksheet["!cols"] = colWidths;
+
+  const sheetName = templateDoc
+    ? templateDoc.title.substring(0, 30).replace(/[:\/?*\[\]]/g, "_")
+    : "Supplementary Applications";
+
+  xlsx.utils.book_append_sheet(workbook, worksheet, sheetName);
 
   const buffer = xlsx.write(workbook, { type: "buffer", bookType: "xlsx" });
+
+  const fileName = templateDoc
+    ? `Supplementary_Applications_${templateDoc.title.replace(/\s+/g, "_")}.xlsx`
+    : `Supplementary_Applications_All.xlsx`;
 
   res.setHeader(
     "Content-Type",
     "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
   );
-  res.setHeader(
-    "Content-Disposition",
-    `attachment; filename=Supplementary_Final_Data.xlsx`
-  );
+  res.setHeader("Content-Disposition", `attachment; filename=${fileName}`);
 
   res.send(buffer);
 });
+

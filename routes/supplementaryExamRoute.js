@@ -1,62 +1,94 @@
 const express = require("express");
 const supplementaryExamController = require("../controllers/supplementaryExamController");
 const authController = require("../controllers/authController");
-const multer = require("multer");
 
 const router = express.Router();
-const upload = multer({ storage: multer.memoryStorage() });
 
-// Super Admin Routes
+// All routes require authentication
+router.use(authController.protect);
+
+// ==========================================
+// SUPER ADMIN ROUTES
+// ==========================================
+router.post(
+  "/templates",
+  authController.restrictTo("superAdmin"),
+  supplementaryExamController.createTemplate
+);
+
 router.get(
-    "/template/:classId",
-    authController.protect,
-    authController.restrictTo('superAdmin'),
-    supplementaryExamController.getTemplate
+  "/templates",
+  authController.restrictTo("superAdmin"),
+  supplementaryExamController.getTemplates
+);
+
+router.get(
+  "/templates/:id",
+  authController.restrictTo("superAdmin"),
+  supplementaryExamController.getTemplateById
+);
+
+router.put(
+  "/templates/:id",
+  authController.restrictTo("superAdmin"),
+  supplementaryExamController.updateTemplate
+);
+
+router.patch(
+  "/templates/:id/toggle-status",
+  authController.restrictTo("superAdmin"),
+  supplementaryExamController.toggleTemplateStatus
+);
+
+router.delete(
+  "/templates/:id",
+  authController.restrictTo("superAdmin"),
+  supplementaryExamController.deleteTemplate
+);
+
+router.get(
+  "/super-admin-applications",
+  authController.restrictTo("superAdmin"),
+  supplementaryExamController.getSuperAdminApplications
+);
+
+router.get(
+  "/export-excel/:templateId",
+  authController.restrictTo("superAdmin"),
+  supplementaryExamController.exportApplicationsExcel
+);
+
+// ==========================================
+// STUDY CENTRE ADMIN & SHARED ROUTES
+// ==========================================
+router.get(
+  "/open-templates",
+  authController.restrictTo("admin", "superAdmin"),
+  supplementaryExamController.getOpenTemplates
+);
+
+router.get(
+  "/search-student/:regNo",
+  authController.restrictTo("admin", "superAdmin"),
+  supplementaryExamController.searchStudentByRegNo
 );
 
 router.post(
-    "/upload-initial",
-    authController.protect,
-    authController.restrictTo('superAdmin'),
-    upload.single("file"),
-    supplementaryExamController.uploadInitialData
+  "/submit-application",
+  authController.restrictTo("admin", "superAdmin"),
+  supplementaryExamController.submitApplication
 );
 
 router.get(
-    "/super-admin-records",
-    authController.protect,
-    authController.restrictTo('superAdmin'),
-    supplementaryExamController.getSuperAdminRecords
+  "/my-applications",
+  authController.restrictTo("admin", "superAdmin"),
+  supplementaryExamController.getAdminApplications
 );
 
-router.get(
-    "/download-final-data/:classId?",
-    authController.protect,
-    authController.restrictTo('superAdmin'),
-    supplementaryExamController.downloadFinalData
-);
-
-// Study Centre Routes
-router.get(
-    "/centre-records",
-    authController.protect,
-    authController.restrictTo('admin'),
-    supplementaryExamController.getStudyCentreRecords
-);
-
-router.get(
-    "/download-centre-list/:classId?",
-    authController.protect,
-    authController.restrictTo('admin'),
-    supplementaryExamController.downloadCentreList
-);
-
-router.post(
-    "/upload-marks",
-    authController.protect,
-    authController.restrictTo('admin'),
-    upload.single("file"),
-    supplementaryExamController.uploadMarks
+router.delete(
+  "/application/:id",
+  authController.restrictTo("admin", "superAdmin"),
+  supplementaryExamController.deleteApplication
 );
 
 module.exports = router;
