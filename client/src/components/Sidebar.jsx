@@ -1,100 +1,123 @@
 import {
-  faAward,
   faBars,
   faBell,
+  faBook,
+  faBookOpenReader,
+  faCalendar,
+  faChalkboardTeacher,
   faChalkboardUser,
+  faCheckDouble,
+  faCheckToSlot,
+  faChevronDown,
+  faChevronRight,
+  faCog,
+  faDownload,
   faEnvelope,
+  faFileArchive,
   faGaugeHigh,
   faGraduationCap,
-  faPenToSquare,
+  faMarker,
+  faPenAlt,
   faRightFromBracket,
   faSchool,
+  faTableList,
+  faToolbox,
+  faTrash,
+  faUpload,
   faUser,
-  faUserGraduate,
+  faUsers,
   faXmark,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useContext, useState } from "react";
-import { Link, NavLink } from "react-router-dom";
+import { useContext, useState, useEffect } from "react";
+import { Link, NavLink, useLocation } from "react-router-dom";
 import { UserAuthContext } from "./../context/userContext";
 
-// --- Brand logo: gradient mark + wordmark ---
+// --- Brand logo ---
 const Logo = ({ dark = true }) => (
-  <Link to="/" className="flex items-center gap-3">
-    <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 shadow-lg shadow-indigo-900/30">
-      <FontAwesomeIcon icon={faGraduationCap} className="h-5 w-5 text-white" />
+  <Link to="/" className="flex items-center gap-2.5">
+    <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 via-purple-600 to-blue-600 shadow-md shadow-indigo-900/40">
+      <FontAwesomeIcon icon={faGraduationCap} className="h-4 w-4 text-white" />
     </span>
     <div className="leading-tight">
       <h1
-        className={`text-base font-bold tracking-tight ${
+        className={`text-sm font-bold tracking-tight ${
           dark ? "text-white" : "text-slate-800"
         }`}
       >
         MAHDIYYAH
       </h1>
-      <p className={`text-[11px] ${dark ? "text-slate-400" : "text-slate-500"}`}>
-        Portal
+      <p className={`text-[10px] font-semibold ${dark ? "text-indigo-400" : "text-indigo-600"}`}>
+        Portal Management
       </p>
     </div>
   </Link>
 );
 
-// --- Single navigation item with gradient active state ---
+// --- Single Nav Link Item (Compact) ---
 const NavItem = ({ nav, onClick }) => (
   <NavLink
     to={nav.route}
     onClick={onClick}
     end={nav.route === "/"}
     className={({ isActive }) =>
-      `group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 ${
+      `group relative flex items-center gap-2.5 rounded-lg px-2.5 py-1.5 text-[11px] font-semibold transition-all duration-150 ${
         isActive
-          ? "bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-lg shadow-indigo-900/40"
-          : "text-slate-400 hover:bg-white/5 hover:text-white"
+          ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-sm shadow-indigo-900/40"
+          : "text-slate-400 hover:bg-slate-800/80 hover:text-slate-100"
       }`
     }
   >
     {({ isActive }) => (
       <>
         <span
-          className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-colors ${
+          className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-md transition-colors ${
             isActive
               ? "bg-white/20 text-white"
-              : "bg-white/5 text-slate-400 group-hover:text-white"
+              : "bg-slate-800/60 text-slate-400 group-hover:text-indigo-400"
           }`}
         >
-          <FontAwesomeIcon icon={nav.icon} className="h-4 w-4" />
+          <FontAwesomeIcon icon={nav.icon} className="h-3 w-3" />
         </span>
-        <span>{nav.name}</span>
+        <span className="truncate">{nav.name}</span>
+        {nav.badge && (
+          <span className="ml-auto rounded-md bg-indigo-500/20 px-1.5 py-0.5 text-[9px] font-bold text-indigo-300 ring-1 ring-inset ring-indigo-500/30">
+            {nav.badge}
+          </span>
+        )}
       </>
     )}
   </NavLink>
 );
 
-// --- Bottom user card ---
+// --- Bottom User Profile Card ---
 const UserProfile = ({ authData, onLogout }) => (
-  <div className="mt-auto pt-4">
-    <div className="flex items-center gap-3 rounded-2xl bg-white/5 p-3 ring-1 ring-white/10">
-      <Link to="/profile" className="flex min-w-0 flex-1 items-center gap-3">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-sm font-bold text-white">
+  <div className="mt-auto border-t border-slate-800/80 pt-3">
+    <div className="flex items-center gap-2.5 rounded-xl bg-slate-800/60 p-2 ring-1 ring-white/10">
+      <Link
+        to={authData.role === "admin" ? "/study-centre-profile/" : "/"}
+        className="flex min-w-0 flex-1 items-center gap-2.5"
+      >
+        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 text-xs font-bold text-white shadow-sm">
           {authData.username?.charAt(0)?.toUpperCase() || (
             <FontAwesomeIcon icon={faUser} />
           )}
         </div>
         <div className="min-w-0">
-          <p className="truncate text-sm font-semibold text-white">
+          <p className="truncate text-xs font-bold text-white leading-tight">
             {authData.username}
           </p>
-          <p className="truncate text-xs capitalize text-slate-400">
-            {authData.role}
+          <p className="truncate text-[10px] capitalize text-slate-400 leading-tight mt-0.5">
+            {authData.role === "superAdmin" ? "Super Admin" : "Branch Admin"}
           </p>
         </div>
       </Link>
       <button
         onClick={onLogout}
         title="Logout"
-        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-red-500/20 hover:text-red-400"
+        className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-red-500/20 hover:text-red-400"
       >
-        <FontAwesomeIcon icon={faRightFromBracket} />
+        <FontAwesomeIcon icon={faRightFromBracket} className="h-3 w-3" />
       </button>
     </div>
   </div>
@@ -103,31 +126,125 @@ const UserProfile = ({ authData, onLogout }) => (
 function Sidebar() {
   const { authData, logout } = useContext(UserAuthContext);
   const [openSidebar, setOpenSidebar] = useState(false);
+  const location = useLocation();
 
-  // --- Navigation Data ---
-  const adminNavigations = [
-    { name: "Dashboard", route: "/", icon: faGaugeHigh },
-    { name: "Teachers", route: "/all-teachers", icon: faChalkboardUser },
-    { name: "Mark Entry", route: "/mark-entry", icon: faPenToSquare },
-    { name: "My Messages", route: "/my-messages", icon: faEnvelope },
+  // --- Collapsible Section States ---
+  const [openSections, setOpenSections] = useState({});
+
+  // Super Admin Navigation Categorization
+  const superAdminSections = [
+    {
+      title: "Main",
+      defaultOpen: true,
+      items: [{ name: "Dashboard", route: "/", icon: faGaugeHigh }],
+    },
+    {
+      title: "Core Management",
+      defaultOpen: true,
+      items: [
+        { name: "Study Centers", route: "/study-centres", icon: faSchool },
+        { name: "Students", route: "/all-centre-students", icon: faUsers },
+        { name: "Teachers", route: "/all-MAHDIYYAH-teachers", icon: faChalkboardTeacher },
+      ],
+    },
+    {
+      title: "Academic Operations",
+      defaultOpen: true,
+      items: [
+        { name: "Subjects", route: "/all-subjects", icon: faBookOpenReader },
+        { name: "Classrooms", route: "/class-management", icon: faToolbox },
+        { name: "Exams", route: "/create-exam", icon: faCheckToSlot },
+        { name: "Exam Timetables", route: "/timetables", icon: faCalendar },
+        { name: "Results", route: "/result-section", icon: faMarker },
+        { name: "Previous Results", route: "/previous-results", icon: faCheckDouble },
+        { name: "Supplementary Exam", route: "/supplementary-exam", icon: faFileArchive, badge: "New" },
+      ],
+    },
+    {
+      title: "System & Utilities",
+      defaultOpen: false,
+      items: [
+        { name: "Downloads", route: "/downloads", icon: faDownload },
+        { name: "Shared Files", route: "/manage-downloads", icon: faDownload },
+        { name: "Notifications", route: "/create-notification", icon: faBell },
+        { name: "Messages", route: "/create-messages", icon: faEnvelope },
+        { name: "Configurations", route: "/configurations", icon: faCog },
+        { name: "Recycle Bin", route: "/trash", icon: faTrash },
+      ],
+    },
   ];
 
-  const superAdminNavigations = [
-    { name: "Dashboard", route: "/", icon: faGaugeHigh },
-    { name: "Study Centers", route: "/study-centres", icon: faSchool },
-    { name: "Students", route: "/all-centre-students", icon: faUserGraduate },
-    { name: "Teachers", route: "/all-MAHDIYYAH-teachers", icon: faChalkboardUser },
-    { name: "Notifications", route: "/create-notification", icon: faBell },
-    { name: "Messages", route: "/create-messages", icon: faEnvelope },
-    { name: "Results", route: "/result-section", icon: faAward },
+  // Study Centre Admin Navigation Categorization
+  const adminSections = [
+    {
+      title: "Main",
+      defaultOpen: true,
+      items: [{ name: "Dashboard", route: "/", icon: faGaugeHigh }],
+    },
+    {
+      title: "Student & Staff",
+      defaultOpen: true,
+      items: [
+        { name: "Students", route: "/all-classes", icon: faGraduationCap },
+        { name: "Teachers", route: "/all-teachers", icon: faChalkboardUser },
+        { name: "New Admissions", route: "/new-admissions", icon: faBook },
+      ],
+    },
+    {
+      title: "Exam & Results",
+      defaultOpen: true,
+      items: [
+        { name: "Mark Entry", route: "/mark-entry", icon: faPenAlt },
+        { name: "Hall Tickets", route: "/hall-tickets", icon: faFileArchive },
+        { name: "Exam Results", route: "/result-view", icon: faCheckDouble },
+        { name: "Bulk Exam Results", route: "/bulk-result-view", icon: faTableList },
+        { name: "Previous Results", route: "/previous-results/admin", icon: faCheckDouble },
+        { name: "Supplementary Exam", route: "/centre-supplementary-exam", icon: faFileArchive, badge: "New" },
+      ],
+    },
+    {
+      title: "Branch Utilities",
+      defaultOpen: false,
+      items: [
+        { name: "My Uploads", route: "/my-uploads", icon: faUpload },
+        { name: "Shared Downloads", route: "/shared-downloads", icon: faDownload },
+        { name: "My Messages", route: "/my-messages", icon: faEnvelope },
+        { name: "Centre Profile", route: "/study-centre-profile/", icon: faUser },
+      ],
+    },
   ];
 
-  const navigations =
-    authData?.role === "admin"
-      ? adminNavigations
-      : authData?.role === "superAdmin"
-      ? superAdminNavigations
+  const sections =
+    authData?.role === "superAdmin"
+      ? superAdminSections
+      : authData?.role === "admin"
+      ? adminSections
       : [];
+
+  // Auto expand category containing current active URL path
+  useEffect(() => {
+    const updatedState = { ...openSections };
+    sections.forEach((section) => {
+      const containsActive = section.items.some((item) =>
+        item.route === "/"
+          ? location.pathname === "/"
+          : location.pathname.startsWith(item.route)
+      );
+      if (containsActive) {
+        updatedState[section.title] = true;
+      } else if (updatedState[section.title] === undefined) {
+        updatedState[section.title] = section.defaultOpen;
+      }
+    });
+    setOpenSections(updatedState);
+  }, [location.pathname]);
+
+  const toggleSection = (title) => {
+    setOpenSections((prev) => ({
+      ...prev,
+      [title]: !prev[title],
+    }));
+  };
 
   const handleLinkClick = () => {
     if (openSidebar) setOpenSidebar(false);
@@ -135,19 +252,19 @@ function Sidebar() {
 
   return (
     <>
-      {/* --- Mobile Header --- */}
-      <div className="sticky top-0 z-30 flex items-center justify-between border-b border-slate-200 bg-white px-4 py-3 lg:hidden">
+      {/* --- Mobile Top Bar --- */}
+      <div className="sticky top-0 z-30 flex items-center justify-between border-b border-slate-200 bg-white px-4 py-2.5 lg:hidden">
         <Logo dark={false} />
         <button
           onClick={() => setOpenSidebar(true)}
-          className="flex h-10 w-10 items-center justify-center rounded-lg text-slate-600 hover:bg-slate-100"
+          className="flex h-9 w-9 items-center justify-center rounded-lg text-slate-600 hover:bg-slate-100"
           aria-label="Open sidebar"
         >
-          <FontAwesomeIcon icon={faBars} className="h-5 w-5" />
+          <FontAwesomeIcon icon={faBars} className="h-4 w-4" />
         </button>
       </div>
 
-      {/* --- Mobile Overlay --- */}
+      {/* --- Mobile Overlay Backdrop --- */}
       {openSidebar && (
         <div
           onClick={() => setOpenSidebar(false)}
@@ -155,44 +272,69 @@ function Sidebar() {
         />
       )}
 
-      {/* --- Main Sidebar --- */}
+      {/* --- Main Sidebar Drawer --- */}
       <aside
-        className={`fixed left-0 top-0 z-50 flex h-full w-72 transform flex-col bg-slate-900 transition-transform duration-300 ease-in-out lg:translate-x-0 ${
+        className={`fixed left-0 top-0 z-50 flex h-full w-64 transform flex-col bg-slate-900 shadow-2xl transition-transform duration-300 ease-in-out lg:translate-x-0 ${
           openSidebar ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        <div className="flex h-full flex-col p-5">
+        <div className="flex h-full flex-col p-3.5">
           {/* Header */}
-          <div className="mb-8 flex items-center justify-between">
+          <div className="mb-4 flex items-center justify-between px-1 pt-1">
             <Logo />
             <button
               onClick={() => setOpenSidebar(false)}
-              className="flex h-9 w-9 items-center justify-center rounded-lg text-slate-400 hover:bg-white/5 hover:text-white lg:hidden"
+              className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-white/5 hover:text-white lg:hidden"
               aria-label="Close sidebar"
             >
-              <FontAwesomeIcon icon={faXmark} className="h-5 w-5" />
+              <FontAwesomeIcon icon={faXmark} className="h-4 w-4" />
             </button>
           </div>
 
-          {/* Section label */}
-          <p className="mb-3 px-3 text-[11px] font-semibold uppercase tracking-widest text-slate-500">
-            Menu
-          </p>
+          {/* Navigation Accordion Sections */}
+          <div className="flex-grow overflow-y-auto pr-1 space-y-3 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-slate-700/50 [&::-webkit-scrollbar-thumb]:rounded-full">
+            {sections.map((section, sIdx) => {
+              const isExpanded = openSections[section.title] !== false;
+              return (
+                <div key={sIdx} className="space-y-1">
+                  {/* Category Header with Toggle Chevron */}
+                  <button
+                    type="button"
+                    onClick={() => toggleSection(section.title)}
+                    className="flex w-full items-center justify-between px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-400 hover:text-slate-200 transition-colors rounded hover:bg-slate-800/50"
+                  >
+                    <span className="flex items-center gap-1.5">
+                      <span>{section.title}</span>
+                      <span className="text-[9px] font-normal text-slate-500">
+                        ({section.items.length})
+                      </span>
+                    </span>
+                    <FontAwesomeIcon
+                      icon={isExpanded ? faChevronDown : faChevronRight}
+                      className="h-2.5 w-2.5 text-slate-500"
+                    />
+                  </button>
 
-          {/* Navigation */}
-          <nav className="flex flex-grow flex-col gap-1.5">
-            {navigations.map((nav, index) => (
-              <NavItem key={index} nav={nav} onClick={handleLinkClick} />
-            ))}
-          </nav>
+                  {/* Category Nav Links */}
+                  {isExpanded && (
+                    <nav className="space-y-0.5 pl-1">
+                      {section.items.map((nav, nIdx) => (
+                        <NavItem key={nIdx} nav={nav} onClick={handleLinkClick} />
+                      ))}
+                    </nav>
+                  )}
+                </div>
+              );
+            })}
+          </div>
 
-          {/* Auth section */}
+          {/* User Profile Footer */}
           {authData ? (
             <UserProfile authData={authData} onLogout={logout} />
           ) : (
             <Link
               to="/login"
-              className="mt-auto flex items-center justify-center rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 p-3 font-semibold text-white shadow-lg shadow-indigo-900/40 transition hover:from-indigo-600 hover:to-purple-700"
+              className="mt-auto flex items-center justify-center rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 p-2.5 text-xs font-semibold text-white shadow-md transition hover:from-indigo-600 hover:to-purple-700"
             >
               <span>Login</span>
             </Link>
