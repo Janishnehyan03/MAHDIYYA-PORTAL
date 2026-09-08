@@ -1,5 +1,6 @@
 import {
   faArrowUpRightDots,
+  faDownload,
   faPenToSquare,
   faPlus,
   faUserGraduate,
@@ -12,6 +13,7 @@ import { Link, useParams } from "react-router-dom";
 import Axios from "../../Axios";
 import { toast } from "react-toastify";
 import { UserAuthContext } from "../../context/userContext";
+import * as XLSX from "xlsx";
 
 // --- Helper Components ---
 
@@ -435,6 +437,36 @@ function AllStudents() {
     }
   };
 
+  const handleExport = () => {
+    if (students.length === 0) {
+      toast.info("There are no students to export.");
+      return;
+    }
+
+    const exportRows = students.map((student, index) => ({
+      "SL. NO.": index + 1,
+      "REG. NO": student.registerNo || "",
+      NAME: student.studentName || "",
+      FATHER: student.fatherName || "",
+      HOUSE: student.houseName || student.house || "",
+      PLACE: student.place || "",
+      "POST OFFICE": student.postOffice || "",
+      PINCODE: student.pinCode || "",
+      DISTRICT: student.district || "",
+      STATE: student.state || "",
+      PHONE: student.phone || "",
+      "DATE OF BIRTH": student.dateOfBirth || "",
+    }));
+    const worksheet = XLSX.utils.json_to_sheet(exportRows);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Students");
+    const safeClassName = (className?.className || "students")
+      .replace(/[^a-z0-9]+/gi, "-")
+      .replace(/^-|-$/g, "");
+
+    XLSX.writeFile(workbook, `${safeClassName}-students.xlsx`);
+  };
+
   const showAddStudents =
     !configLoading &&
     configuration &&
@@ -465,6 +497,14 @@ function AllStudents() {
                 </div>
               </div>
               <div className="flex flex-wrap items-center gap-2">
+                <button
+                  onClick={handleExport}
+                  disabled={students.length === 0}
+                  className="inline-flex items-center gap-2 rounded-xl bg-white/10 px-4 py-2.5 text-sm font-semibold text-white ring-1 ring-inset ring-white/20 backdrop-blur transition hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  <FontAwesomeIcon icon={faDownload} />
+                  Export Students
+                </button>
                 {isSuperAdmin && (
                   <>
                     <select
