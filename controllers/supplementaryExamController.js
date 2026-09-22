@@ -264,9 +264,36 @@ exports.getAdminApplications = catchAsync(async (req, res, next) => {
 
 // 11. Delete/Cancel Application
 exports.deleteApplication = catchAsync(async (req, res, next) => {
-  const application = await SupplementaryApplication.findById(req.params.id);
+  const application = await SupplementaryApplication.findById(req.params.id).populate("examTemplate");
   if (!application) {
     return next(new AppError("Application not found", 404));
+  }
+
+  // Prevent study centre admins from deleting applications if the exam session is closed
+  if (req.user && req.user.role === "admin") {
+    if (application.examTemplate && application.examTemplate.status === "closed") {
+      return next(
+        new AppError(
+          "Cannot delete applications after the supplementary exam window is closed.",
+          400
+        )
+      );
+    }
+    const isBranchMatch =
+      req.user.branch &&
+      application.branch &&
+      application.branch.toString() === req.user.branch.toString();
+    const isUserMatch =
+      application.submittedBy &&
+      application.submittedBy.toString() === req.user._id.toString();
+    if (!isBranchMatch && !isUserMatch) {
+      return next(
+        new AppError(
+          "You do not have permission to delete this application.",
+          403
+        )
+      );
+    }
   }
 
   application.deleted = true;
@@ -279,7 +306,7 @@ exports.deleteApplication = catchAsync(async (req, res, next) => {
 });
 
 // ==========================================
-// SUPER ADMIN: VIEW SUBMISSIONS & EXCEL EXPORT
+// SUPER ADMIN & STUDY CENTRE: VIEW SUBMISSIONS & EXCEL EXPORT
 // ==========================================
 
 // 12. Get Super Admin Submissions for Exam Template
@@ -307,6 +334,15 @@ exports.exportApplicationsExcel = catchAsync(async (req, res, next) => {
   const query = {};
   if (templateId && templateId !== "all") {
     query.examTemplate = templateId;
+  }
+
+  // If study centre admin, restrict export to their study centre
+  if (req.user && req.user.role === "admin") {
+    if (req.user.branch) {
+      query.branch = req.user.branch;
+    } else {
+      query.submittedBy = req.user._id;
+    }
   }
 
   const templateDoc =
