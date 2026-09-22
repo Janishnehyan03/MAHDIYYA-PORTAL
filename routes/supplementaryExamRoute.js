@@ -18,13 +18,13 @@ router.post(
 
 router.get(
   "/templates",
-  authController.restrictTo("superAdmin"),
+  authController.restrictTo("admin", "superAdmin"),
   supplementaryExamController.getTemplates
 );
 
 router.get(
   "/templates/:id",
-  authController.restrictTo("superAdmin"),
+  authController.restrictTo("admin", "superAdmin"),
   supplementaryExamController.getTemplateById
 );
 
@@ -54,7 +54,7 @@ router.get(
 
 router.get(
   "/export-excel/:templateId",
-  authController.restrictTo("superAdmin"),
+  authController.restrictTo("admin", "superAdmin"),
   supplementaryExamController.exportApplicationsExcel
 );
 

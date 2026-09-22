@@ -11,11 +11,14 @@ import {
   faPaperPlane,
   faFileAlt,
   faGraduationCap,
+  faLock,
+  faFileExcel,
+  faInfoCircle,
 } from "@fortawesome/free-solid-svg-icons";
 import { toast } from "react-toastify";
 
 function SupplementaryExamCentre() {
-  const [openTemplates, setOpenTemplates] = useState([]);
+  const [templates, setTemplates] = useState([]);
   const [selectedTemplateId, setSelectedTemplateId] = useState("");
   const [selectedTemplate, setSelectedTemplate] = useState(null);
 
@@ -33,39 +36,63 @@ function SupplementaryExamCentre() {
 
   // Submissions list
   const [myApplications, setMyApplications] = useState([]);
+  const [searchFilter, setSearchFilter] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [exporting, setExporting] = useState(false);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    fetchOpenTemplates();
+    fetchTemplates();
   }, []);
 
   useEffect(() => {
-    if (selectedTemplateId) {
-      const template = openTemplates.find((t) => t._id === selectedTemplateId);
+    if (selectedTemplateId && selectedTemplateId !== "all") {
+      const template = templates.find((t) => t._id === selectedTemplateId);
       setSelectedTemplate(template || null);
       setSelectedSemester("");
       setAvailableSubjects([]);
       setSelectedSubjects([]);
       fetchMyApplications(selectedTemplateId);
+    } else if (selectedTemplateId === "all") {
+      setSelectedTemplate(null);
+      setSelectedSemester("");
+      setAvailableSubjects([]);
+      setSelectedSubjects([]);
+      fetchMyApplications("all");
     } else {
       setSelectedTemplate(null);
       setMyApplications([]);
     }
-  }, [selectedTemplateId, openTemplates]);
+  }, [selectedTemplateId, templates]);
 
-  const fetchOpenTemplates = async () => {
+  const fetchTemplates = async () => {
     try {
       setLoading(true);
-      const { data } = await Axios.get("/supplementary-exam/open-templates");
-      const list = data.data.templates || [];
-      setOpenTemplates(list);
+      // Fetch all templates (accessible to study centre admin and superAdmin)
+      let list = [];
+      try {
+        const { data } = await Axios.get("/supplementary-exam/templates");
+        list = data.data.templates || [];
+      } catch (err) {
+        // Fallback to open-templates if /templates encounters an issue
+        const { data } = await Axios.get("/supplementary-exam/open-templates");
+        list = data.data.templates || [];
+      }
+
+      setTemplates(list);
+
       if (list.length > 0) {
-        setSelectedTemplateId(list[0]._id);
+        // Prioritize first open template, otherwise choose the latest template
+        const openTemplate = list.find((t) => t.status === "open");
+        if (openTemplate) {
+          setSelectedTemplateId(openTemplate._id);
+        } else {
+          setSelectedTemplateId(list[0]._id);
+        }
       }
     } catch (error) {
-      console.error("Error fetching open templates:", error);
-      toast.error("Failed to load open supplementary exams");
+      console.error("Error fetching supplementary exam templates:", error);
+      toast.error("Failed to load supplementary exams");
     } finally {
       setLoading(false);
     }
@@ -73,9 +100,10 @@ function SupplementaryExamCentre() {
 
   const fetchMyApplications = async (templateId) => {
     try {
-      const url = templateId
-        ? `/supplementary-exam/my-applications?examTemplateId=${templateId}`
-        : "/supplementary-exam/my-applications";
+      const url =
+        templateId && templateId !== "all"
+          ? `/supplementary-exam/my-applications?examTemplateId=${templateId}`
+          : "/supplementary-exam/my-applications";
       const { data } = await Axios.get(url);
       setMyApplications(data.data.applications || []);
     } catch (error) {
@@ -155,8 +183,13 @@ function SupplementaryExamCentre() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!selectedTemplateId) {
-      toast.warn("Please select a Supplementary Exam");
+    if (!selectedTemplateId || selectedTemplateId === "all") {
+      toast.warn("Please select an active Supplementary Exam");
+      return;
+    }
+
+    if (selectedTemplate?.status !== "open") {
+      toast.error("This supplementary exam session is closed for submissions.");
       return;
     }
 
@@ -230,63 +263,194 @@ function SupplementaryExamCentre() {
       fetchMyApplications(selectedTemplateId);
     } catch (error) {
       console.error("Delete application error:", error);
-      toast.error("Failed to delete application");
+      toast.error(
+        error.response?.data?.message || "Failed to delete application"
+      );
     }
   };
+
+  // Export Excel
+  const handleExportExcel = async () => {
+    try {
+      setExporting(true);
+      const url = `/supplementary-exam/export-excel/${selectedTemplateId || "all"}`;
+      const response = await Axios.get(url, { responseType: "blob" });
+      const blob = new Blob([response.data], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
+      const downloadUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = downloadUrl;
+      const fileName =
+        selectedTemplate && selectedTemplateId !== "all"
+          ? `Supplementary_${selectedTemplate.title.replace(/\s+/g, "_")}.xlsx`
+          : "Supplementary_Applications_All.xlsx";
+      link.setAttribute("download", fileName);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(downloadUrl);
+      toast.success("Applications exported to Excel successfully");
+    } catch (error) {
+      console.error("Export Excel error:", error);
+      toast.error(error.response?.data?.message || "Failed to export applications to Excel");
+    } finally {
+      setExporting(false);
+    }
+  };
+
+  // Filter applications by search term
+  const filteredApplications = myApplications.filter((app) => {
+    if (!searchFilter.trim()) return true;
+    const term = searchFilter.toLowerCase();
+    return (
+      app.registerNo?.toLowerCase().includes(term) ||
+      app.studentName?.toLowerCase().includes(term) ||
+      app.semester?.toLowerCase().includes(term)
+    );
+  });
+
+  const isCurrentTemplateOpen = selectedTemplate?.status === "open";
+  const allTemplatesClosed =
+    templates.length > 0 && templates.every((t) => t.status === "closed");
 
   return (
     <div className="min-h-screen bg-gray-50 p-4 sm:p-6 lg:p-8">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 flex items-center gap-3">
-            <FontAwesomeIcon icon={faGraduationCap} className="text-blue-600" />
-            Supplementary Exam Registration
-          </h1>
-          <p className="text-gray-600 mt-1">
-            Submit student applications for open supplementary examination sessions.
-          </p>
+        <div className="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 flex items-center gap-3">
+              <FontAwesomeIcon icon={faGraduationCap} className="text-blue-600" />
+              Supplementary Exam Applications
+            </h1>
+            <p className="text-gray-600 mt-1 text-sm sm:text-base">
+              Submit student applications for open sessions and view all submitted supplementary applications from your study centre.
+            </p>
+          </div>
+
+          {myApplications.length > 0 && (
+            <div>
+              <button
+                type="button"
+                onClick={handleExportExcel}
+                disabled={exporting}
+                className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm rounded-lg shadow-sm flex items-center gap-2 transition disabled:opacity-50"
+              >
+                {exporting ? (
+                  <FontAwesomeIcon icon={faSpinner} spin />
+                ) : (
+                  <FontAwesomeIcon icon={faFileExcel} />
+                )}
+                Export to Excel
+              </button>
+            </div>
+          )}
         </div>
 
-        {/* If NO OPEN TEMPLATES */}
+        {/* Global Loading */}
         {loading ? (
-          <div className="flex justify-center items-center py-16">
-            <FontAwesomeIcon icon={faSpinner} spin className="text-3xl text-blue-600" />
+          <div className="flex justify-center items-center py-20">
+            <FontAwesomeIcon icon={faSpinner} spin className="text-4xl text-blue-600" />
           </div>
-        ) : openTemplates.length === 0 ? (
+        ) : templates.length === 0 ? (
           <div className="bg-yellow-50 border-l-4 border-yellow-400 p-6 rounded-r-lg shadow-sm">
             <div className="flex items-start">
               <FontAwesomeIcon icon={faExclamationTriangle} className="text-yellow-600 text-xl mr-4 mt-0.5" />
               <div>
-                <h3 className="font-bold text-yellow-800 text-lg">Supplementary Exam Window Closed</h3>
+                <h3 className="font-bold text-yellow-800 text-lg">No Supplementary Exam Sessions Available</h3>
                 <p className="text-yellow-700 mt-1 text-sm">
-                  There are currently no open supplementary exams available for application submission. Please check back when the administration opens an exam session.
+                  There are currently no supplementary exam sessions found in the portal. Please contact the administrator.
                 </p>
               </div>
             </div>
           </div>
         ) : (
           <div className="space-y-8">
-            {/* Exam Selection Bar */}
+            {/* Exam Session Selection Card */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-              <label className="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-2">
-                SELECT SUPPLEMENTARY EXAM SESSION *
-              </label>
+              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-3">
+                <label className="block text-xs font-bold text-gray-600 uppercase tracking-wider">
+                  SELECT SUPPLEMENTARY EXAM SESSION
+                </label>
+
+                {/* Status Indicator */}
+                {selectedTemplate && (
+                  <div>
+                    {isCurrentTemplateOpen ? (
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800 border border-green-200">
+                        <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                        SESSION OPEN (Accepting Submissions)
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800 border border-amber-200">
+                        <FontAwesomeIcon icon={faLock} className="text-xs text-amber-600" />
+                        SESSION CLOSED (View Only)
+                      </span>
+                    )}
+                  </div>
+                )}
+                {selectedTemplateId === "all" && (
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800 border border-blue-200">
+                    <FontAwesomeIcon icon={faFileAlt} className="text-xs text-blue-600" />
+                    ALL SESSIONS (Viewing All Applications)
+                  </span>
+                )}
+              </div>
+
               <select
                 value={selectedTemplateId}
                 onChange={(e) => setSelectedTemplateId(e.target.value)}
                 className="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 p-3 text-base border font-semibold text-gray-800"
               >
-                {openTemplates.map((t) => (
+                {templates.map((t) => (
                   <option key={t._id} value={t._id}>
-                    {t.title}
+                    {t.title} — [{t.status === "open" ? "OPEN" : "CLOSED"}]
                   </option>
                 ))}
+                <option value="all">-- All Exam Sessions (View All Submitted Applications) --</option>
               </select>
             </div>
 
-            {/* Application Form */}
-            {selectedTemplate && (
+            {/* Information Banner when Closed or All Sessions */}
+            {!isCurrentTemplateOpen && selectedTemplate && (
+              <div className="bg-amber-50 border-l-4 border-amber-500 p-5 rounded-r-lg shadow-sm">
+                <div className="flex items-start gap-3">
+                  <div className="p-2 bg-amber-100 rounded-lg text-amber-700 flex-shrink-0">
+                    <FontAwesomeIcon icon={faLock} className="text-lg" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-amber-900 text-base">
+                      Supplementary Exam Window Closed
+                    </h3>
+                    <p className="text-amber-800 text-sm mt-1">
+                      The application window for <strong>"{selectedTemplate.title}"</strong> is closed. New applications cannot be submitted or deleted, but you can view all applications submitted by your study centre below.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {selectedTemplateId === "all" && (
+              <div className="bg-blue-50 border-l-4 border-blue-500 p-5 rounded-r-lg shadow-sm">
+                <div className="flex items-start gap-3">
+                  <div className="p-2 bg-blue-100 rounded-lg text-blue-700 flex-shrink-0">
+                    <FontAwesomeIcon icon={faInfoCircle} className="text-lg" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-blue-900 text-base">
+                      Viewing Applications Across All Sessions
+                    </h3>
+                    <p className="text-blue-800 text-sm mt-1">
+                      Displaying all supplementary applications submitted by your study centre across all exam sessions. To submit new applications, select an active <strong>OPEN</strong> session from the dropdown above.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* APPLICATION FORM - Only rendered when selected session is OPEN */}
+            {isCurrentTemplateOpen && selectedTemplate && (
               <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                 <div className="bg-blue-600 px-6 py-4 text-white">
                   <h2 className="text-lg font-bold flex items-center gap-2">
@@ -302,7 +466,7 @@ function SupplementaryExamCentre() {
                   {/* STEP 1: REGISTER NUMBER */}
                   <div>
                     <label className="block text-sm font-bold text-gray-800 mb-1">
-                      ENTER YOUR REGISTER NUMBER HERE:{" "}
+                      ENTER REGISTER NUMBER:{" "}
                       <span className="text-xs font-normal text-blue-600">
                         (Add CMS/DMS.. before number) *
                       </span>
@@ -348,49 +512,72 @@ function SupplementaryExamCentre() {
                     )}
 
                     {studentSearchStatus === "not_found" && (
-                      <div className="mt-2 text-xs font-semibold text-amber-800 bg-amber-50 p-3 rounded-lg border border-amber-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                      <div className="mt-2 text-xs text-amber-800 bg-amber-50 p-3 rounded-lg border border-amber-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                         <div className="flex items-center gap-2">
                           <FontAwesomeIcon icon={faExclamationTriangle} className="text-amber-600 text-base" />
-                          <span>Student details not found in database.</span>
+                          <span>Student not found with this register number.</span>
                         </div>
                         <button
                           type="button"
-                          onClick={() => setShowAddStudentForm(true)}
-                          className="px-3 py-1 bg-amber-600 hover:bg-amber-700 text-white rounded font-medium text-xs flex items-center gap-1.5"
+                          onClick={() => {
+                            setShowAddStudentForm(true);
+                            setIsManualStudent(true);
+                          }}
+                          className="px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white rounded text-xs font-bold flex items-center gap-1.5 self-start sm:self-auto"
                         >
                           <FontAwesomeIcon icon={faUserPlus} />
-                          Add Student for Supplementary
+                          Add Student
                         </button>
                       </div>
                     )}
                   </div>
 
-                  {/* STEP 2: STUDENT NAME */}
-                  {(studentSearchStatus === "found" || showAddStudentForm || studentName) && (
-                    <div>
-                      <label className="block text-sm font-bold text-gray-800 mb-1">
-                        ENTER YOUR NAME: *
+                  {/* STEP 2: STUDENT DETAILS */}
+                  {studentName && !showAddStudentForm && (
+                    <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                      <label className="block text-xs font-bold text-gray-500 uppercase mb-1">
+                        STUDENT NAME
                       </label>
-                      <input
-                        type="text"
-                        placeholder="e.g. JANISH"
-                        value={studentName}
-                        onChange={(e) => setStudentName(e.target.value)}
-                        className="w-full border border-gray-300 rounded-lg p-3 text-sm uppercase font-semibold focus:ring-blue-500 focus:border-blue-500"
-                        required
-                      />
-                      {isManualStudent && (
-                        <span className="text-xs text-amber-600 block mt-1 font-medium">
-                          Note: Student details entered manually for supplementary exam submission.
-                        </span>
-                      )}
+                      <p className="text-base font-bold text-gray-900">{studentName}</p>
                     </div>
                   )}
 
-                  {/* STEP 3: CHOOSE SEMESTER */}
+                  {/* MANUAL STUDENT ENTRY FORM */}
+                  {showAddStudentForm && (
+                    <div className="p-4 bg-blue-50/50 rounded-lg border border-blue-200 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <h4 className="text-xs font-bold text-blue-900 uppercase tracking-wider flex items-center gap-1.5">
+                          <FontAwesomeIcon icon={faUserPlus} />
+                          Add Student for Supplementary
+                        </h4>
+                        <span className="text-xs text-amber-700 bg-amber-100 px-2 py-0.5 rounded font-semibold">
+                          Manual Entry
+                        </span>
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-semibold text-gray-700 mb-1">
+                          STUDENT NAME *
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="Enter full student name"
+                          value={studentName}
+                          onChange={(e) => setStudentName(e.target.value)}
+                          className="w-full border border-gray-300 rounded-lg p-2.5 text-sm uppercase font-semibold focus:ring-blue-500 focus:border-blue-500"
+                          required
+                        />
+                      </div>
+                      <p className="text-xs text-gray-500 italic">
+                        Note: Student details entered manually for supplementary exam submission.
+                      </p>
+                    </div>
+                  )}
+
+                  {/* STEP 3: SELECT SEMESTER */}
                   <div>
                     <label className="block text-sm font-bold text-gray-800 mb-1">
-                      CHOOSE YOUR SEMESTER: *
+                      SELECT SEMESTER *
                     </label>
                     <select
                       value={selectedSemester}
@@ -398,11 +585,9 @@ function SupplementaryExamCentre() {
                       className="w-full border border-gray-300 rounded-lg p-3 text-sm font-semibold focus:ring-blue-500 focus:border-blue-500"
                       required
                     >
-                      <option value="" disabled>
-                        -- Select Semester --
-                      </option>
-                      {selectedTemplate.semesters?.map((sem, sIdx) => (
-                        <option key={sIdx} value={sem.semesterName}>
+                      <option value="">-- Choose Semester --</option>
+                      {selectedTemplate.semesters?.map((sem, idx) => (
+                        <option key={idx} value={sem.semesterName}>
                           {sem.semesterName}
                         </option>
                       ))}
@@ -411,19 +596,16 @@ function SupplementaryExamCentre() {
 
                   {/* STEP 4: SELECT SUBJECTS FOR SUPPLEMENTARY */}
                   {selectedSemester && (
-                    <div className="bg-gray-50 p-5 rounded-xl border border-gray-200 space-y-4">
-                      <div className="flex justify-between items-center border-b pb-2 border-gray-200">
-                        <label className="block text-sm font-bold text-gray-900">
-                          SUBJECTS OF {selectedSemester.toUpperCase()}
-                          <span className="block text-xs font-normal text-gray-600 mt-0.5">
-                            SELECT YOUR SUBJECTS FOR SUPPLEMENTARY *
-                          </span>
+                    <div className="space-y-3 p-4 bg-gray-50 rounded-xl border border-gray-200">
+                      <div className="flex items-center justify-between">
+                        <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider">
+                          SELECT YOUR SUBJECTS FOR SUPPLEMENTARY *
                         </label>
                         {availableSubjects.length > 0 && (
                           <button
                             type="button"
                             onClick={handleSelectAllSubjects}
-                            className="text-xs font-bold text-blue-600 hover:text-blue-800"
+                            className="text-xs text-blue-600 hover:text-blue-800 font-semibold"
                           >
                             {selectedSubjects.length === availableSubjects.length
                               ? "Deselect All"
@@ -434,19 +616,19 @@ function SupplementaryExamCentre() {
 
                       {availableSubjects.length === 0 ? (
                         <p className="text-sm text-gray-500 italic">
-                          No subjects allotted for this semester in the exam template.
+                          No subjects configured for this semester.
                         </p>
                       ) : (
                         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-                          {availableSubjects.map((subj, subIdx) => {
+                          {availableSubjects.map((subj, idx) => {
                             const isChecked = selectedSubjects.includes(subj);
                             return (
                               <label
-                                key={subIdx}
+                                key={idx}
                                 className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition ${
                                   isChecked
-                                    ? "bg-blue-50 border-blue-500 text-blue-900 font-bold shadow-sm"
-                                    : "bg-white border-gray-200 text-gray-700 hover:border-gray-300 font-medium"
+                                    ? "bg-blue-50 border-blue-400 text-blue-900 font-semibold"
+                                    : "bg-white border-gray-200 hover:bg-gray-50 text-gray-700"
                                 }`}
                               >
                                 <input
@@ -485,10 +667,37 @@ function SupplementaryExamCentre() {
 
             {/* MY SUBMITTED APPLICATIONS LIST */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-              <div className="p-6 border-b border-gray-200 bg-gray-50">
-                <h3 className="font-bold text-gray-800 text-base">
-                  Submitted Applications for Selected Exam
-                </h3>
+              <div className="p-6 border-b border-gray-200 bg-gray-50 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <div>
+                  <h3 className="font-bold text-gray-800 text-base flex items-center gap-2">
+                    <span>Submitted Applications from Your Study Centre</span>
+                    <span className="bg-blue-100 text-blue-800 text-xs px-2.5 py-0.5 rounded-full font-bold">
+                      {filteredApplications.length}
+                    </span>
+                  </h3>
+                  <p className="text-xs text-gray-500 mt-1">
+                    {selectedTemplateId === "all"
+                      ? "Showing applications across all supplementary sessions"
+                      : `Showing applications for: ${selectedTemplate ? selectedTemplate.title : "Selected Exam"}`}
+                  </p>
+                </div>
+
+                {/* Filter / Search input */}
+                <div className="flex items-center gap-2">
+                  <div className="relative">
+                    <input
+                      type="text"
+                      placeholder="Search Reg No or Name..."
+                      value={searchFilter}
+                      onChange={(e) => setSearchFilter(e.target.value)}
+                      className="text-xs border border-gray-300 rounded-lg pl-8 pr-3 py-2 w-48 sm:w-64 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                    <FontAwesomeIcon
+                      icon={faSearch}
+                      className="absolute left-2.5 top-2.5 text-gray-400 text-xs"
+                    />
+                  </div>
+                </div>
               </div>
 
               <div className="overflow-x-auto">
@@ -498,57 +707,85 @@ function SupplementaryExamCentre() {
                       <th className="px-6 py-3">Sl No</th>
                       <th className="px-6 py-3">Reg No</th>
                       <th className="px-6 py-3">Student Name</th>
+                      {selectedTemplateId === "all" && (
+                        <th className="px-6 py-3">Exam Session</th>
+                      )}
                       <th className="px-6 py-3">Semester</th>
                       <th className="px-6 py-3">Selected Subjects</th>
                       <th className="px-6 py-3">Submitted At</th>
-                      <th className="px-6 py-3">Action</th>
+                      <th className="px-6 py-3 text-center">Status / Action</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200">
-                    {myApplications.length > 0 ? (
-                      myApplications.map((app, idx) => (
-                        <tr key={app._id} className="hover:bg-gray-50">
-                          <td className="px-6 py-4 text-gray-500">{idx + 1}</td>
-                          <td className="px-6 py-4 font-bold text-gray-900">{app.registerNo}</td>
-                          <td className="px-6 py-4 font-medium text-gray-800">
-                            {app.studentName}
-                            {app.isManualStudent && (
-                              <span className="ml-2 text-xs text-amber-600 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded font-normal">
-                                Manual Entry
-                              </span>
-                            )}
-                          </td>
-                          <td className="px-6 py-4 font-medium text-blue-700">{app.semester}</td>
-                          <td className="px-6 py-4">
-                            <div className="flex flex-wrap gap-1">
-                              {app.subjects?.map((sub, sIdx) => (
-                                <span
-                                  key={sIdx}
-                                  className="bg-indigo-50 text-indigo-700 border border-indigo-200 text-xs px-2 py-0.5 rounded font-semibold"
-                                >
-                                  {sub}
+                    {filteredApplications.length > 0 ? (
+                      filteredApplications.map((app, idx) => {
+                        const isAppFromOpenSession =
+                          app.examTemplate?.status === "open";
+
+                        return (
+                          <tr key={app._id} className="hover:bg-gray-50">
+                            <td className="px-6 py-4 text-gray-500">{idx + 1}</td>
+                            <td className="px-6 py-4 font-bold text-gray-900">{app.registerNo}</td>
+                            <td className="px-6 py-4 font-medium text-gray-800">
+                              {app.studentName}
+                              {app.isManualStudent && (
+                                <span className="ml-2 text-xs text-amber-600 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded font-normal">
+                                  Manual
                                 </span>
-                              ))}
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 text-gray-500 text-xs">
-                            {new Date(app.createdAt).toLocaleDateString()}
-                          </td>
-                          <td className="px-6 py-4">
-                            <button
-                              onClick={() => handleDeleteApplication(app._id)}
-                              className="text-red-500 hover:text-red-700 p-1.5 rounded hover:bg-red-50"
-                              title="Delete Application"
-                            >
-                              <FontAwesomeIcon icon={faTrash} />
-                            </button>
-                          </td>
-                        </tr>
-                      ))
+                              )}
+                            </td>
+                            {selectedTemplateId === "all" && (
+                              <td className="px-6 py-4 text-xs font-semibold text-gray-700">
+                                {app.examTemplate?.title || "N/A"}
+                              </td>
+                            )}
+                            <td className="px-6 py-4 font-medium text-blue-700">{app.semester}</td>
+                            <td className="px-6 py-4">
+                              <div className="flex flex-wrap gap-1">
+                                {app.subjects?.map((sub, sIdx) => (
+                                  <span
+                                    key={sIdx}
+                                    className="bg-indigo-50 text-indigo-700 border border-indigo-200 text-xs px-2 py-0.5 rounded font-semibold"
+                                  >
+                                    {sub}
+                                  </span>
+                                ))}
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 text-gray-500 text-xs whitespace-nowrap">
+                              {new Date(app.createdAt).toLocaleDateString()}
+                            </td>
+                            <td className="px-6 py-4 text-center">
+                              {isAppFromOpenSession ? (
+                                <button
+                                  onClick={() => handleDeleteApplication(app._id)}
+                                  className="text-red-500 hover:text-red-700 p-1.5 rounded hover:bg-red-50 transition"
+                                  title="Delete Application"
+                                >
+                                  <FontAwesomeIcon icon={faTrash} />
+                                </button>
+                              ) : (
+                                <span
+                                  className="inline-flex items-center gap-1 text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded font-medium cursor-not-allowed"
+                                  title="Exam window closed. Applications cannot be modified or deleted."
+                                >
+                                  <FontAwesomeIcon icon={faLock} className="text-[10px]" />
+                                  Closed
+                                </span>
+                              )}
+                            </td>
+                          </tr>
+                        );
+                      })
                     ) : (
                       <tr>
-                        <td colSpan="7" className="px-6 py-12 text-center text-gray-500">
-                          No supplementary applications submitted by your centre for this exam session yet.
+                        <td
+                          colSpan={selectedTemplateId === "all" ? 8 : 7}
+                          className="px-6 py-12 text-center text-gray-500"
+                        >
+                          {searchFilter
+                            ? "No applications matched your search."
+                            : "No supplementary applications submitted by your centre for this exam session yet."}
                         </td>
                       </tr>
                     )}
