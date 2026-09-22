@@ -33,55 +33,57 @@ import { useContext, useState, useEffect } from "react";
 import { Link, NavLink, useLocation } from "react-router-dom";
 import { UserAuthContext } from "./../context/userContext";
 
-// --- Brand logo ---
-const Logo = ({ dark = true }) => (
-  <Link to="/" className="flex items-center gap-2.5">
-    <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 via-purple-600 to-blue-600 shadow-md shadow-indigo-900/40">
-      <FontAwesomeIcon icon={faGraduationCap} className="h-4 w-4 text-white" />
+// --- Brand Logo ---
+const Logo = () => (
+  <Link to="/" className="flex items-center gap-3">
+    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-600 via-purple-600 to-blue-600 shadow-md shadow-indigo-600/25">
+      <FontAwesomeIcon icon={faGraduationCap} className="h-5 w-5 text-white" />
     </span>
     <div className="leading-tight">
-      <h1
-        className={`text-sm font-bold tracking-tight ${
-          dark ? "text-white" : "text-slate-800"
-        }`}
-      >
+      <h1 className="text-base font-bold tracking-tight text-slate-900">
         MAHDIYYAH
       </h1>
-      <p className={`text-[10px] font-semibold ${dark ? "text-indigo-400" : "text-indigo-600"}`}>
+      <p className="text-[11px] font-semibold text-indigo-600 tracking-wide uppercase">
         Portal Management
       </p>
     </div>
   </Link>
 );
 
-// --- Single Nav Link Item (Compact) ---
+// --- Single Nav Link Item ---
 const NavItem = ({ nav, onClick }) => (
   <NavLink
     to={nav.route}
     onClick={onClick}
     end={nav.route === "/"}
     className={({ isActive }) =>
-      `group relative flex items-center gap-2.5 rounded-lg px-2.5 py-1.5 text-[11px] font-semibold transition-all duration-150 ${
+      `group relative flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-semibold transition-all duration-150 ${
         isActive
-          ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-sm shadow-indigo-900/40"
-          : "text-slate-400 hover:bg-slate-800/80 hover:text-slate-100"
+          ? "bg-indigo-600 text-white shadow-md shadow-indigo-600/25"
+          : "text-slate-600 hover:bg-slate-100/90 hover:text-slate-900"
       }`
     }
   >
     {({ isActive }) => (
       <>
         <span
-          className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-md transition-colors ${
+          className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-colors ${
             isActive
               ? "bg-white/20 text-white"
-              : "bg-slate-800/60 text-slate-400 group-hover:text-indigo-400"
+              : "bg-slate-100 text-slate-500 group-hover:bg-indigo-50 group-hover:text-indigo-600"
           }`}
         >
-          <FontAwesomeIcon icon={nav.icon} className="h-3 w-3" />
+          <FontAwesomeIcon icon={nav.icon} className="h-4 w-4" />
         </span>
-        <span className="truncate">{nav.name}</span>
+        <span className="truncate flex-1 tracking-tight">{nav.name}</span>
         {nav.badge && (
-          <span className="ml-auto rounded-md bg-indigo-500/20 px-1.5 py-0.5 text-[9px] font-bold text-indigo-300 ring-1 ring-inset ring-indigo-500/30">
+          <span
+            className={`ml-auto rounded-full px-2 py-0.5 text-[10px] font-bold tracking-wide ${
+              isActive
+                ? "bg-white/25 text-white"
+                : "bg-indigo-50 text-indigo-600 border border-indigo-200"
+            }`}
+          >
             {nav.badge}
           </span>
         )}
@@ -92,22 +94,22 @@ const NavItem = ({ nav, onClick }) => (
 
 // --- Bottom User Profile Card ---
 const UserProfile = ({ authData, onLogout }) => (
-  <div className="mt-auto border-t border-slate-800/80 pt-3">
-    <div className="flex items-center gap-2.5 rounded-xl bg-slate-800/60 p-2 ring-1 ring-white/10">
+  <div className="mt-auto border-t border-slate-200 pt-3">
+    <div className="flex items-center gap-3 rounded-xl bg-slate-50 p-2.5 border border-slate-200/80 shadow-xs">
       <Link
         to={authData.role === "admin" ? "/study-centre-profile/" : "/"}
-        className="flex min-w-0 flex-1 items-center gap-2.5"
+        className="flex min-w-0 flex-1 items-center gap-3 group"
       >
-        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 text-xs font-bold text-white shadow-sm">
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 text-xs font-bold text-white shadow-sm">
           {authData.username?.charAt(0)?.toUpperCase() || (
             <FontAwesomeIcon icon={faUser} />
           )}
         </div>
         <div className="min-w-0">
-          <p className="truncate text-xs font-bold text-white leading-tight">
+          <p className="truncate text-xs font-bold text-slate-900 group-hover:text-indigo-600 transition-colors leading-tight">
             {authData.username}
           </p>
-          <p className="truncate text-[10px] capitalize text-slate-400 leading-tight mt-0.5">
+          <p className="truncate text-[11px] font-medium capitalize text-slate-500 leading-tight mt-0.5">
             {authData.role === "superAdmin" ? "Super Admin" : "Branch Admin"}
           </p>
         </div>
@@ -115,9 +117,9 @@ const UserProfile = ({ authData, onLogout }) => (
       <button
         onClick={onLogout}
         title="Logout"
-        className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-red-500/20 hover:text-red-400"
+        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-red-50 hover:text-red-600 border border-transparent hover:border-red-100"
       >
-        <FontAwesomeIcon icon={faRightFromBracket} className="h-3 w-3" />
+        <FontAwesomeIcon icon={faRightFromBracket} className="h-3.5 w-3.5" />
       </button>
     </div>
   </div>
@@ -196,14 +198,15 @@ function Sidebar() {
       items: [
         { name: "Mark Entry", route: "/mark-entry", icon: faPenAlt },
         { name: "Hall Tickets", route: "/hall-tickets", icon: faFileArchive },
+        { name: "Supplementary Hall Tickets", route: "/supplementary-hall-tickets", icon: faFileArchive, badge: "New" },
         { name: "Exam Results", route: "/result-view", icon: faCheckDouble },
         { name: "Bulk Exam Results", route: "/bulk-result-view", icon: faTableList },
         { name: "Previous Results", route: "/previous-results/admin", icon: faCheckDouble },
-        { name: "Supplementary Exam", route: "/centre-supplementary-exam", icon: faFileArchive, badge: "New" },
+        { name: "Supplementary Exam", route: "/centre-supplementary-exam", icon: faFileArchive },
       ],
     },
     {
-      title: "Branch Utilities",
+      title: "Utilities",
       defaultOpen: false,
       items: [
         { name: "My Uploads", route: "/my-uploads", icon: faUpload },
@@ -253,11 +256,11 @@ function Sidebar() {
   return (
     <>
       {/* --- Mobile Top Bar --- */}
-      <div className="sticky top-0 z-30 flex items-center justify-between border-b border-slate-200 bg-white px-4 py-2.5 lg:hidden">
-        <Logo dark={false} />
+      <div className="sticky top-0 z-30 flex items-center justify-between border-b border-slate-200 bg-white px-4 py-3 lg:hidden shadow-xs">
+        <Logo />
         <button
           onClick={() => setOpenSidebar(true)}
-          className="flex h-9 w-9 items-center justify-center rounded-lg text-slate-600 hover:bg-slate-100"
+          className="flex h-9 w-9 items-center justify-center rounded-lg text-slate-600 hover:bg-slate-100 transition-colors"
           aria-label="Open sidebar"
         >
           <FontAwesomeIcon icon={faBars} className="h-4 w-4" />
@@ -268,23 +271,23 @@ function Sidebar() {
       {openSidebar && (
         <div
           onClick={() => setOpenSidebar(false)}
-          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden"
+          className="fixed inset-0 z-40 bg-slate-900/40 backdrop-blur-xs lg:hidden transition-opacity"
         />
       )}
 
       {/* --- Main Sidebar Drawer --- */}
       <aside
-        className={`fixed left-0 top-0 z-50 flex h-full w-64 transform flex-col bg-slate-900 shadow-2xl transition-transform duration-300 ease-in-out lg:translate-x-0 ${
+        className={`fixed left-0 top-0 z-50 flex h-full w-72 transform flex-col bg-white border-r border-slate-200 shadow-xl lg:shadow-none transition-transform duration-300 ease-in-out lg:translate-x-0 ${
           openSidebar ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        <div className="flex h-full flex-col p-3.5">
+        <div className="flex h-full flex-col p-4">
           {/* Header */}
-          <div className="mb-4 flex items-center justify-between px-1 pt-1">
+          <div className="mb-4 flex items-center justify-between pb-3 border-b border-slate-100">
             <Logo />
             <button
               onClick={() => setOpenSidebar(false)}
-              className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-white/5 hover:text-white lg:hidden"
+              className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-700 lg:hidden"
               aria-label="Close sidebar"
             >
               <FontAwesomeIcon icon={faXmark} className="h-4 w-4" />
@@ -292,7 +295,7 @@ function Sidebar() {
           </div>
 
           {/* Navigation Accordion Sections */}
-          <div className="flex-grow overflow-y-auto pr-1 space-y-3 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-slate-700/50 [&::-webkit-scrollbar-thumb]:rounded-full">
+          <div className="flex-grow overflow-y-auto pr-1 space-y-4 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-slate-200 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-slate-300">
             {sections.map((section, sIdx) => {
               const isExpanded = openSections[section.title] !== false;
               return (
@@ -301,23 +304,23 @@ function Sidebar() {
                   <button
                     type="button"
                     onClick={() => toggleSection(section.title)}
-                    className="flex w-full items-center justify-between px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-400 hover:text-slate-200 transition-colors rounded hover:bg-slate-800/50"
+                    className="group flex w-full items-center justify-between px-2.5 py-1.5 text-xs font-bold uppercase tracking-wider text-slate-400 hover:text-slate-700 transition-colors rounded-lg hover:bg-slate-50"
                   >
                     <span className="flex items-center gap-1.5">
                       <span>{section.title}</span>
-                      <span className="text-[9px] font-normal text-slate-500">
-                        ({section.items.length})
+                      <span className="text-[10px] font-semibold text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded-full">
+                        {section.items.length}
                       </span>
                     </span>
                     <FontAwesomeIcon
                       icon={isExpanded ? faChevronDown : faChevronRight}
-                      className="h-2.5 w-2.5 text-slate-500"
+                      className="h-2.5 w-2.5 text-slate-400 group-hover:text-slate-600 transition-transform duration-150"
                     />
                   </button>
 
                   {/* Category Nav Links */}
                   {isExpanded && (
-                    <nav className="space-y-0.5 pl-1">
+                    <nav className="space-y-1 pt-0.5">
                       {section.items.map((nav, nIdx) => (
                         <NavItem key={nIdx} nav={nav} onClick={handleLinkClick} />
                       ))}
@@ -334,7 +337,7 @@ function Sidebar() {
           ) : (
             <Link
               to="/login"
-              className="mt-auto flex items-center justify-center rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 p-2.5 text-xs font-semibold text-white shadow-md transition hover:from-indigo-600 hover:to-purple-700"
+              className="mt-auto flex items-center justify-center rounded-xl bg-indigo-600 hover:bg-indigo-700 p-2.5 text-sm font-semibold text-white shadow-md transition"
             >
               <span>Login</span>
             </Link>

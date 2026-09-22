@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import Axios from "../../Axios";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -14,6 +15,7 @@ import {
   faLock,
   faFileExcel,
   faInfoCircle,
+  faFileArchive,
 } from "@fortawesome/free-solid-svg-icons";
 import { toast } from "react-toastify";
 
@@ -329,8 +331,16 @@ function SupplementaryExamCentre() {
             </p>
           </div>
 
-          {myApplications.length > 0 && (
-            <div>
+          <div className="flex items-center gap-3">
+            <Link
+              to="/supplementary-hall-tickets"
+              className="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm rounded-lg shadow-sm flex items-center gap-2 transition"
+            >
+              <FontAwesomeIcon icon={faFileArchive} />
+              Hall Tickets
+            </Link>
+
+            {myApplications.length > 0 && (
               <button
                 type="button"
                 onClick={handleExportExcel}
@@ -344,8 +354,8 @@ function SupplementaryExamCentre() {
                 )}
                 Export to Excel
               </button>
-            </div>
-          )}
+            )}
+          </div>
         </div>
 
         {/* Global Loading */}

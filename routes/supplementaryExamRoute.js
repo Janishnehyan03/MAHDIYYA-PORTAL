@@ -91,4 +91,16 @@ router.delete(
   supplementaryExamController.deleteApplication
 );
 
+router.get(
+  "/hall-ticket-sessions",
+  authController.restrictTo("admin", "superAdmin"),
+  supplementaryExamController.getSupplementaryHallTicketSessions
+);
+
+router.get(
+  "/hall-tickets",
+  authController.restrictTo("admin", "superAdmin"),
+  supplementaryExamController.getSupplementaryHallTickets
+);
+
 module.exports = router;

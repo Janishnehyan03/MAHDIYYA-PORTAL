@@ -1,6 +1,7 @@
 const SupplementaryExamTemplate = require("../models/supplementaryExamTemplateModel");
 const SupplementaryApplication = require("../models/supplementaryApplicationModel");
 const Student = require("../models/studentModel");
+const Subject = require("../models/subjectModel");
 const Branch = require("../models/studyCentreModel");
 const catchAsync = require("../utils/catchAsync");
 const AppError = require("../utils/AppError");
@@ -453,5 +454,170 @@ exports.exportApplicationsExcel = catchAsync(async (req, res, next) => {
   res.setHeader("Content-Disposition", `attachment; filename=${fileName}`);
 
   res.send(buffer);
+});
+
+// ==========================================
+// SUPPLEMENTARY HALL TICKETS
+// ==========================================
+
+// 14. Get Hall Ticket Sessions and Semesters Summary (for Study Centre)
+exports.getSupplementaryHallTicketSessions = catchAsync(async (req, res, next) => {
+  const query = {};
+  if (req.user && req.user.role === "admin") {
+    if (req.user.branch) {
+      query.branch = req.user.branch;
+    } else {
+      query.submittedBy = req.user._id;
+    }
+  }
+
+  // Find all applications submitted by this centre
+  const applications = await SupplementaryApplication.find(query)
+    .populate("examTemplate", "title status")
+    .sort({ createdAt: -1 });
+
+  // Group by Exam Template and Semester
+  const sessionMap = {};
+
+  applications.forEach((app) => {
+    if (!app.examTemplate) return;
+    const templateId = app.examTemplate._id.toString();
+    if (!sessionMap[templateId]) {
+      sessionMap[templateId] = {
+        _id: templateId,
+        title: app.examTemplate.title,
+        status: app.examTemplate.status,
+        totalStudents: 0,
+        semesters: {},
+      };
+    }
+
+    sessionMap[templateId].totalStudents += 1;
+    const semName = (app.semester || "General").trim();
+    if (!sessionMap[templateId].semesters[semName]) {
+      sessionMap[templateId].semesters[semName] = 0;
+    }
+    sessionMap[templateId].semesters[semName] += 1;
+  });
+
+  const sessions = Object.values(sessionMap).map((session) => ({
+    _id: session._id,
+    title: session.title,
+    status: session.status,
+    totalStudents: session.totalStudents,
+    semesters: Object.entries(session.semesters).map(([semesterName, count]) => ({
+      semesterName,
+      count,
+    })),
+  }));
+
+  res.status(200).json({
+    status: "success",
+    data: { sessions },
+  });
+});
+
+// 15. Get Supplementary Hall Tickets Data for Bulk Download
+exports.getSupplementaryHallTickets = catchAsync(async (req, res, next) => {
+  const { examTemplateId, semester } = req.query;
+  const query = {};
+
+  if (req.user && req.user.role === "admin") {
+    if (req.user.branch) {
+      query.branch = req.user.branch;
+    } else {
+      query.submittedBy = req.user._id;
+    }
+  }
+
+  if (examTemplateId && examTemplateId !== "all") {
+    query.examTemplate = examTemplateId;
+  }
+
+  if (semester && semester !== "all") {
+    query.semester = semester;
+  }
+
+  const applications = await SupplementaryApplication.find(query)
+    .populate("examTemplate", "title status")
+    .populate("branch", "studyCentreName studyCentreCode")
+    .sort({ registerNo: 1 });
+
+  if (!applications || applications.length === 0) {
+    return res.status(200).json({
+      status: "success",
+      data: { hallTickets: [] },
+      message: "No supplementary applications found",
+    });
+  }
+
+  // Collect register numbers to fetch photos
+  const regNos = applications
+    .map((a) => a.registerNo?.trim().toUpperCase())
+    .filter(Boolean);
+  const students = await Student.find({
+    registerNo: { $in: regNos.map((r) => new RegExp(`^${r}$`, "i")) },
+  }).select("registerNo imageUrl");
+
+  const studentPhotoMap = {};
+  students.forEach((s) => {
+    if (s.registerNo && s.imageUrl) {
+      studentPhotoMap[s.registerNo.trim().toUpperCase()] = s.imageUrl;
+    }
+  });
+
+  // Fetch subjects to map codes if available
+  const allSubjects = await Subject.find().select("subjectName subjectCode");
+  const subjectCodeMap = {};
+  allSubjects.forEach((sub) => {
+    if (sub.subjectName && sub.subjectCode) {
+      subjectCodeMap[sub.subjectName.trim().toUpperCase()] = sub.subjectCode;
+    }
+  });
+
+  const hallTickets = applications.map((app) => {
+    const regNoUpper = (app.registerNo || "").trim().toUpperCase();
+    const photo = studentPhotoMap[regNoUpper] || null;
+
+    const subjectsList = Array.isArray(app.subjects) ? app.subjects : [];
+    const formattedSubjects = subjectsList.map((subj) => {
+      const sName = (subj || "").trim();
+      return {
+        subjectName: sName,
+        subjectCode: subjectCodeMap[sName.toUpperCase()] || "-",
+        date: "-",
+        time: "-",
+      };
+    });
+
+    const institution =
+      app.studyCentreName ||
+      app.branch?.studyCentreName ||
+      (req.user?.branch ? req.user.branch.studyCentreName : "") ||
+      "MAHDIYYAH STUDY CENTRE";
+
+    const examTitle = app.examTemplate?.title
+      ? `${app.examTemplate.title}`
+      : "SUPPLEMENTARY EXAMINATION";
+
+    return {
+      _id: app._id,
+      registerNo: app.registerNo,
+      studentName: app.studentName,
+      institution: institution.toUpperCase(),
+      className: (app.semester || "SUPPLEMENTARY").toUpperCase(),
+      semester: app.semester,
+      examName: examTitle,
+      examTemplateId: app.examTemplate?._id,
+      imageUrl: photo,
+      subjects: formattedSubjects,
+      isManualStudent: app.isManualStudent,
+    };
+  });
+
+  res.status(200).json({
+    status: "success",
+    data: { hallTickets },
+  });
 });
 

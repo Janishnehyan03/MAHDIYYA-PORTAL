@@ -150,6 +150,12 @@ const adminDashboardConfig = {
       description: "Generate exam passes",
     },
     {
+      text: "Supplementary Hall Tickets",
+      icon: faFileArchive,
+      link: "/supplementary-hall-tickets",
+      description: "Download supplementary hall tickets",
+    },
+    {
       text: "Exam Results",
       icon: faCheckDouble,
       link: "/result-view",
@@ -174,7 +180,7 @@ const adminDashboardConfig = {
       description: "Enter supplementary marks",
     },
   ],
-  "Branch Utilities": [
+  Utilities: [
     {
       text: "Uploads",
       icon: faUpload,
