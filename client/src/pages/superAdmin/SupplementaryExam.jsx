@@ -13,14 +13,16 @@ import {
   faFileExcel,
   faBookOpen,
   faGraduationCap,
+  faRefresh,
 } from "@fortawesome/free-solid-svg-icons";
 import { toast } from "react-toastify";
 
 function SupplementaryExam() {
-  const [activeTab, setActiveTab] = useState("templates"); // 'templates' | 'applications'
+  const [activeTab, setActiveTab] = useState("templates"); // 'templates' | 'applications' | 'results'
   const [templates, setTemplates] = useState([]);
   const [applications, setApplications] = useState([]);
   const [selectedTemplateFilter, setSelectedTemplateFilter] = useState("all");
+  const [selectedCollegeFilter, setSelectedCollegeFilter] = useState("all");
   const [loading, setLoading] = useState(false);
   const [exportLoading, setExportLoading] = useState(false);
 
@@ -190,7 +192,8 @@ function SupplementaryExam() {
   const handleExportExcel = async () => {
     try {
       setExportLoading(true);
-      const url = `/supplementary-exam/export-excel/${selectedTemplateFilter || "all"}`;
+      const collegeQuery = selectedCollegeFilter !== "all" ? `?branchId=${selectedCollegeFilter}` : "";
+      const url = `/supplementary-exam/export-excel/${selectedTemplateFilter || "all"}${collegeQuery}`;
       const response = await Axios.get(url, { responseType: "blob" });
 
       const blob = new Blob([response.data], {
@@ -218,6 +221,51 @@ function SupplementaryExam() {
     } finally {
       setExportLoading(false);
     }
+  };
+
+  const handleExportResults = async () => {
+    try {
+      setExportLoading(true);
+      const params = new URLSearchParams({ includeMarks: "true" });
+      if (selectedTemplateFilter !== "all") params.set("templateId", selectedTemplateFilter);
+      if (selectedCollegeFilter !== "all") params.set("branchId", selectedCollegeFilter);
+      const response = await Axios.get(`/supplementary-exam/export-excel/all?${params.toString()}`, { responseType: "blob" });
+      const link = document.createElement("a");
+      link.href = window.URL.createObjectURL(new Blob([response.data]));
+      link.download = "Supplementary_Results.xlsx";
+      document.body.appendChild(link); link.click(); link.remove();
+      toast.success("Results exported successfully!");
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to export results.");
+    } finally { setExportLoading(false); }
+  };
+
+  const colleges = [...new Map(applications.filter((app) => app.branch?._id).map((app) => [
+    app.branch._id,
+    { id: app.branch._id, name: app.branch.studyCentreName || app.studyCentreName, code: app.branch.studyCentreCode || app.studyCentreCode },
+  ])).values()];
+  const visibleApplications = applications.filter((app) => selectedCollegeFilter === "all" || app.branch?._id === selectedCollegeFilter);
+
+  const getResultDetails = (application) => {
+    const marks = Array.isArray(application.subjectMarks)
+      ? application.subjectMarks
+      : [];
+    const markMap = new Map(
+      marks.map((item) => [item.subjectName?.trim().toUpperCase(), item.mark])
+    );
+    const hasAllMarks = (application.subjects || []).every((subject) => {
+      const mark = markMap.get(subject.trim().toUpperCase());
+      return mark !== "" && mark !== null && mark !== undefined;
+    });
+    const passed = hasAllMarks && (application.subjects || []).every((subject) => {
+      const mark = Number(markMap.get(subject.trim().toUpperCase()));
+      return Number.isFinite(mark) && mark >= 40;
+    });
+
+    return {
+      markMap,
+      status: !hasAllMarks ? "Pending" : passed ? "Pass" : "Fail",
+    };
   };
 
   return (
@@ -269,6 +317,17 @@ function SupplementaryExam() {
             >
               <FontAwesomeIcon icon={faList} />
               Submitted Applications ({applications.length})
+            </button>
+            <button
+              onClick={() => setActiveTab("results")}
+              className={`${
+                activeTab === "results"
+                  ? "border-blue-600 text-blue-600"
+                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+              } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm flex items-center gap-2 transition-colors`}
+            >
+              <FontAwesomeIcon icon={faGraduationCap} />
+              Supplementary Results ({applications.length})
             </button>
           </nav>
         </div>
@@ -403,7 +462,22 @@ function SupplementaryExam() {
                   ))}
                 </select>
               </div>
+              <div className="w-full sm:w-1/2 md:w-1/4">
+                <label className="block text-xs font-semibold text-gray-600 mb-1">FILTER BY COLLEGE</label>
+                <select value={selectedCollegeFilter} onChange={(e) => setSelectedCollegeFilter(e.target.value)} className="w-full border-gray-300 rounded-lg shadow-sm p-2 text-sm border">
+                  <option value="all">All Colleges</option>
+                  {colleges.map((college) => <option key={college.id} value={college.id}>{college.name || college.code || college.id}</option>)}
+                </select>
+              </div>
 
+              <button
+                onClick={fetchApplications}
+                disabled={loading}
+                className="flex items-center gap-2 px-4 py-2.5 border border-blue-200 text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-lg font-medium disabled:opacity-50 transition"
+              >
+                <FontAwesomeIcon icon={faRefresh} spin={loading} />
+                Refresh Results
+              </button>
               <button
                 onClick={handleExportExcel}
                 disabled={exportLoading || applications.length === 0}
@@ -415,6 +489,9 @@ function SupplementaryExam() {
                   <FontAwesomeIcon icon={faFileExcel} />
                 )}
                 Export to Excel
+              </button>
+              <button onClick={handleExportResults} disabled={exportLoading || visibleApplications.length === 0} className="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium shadow-sm disabled:opacity-50 transition">
+                <FontAwesomeIcon icon={faFileExcel} /> Export Results
               </button>
             </div>
 
@@ -432,8 +509,8 @@ function SupplementaryExam() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
-                  {applications.length > 0 ? (
-                    applications.map((app, idx) => (
+                  {visibleApplications.length > 0 ? (
+                    visibleApplications.map((app, idx) => (
                       <tr key={app._id} className="hover:bg-gray-50">
                         <td className="px-6 py-4 text-gray-500">{idx + 1}</td>
                         <td className="px-6 py-4 font-bold text-gray-900">{app.registerNo}</td>
@@ -465,6 +542,69 @@ function SupplementaryExam() {
                         No supplementary applications submitted for this selection yet.
                       </td>
                     </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* TAB 3: SUPPLEMENTARY RESULTS */}
+        {activeTab === "results" && (
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+            <div className="p-6 border-b border-gray-200 bg-gray-50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+              <div>
+                <h2 className="text-lg font-bold text-gray-900">Supplementary Exam Results</h2>
+                <p className="text-sm text-gray-500 mt-1">View marks entered for submitted supplementary applications.</p>
+              </div>
+              <button
+                onClick={fetchApplications}
+                disabled={loading}
+                className="flex items-center gap-2 px-4 py-2.5 border border-blue-200 text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-lg font-medium disabled:opacity-50 transition"
+              >
+                <FontAwesomeIcon icon={faRefresh} spin={loading} />
+                Refresh Results
+              </button>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm">
+                <thead className="bg-gray-100 text-gray-600 text-xs uppercase font-semibold border-b">
+                  <tr>
+                    <th className="px-6 py-3">Sl No</th>
+                    <th className="px-6 py-3">Reg No</th>
+                    <th className="px-6 py-3">Student Name</th>
+                    <th className="px-6 py-3">Exam / Semester</th>
+                    <th className="px-6 py-3">Marks</th>
+                    <th className="px-6 py-3">Result</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
+                  {visibleApplications.length > 0 ? visibleApplications.map((app, idx) => {
+                    const result = getResultDetails(app);
+                    return (
+                      <tr key={app._id} className="hover:bg-gray-50">
+                        <td className="px-6 py-4 text-gray-500">{idx + 1}</td>
+                        <td className="px-6 py-4 font-bold text-gray-900">{app.registerNo}</td>
+                        <td className="px-6 py-4 font-medium text-gray-800">{app.studentName}</td>
+                        <td className="px-6 py-4">
+                          <div className="font-medium text-blue-700">{app.examTemplate?.title || "-"}</div>
+                          <div className="text-xs text-gray-500">{app.semester}</div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex flex-wrap gap-1.5 min-w-48">
+                            {(app.subjects || []).map((subject) => {
+                              const mark = result.markMap.get(subject.trim().toUpperCase());
+                              return <span key={subject} className="bg-gray-50 text-gray-700 border border-gray-200 text-xs px-2 py-1 rounded font-semibold">{subject}: {mark === "" || mark === undefined ? "—" : mark}</span>;
+                            })}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <span className={`inline-flex px-2.5 py-1 rounded-full text-xs font-bold ${result.status === "Pass" ? "bg-green-100 text-green-700" : result.status === "Fail" ? "bg-red-100 text-red-700" : "bg-amber-100 text-amber-700"}`}>{result.status}</span>
+                        </td>
+                      </tr>
+                    );
+                  }) : (
+                    <tr><td colSpan="6" className="px-6 py-12 text-center text-gray-500">No supplementary results found.</td></tr>
                   )}
                 </tbody>
               </table>
