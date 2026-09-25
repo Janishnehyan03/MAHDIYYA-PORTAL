@@ -1,6 +1,8 @@
 const express = require("express");
 const supplementaryExamController = require("../controllers/supplementaryExamController");
 const authController = require("../controllers/authController");
+const multer = require("multer");
+const upload = multer({ storage: new multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
 
 const router = express.Router();
 
@@ -38,6 +40,19 @@ router.patch(
   "/templates/:id/toggle-status",
   authController.restrictTo("superAdmin"),
   supplementaryExamController.toggleTemplateStatus
+);
+
+router.get(
+  "/marks-template/:templateId",
+  authController.restrictTo("admin", "superAdmin"),
+  supplementaryExamController.downloadMarksTemplate
+);
+
+router.post(
+  "/marks-import/:templateId",
+  authController.restrictTo("admin", "superAdmin"),
+  upload.single("file"),
+  supplementaryExamController.importMarks
 );
 
 router.delete(
@@ -89,6 +104,12 @@ router.delete(
   "/application/:id",
   authController.restrictTo("admin", "superAdmin"),
   supplementaryExamController.deleteApplication
+);
+
+router.patch(
+  "/application/:id/marks",
+  authController.restrictTo("admin", "superAdmin"),
+  supplementaryExamController.updateMarks
 );
 
 router.get(

@@ -306,6 +306,133 @@ exports.deleteApplication = catchAsync(async (req, res, next) => {
   });
 });
 
+// 11.5 Update marks for a supplementary application
+exports.updateMarks = catchAsync(async (req, res, next) => {
+  const { subjectMarks } = req.body;
+
+  const application = await SupplementaryApplication.findById(req.params.id).populate("examTemplate");
+  if (!application) {
+    return next(new AppError("Application not found", 404));
+  }
+
+  // Check permissions (branch or superAdmin)
+  if (req.user && req.user.role === "admin") {
+    const isBranchMatch =
+      req.user.branch &&
+      application.branch &&
+      application.branch.toString() === req.user.branch.toString();
+    const isUserMatch =
+      application.submittedBy &&
+      application.submittedBy.toString() === req.user._id.toString();
+    if (!isBranchMatch && !isUserMatch) {
+      return next(
+        new AppError("You do not have permission to update marks for this application.", 403)
+      );
+    }
+  }
+
+  if (subjectMarks && Array.isArray(subjectMarks)) {
+    application.subjectMarks = subjectMarks;
+  }
+
+  await application.save();
+
+  res.status(200).json({
+    status: "success",
+    message: "Marks updated successfully",
+    data: { application },
+  });
+});
+
+// 11.6 Download a ready-to-fill supplementary mark-entry workbook
+exports.downloadMarksTemplate = catchAsync(async (req, res, next) => {
+  const template = await SupplementaryExamTemplate.findById(req.params.templateId);
+  if (!template) return next(new AppError("Exam template not found", 404));
+
+  const query = { examTemplate: template._id };
+  if (req.user?.role === "admin") {
+    if (req.user.branch) query.branch = req.user.branch;
+    else query.submittedBy = req.user._id;
+  }
+
+  const applications = await SupplementaryApplication.find(query).sort({ registerNo: 1 });
+  const subjects = [...new Set(applications.flatMap((application) => application.subjects || []))];
+  const rows = [["Register No", "Student Name", "Semester", ...subjects]];
+  applications.forEach((application) => {
+    const marks = new Map((application.subjectMarks || []).map((item) => [item.subjectName?.toUpperCase(), item.mark]));
+    rows.push([
+      application.registerNo || "",
+      application.studentName || "",
+      application.semester || "",
+      ...subjects.map((subject) => marks.get(subject.toUpperCase()) ?? ""),
+    ]);
+  });
+
+  const worksheet = xlsx.utils.aoa_to_sheet(rows);
+  worksheet["!cols"] = [{ wch: 18 }, { wch: 28 }, { wch: 24 }, ...subjects.map(() => ({ wch: 14 }))];
+  const workbook = xlsx.utils.book_new();
+  xlsx.utils.book_append_sheet(workbook, worksheet, "Supplementary Marks");
+  const buffer = xlsx.write(workbook, { type: "buffer", bookType: "xlsx" });
+
+  res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+  res.setHeader("Content-Disposition", `attachment; filename=Supplementary_Marks_${template.title.replace(/\s+/g, "_")}.xlsx`);
+  res.send(buffer);
+});
+
+// 11.7 Import supplementary marks from the template format
+exports.importMarks = catchAsync(async (req, res, next) => {
+  if (!req.file) return next(new AppError("Please upload an Excel file", 400));
+  const template = await SupplementaryExamTemplate.findById(req.params.templateId);
+  if (!template) return next(new AppError("Exam template not found", 404));
+
+  const workbook = xlsx.read(req.file.buffer, { type: "buffer" });
+  const sheet = workbook.Sheets[workbook.SheetNames[0]];
+  const rows = xlsx.utils.sheet_to_json(sheet, { defval: "" });
+  if (!rows.length) return next(new AppError("The Excel file has no mark rows", 400));
+
+  const applications = await SupplementaryApplication.find({ examTemplate: template._id });
+  const allowed = applications.filter((application) => {
+    if (req.user?.role !== "admin") return true;
+    return req.user.branch
+      ? application.branch?.toString() === req.user.branch.toString()
+      : application.submittedBy?.toString() === req.user._id.toString();
+  });
+  const appMap = new Map(allowed.map((application) => [
+    `${application.registerNo.toUpperCase()}|${application.semester.toUpperCase()}`,
+    application,
+  ]));
+  const errors = [];
+  const updates = new Map();
+  rows.forEach((row, index) => {
+    const registerNo = String(row["Register No"] || "").trim().toUpperCase();
+    const semester = String(row.Semester || "").trim().toUpperCase();
+    const application = appMap.get(`${registerNo}|${semester}`);
+    const subjectHeaders = Object.keys(row).filter((header) => !["Register No", "Student Name", "Semester"].includes(header));
+    if (!registerNo && !semester && subjectHeaders.every((subject) => row[subject] === "")) return;
+    if (!application) return errors.push(`Row ${index + 2}: student/session not found`);
+    const marks = updates.get(application._id.toString()) || [...(application.subjectMarks || [])].map((item) => ({ subjectName: item.subjectName, mark: item.mark }));
+    for (const subject of subjectHeaders) {
+      const registeredSubject = application.subjects.find((item) => item.toUpperCase() === subject.toUpperCase());
+      if (!registeredSubject) {
+        errors.push(`Row ${index + 2}: ${subject} is not registered for this student`);
+        continue;
+      }
+      const rawMark = row[subject];
+      const mark = rawMark === "" || rawMark === null ? "" : Number(rawMark);
+      if (mark !== "" && (!Number.isFinite(mark) || mark < 0 || mark > 100)) {
+        errors.push(`Row ${index + 2}: ${subject} mark must be between 0 and 100`);
+        continue;
+      }
+      const existing = marks.find((item) => item.subjectName?.toUpperCase() === registeredSubject.toUpperCase());
+      if (existing) existing.mark = mark;
+      else marks.push({ subjectName: registeredSubject, mark });
+    }
+    updates.set(application._id.toString(), marks);
+  });
+  for (const [id, subjectMarks] of updates) await SupplementaryApplication.findByIdAndUpdate(id, { subjectMarks });
+  res.status(200).json({ status: "success", message: `${updates.size} student records updated`, data: { updated: updates.size, errors } });
+});
+
 // ==========================================
 // SUPER ADMIN & STUDY CENTRE: VIEW SUBMISSIONS & EXCEL EXPORT
 // ==========================================
@@ -331,11 +458,14 @@ exports.getSuperAdminApplications = catchAsync(async (req, res, next) => {
 
 // 13. Export Submitted Applications to Excel (Semester names as headers, multiple student rows for multiple subjects)
 exports.exportApplicationsExcel = catchAsync(async (req, res, next) => {
-  const { templateId } = req.params;
+  const { templateId: queryTemplateId } = req.query;
+  const templateId = queryTemplateId || req.params.templateId;
+  const { branchId, includeMarks } = req.query;
   const query = {};
   if (templateId && templateId !== "all") {
     query.examTemplate = templateId;
   }
+  if (branchId && branchId !== "all") query.branch = branchId;
 
   // If study centre admin, restrict export to their study centre
   if (req.user && req.user.role === "admin") {
@@ -376,6 +506,9 @@ exports.exportApplicationsExcel = catchAsync(async (req, res, next) => {
   const semesterNames = Array.from(semesterSet);
 
   // Build Headers: Sl No, Register No, Student Name, Study Centre Code, Study Centre Name, [Semester 1], [Semester 2] ...
+  const markSubjects = includeMarks === "true"
+    ? [...new Set(applications.flatMap((app) => app.subjects || []))]
+    : [];
   const headers = [
     "Sl No",
     "Register No",
@@ -383,6 +516,7 @@ exports.exportApplicationsExcel = catchAsync(async (req, res, next) => {
     "Study Centre Code",
     "Study Centre Name",
     ...semesterNames,
+    ...(includeMarks === "true" ? ["Result Status", ...markSubjects.map((subject) => `${subject} Mark`)] : []),
   ];
 
   const rows = [headers];
@@ -414,6 +548,17 @@ exports.exportApplicationsExcel = catchAsync(async (req, res, next) => {
           row.push("");
         }
       });
+
+      if (includeMarks === "true") {
+        const markMap = new Map((app.subjectMarks || []).map((item) => [item.subjectName?.trim().toUpperCase(), item.mark]));
+        const complete = markSubjects.every((subject) => {
+          const mark = markMap.get(subject.trim().toUpperCase());
+          return mark !== "" && mark !== null && mark !== undefined;
+        });
+        const passed = complete && markSubjects.every((subject) => Number(markMap.get(subject.trim().toUpperCase())) >= 40);
+        row.push(!complete ? "Pending" : passed ? "Pass" : "Fail");
+        markSubjects.forEach((subject) => row.push(markMap.get(subject.trim().toUpperCase()) ?? ""));
+      }
 
       rows.push(row);
     });
@@ -620,4 +765,3 @@ exports.getSupplementaryHallTickets = catchAsync(async (req, res, next) => {
     data: { hallTickets },
   });
 });
-

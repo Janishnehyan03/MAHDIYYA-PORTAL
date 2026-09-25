@@ -317,24 +317,32 @@ function SupplementaryExamCentre() {
     templates.length > 0 && templates.every((t) => t.status === "closed");
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4 sm:p-6 lg:p-8">
-      <div className="max-w-6xl mx-auto">
+    <div className="min-h-screen bg-slate-50 px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
+      <div className="mx-auto w-full max-w-[1440px]">
         {/* Header */}
-        <div className="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 flex items-center gap-3">
-              <FontAwesomeIcon icon={faGraduationCap} className="text-blue-600" />
+        <div className="mb-7 flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
+          <div className="min-w-0 max-w-3xl">
+            <h1 className="flex items-start gap-3 text-2xl font-extrabold leading-tight tracking-tight text-slate-950 sm:text-3xl lg:text-4xl">
+              <FontAwesomeIcon icon={faGraduationCap} className="mt-1 shrink-0 text-blue-600" />
               Supplementary Exam Applications
             </h1>
-            <p className="text-gray-600 mt-1 text-sm sm:text-base">
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600 sm:text-base">
               Submit student applications for open sessions and view all submitted supplementary applications from your study centre.
             </p>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="grid w-full grid-cols-1 gap-2 sm:grid-cols-3 xl:w-auto xl:min-w-[420px]">
+            <Link
+              to="/supplementary-mark-entry"
+              className="flex min-h-[52px] items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-3 text-center text-sm font-bold text-white shadow-sm transition hover:bg-indigo-700"
+            >
+              <FontAwesomeIcon icon={faFileAlt} />
+              Mark Entry
+            </Link>
+
             <Link
               to="/supplementary-hall-tickets"
-              className="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm rounded-lg shadow-sm flex items-center gap-2 transition"
+              className="flex min-h-[52px] items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-3 text-center text-sm font-bold text-white shadow-sm transition hover:bg-blue-700"
             >
               <FontAwesomeIcon icon={faFileArchive} />
               Hall Tickets
@@ -345,7 +353,7 @@ function SupplementaryExamCentre() {
                 type="button"
                 onClick={handleExportExcel}
                 disabled={exporting}
-                className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm rounded-lg shadow-sm flex items-center gap-2 transition disabled:opacity-50"
+                className="flex min-h-[52px] items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-3 text-center text-sm font-bold text-white shadow-sm transition hover:bg-emerald-700 disabled:opacity-50"
               >
                 {exporting ? (
                   <FontAwesomeIcon icon={faSpinner} spin />
@@ -378,8 +386,8 @@ function SupplementaryExamCentre() {
         ) : (
           <div className="space-y-8">
             {/* Exam Session Selection Card */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-3">
+            <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+              <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <label className="block text-xs font-bold text-gray-600 uppercase tracking-wider">
                   SELECT SUPPLEMENTARY EXAM SESSION
                 </label>
@@ -411,7 +419,7 @@ function SupplementaryExamCentre() {
               <select
                 value={selectedTemplateId}
                 onChange={(e) => setSelectedTemplateId(e.target.value)}
-                className="w-full border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 p-3 text-base border font-semibold text-gray-800"
+                className="h-14 w-full rounded-xl border border-slate-300 bg-white px-4 text-base font-semibold text-slate-800 shadow-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
               >
                 {templates.map((t) => (
                   <option key={t._id} value={t._id}>
@@ -676,10 +684,10 @@ function SupplementaryExamCentre() {
             )}
 
             {/* MY SUBMITTED APPLICATIONS LIST */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-              <div className="p-6 border-b border-gray-200 bg-gray-50 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+              <div className="flex flex-col gap-4 border-b border-slate-200 bg-slate-50/80 p-5 sm:p-6 md:flex-row md:items-center md:justify-between">
                 <div>
-                  <h3 className="font-bold text-gray-800 text-base flex items-center gap-2">
+                  <h3 className="flex items-center gap-2 text-base font-bold text-slate-900 sm:text-lg">
                     <span>Submitted Applications from Your Study Centre</span>
                     <span className="bg-blue-100 text-blue-800 text-xs px-2.5 py-0.5 rounded-full font-bold">
                       {filteredApplications.length}
@@ -700,7 +708,7 @@ function SupplementaryExamCentre() {
                       placeholder="Search Reg No or Name..."
                       value={searchFilter}
                       onChange={(e) => setSearchFilter(e.target.value)}
-                      className="text-xs border border-gray-300 rounded-lg pl-8 pr-3 py-2 w-48 sm:w-64 focus:ring-blue-500 focus:border-blue-500"
+                      className="h-11 w-full rounded-xl border border-slate-300 bg-white pl-9 pr-3 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 sm:w-72"
                     />
                     <FontAwesomeIcon
                       icon={faSearch}
@@ -711,19 +719,19 @@ function SupplementaryExamCentre() {
               </div>
 
               <div className="overflow-x-auto">
-                <table className="w-full text-left text-sm">
-                  <thead className="bg-gray-100 text-gray-600 text-xs uppercase font-semibold border-b">
+                <table className="min-w-[980px] w-full text-left text-sm">
+                  <thead className="border-b border-slate-200 bg-slate-100 text-xs font-bold uppercase tracking-wide text-slate-600">
                     <tr>
-                      <th className="px-6 py-3">Sl No</th>
-                      <th className="px-6 py-3">Reg No</th>
-                      <th className="px-6 py-3">Student Name</th>
+                      <th className="w-20 px-6 py-4">Sl No</th>
+                      <th className="px-6 py-4">Reg No</th>
+                      <th className="px-6 py-4">Student Name</th>
                       {selectedTemplateId === "all" && (
                         <th className="px-6 py-3">Exam Session</th>
                       )}
-                      <th className="px-6 py-3">Semester</th>
-                      <th className="px-6 py-3">Selected Subjects</th>
-                      <th className="px-6 py-3">Submitted At</th>
-                      <th className="px-6 py-3 text-center">Status / Action</th>
+                      <th className="px-6 py-4">Semester</th>
+                      <th className="px-6 py-4">Selected Subjects</th>
+                      <th className="px-6 py-4">Submitted At</th>
+                      <th className="px-6 py-4 text-center">Status / Action</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200">

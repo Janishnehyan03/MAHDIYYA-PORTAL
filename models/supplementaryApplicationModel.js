@@ -46,6 +46,12 @@ const supplementaryApplicationSchema = new mongoose.Schema(
         trim: true,
       },
     ],
+    subjectMarks: [
+      {
+        subjectName: String,
+        mark: String,
+      }
+    ],
     isManualStudent: {
       type: Boolean,
       default: false,

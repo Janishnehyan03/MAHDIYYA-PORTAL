@@ -26,6 +26,11 @@ import SupplementaryExam from "./pages/superAdmin/SupplementaryExam";
 import SupplementaryExamCentre from "./pages/admin/SupplementaryExamCentre";
 import ManageDownloads from "./pages/superAdmin/ManageDownloads";
 import SharedDownloads from "./pages/admin/SharedDownloads";
+import FeeStatus from "./pages/admin/FeeStatus";
+import FeeCollection from "./pages/superAdmin/FeeCollection";
+import FeeCentreDetails from "./pages/superAdmin/FeeCentreDetails";
+
+import SupplementaryMarkEntry from "./pages/admin/SupplementaryMarkEntry";
 
 export const SuperAdminRoutes = [
   {
@@ -160,7 +165,9 @@ export const SuperAdminRoutes = [
     route: "/manage-downloads",
     component: <ManageDownloads />,
     role: "superAdmin",
-  }
+  },
+  { route: "/fee-collection", component: <FeeCollection />, role: "superAdmin" }
+  ,{ route: "/fee-collection/centre/:centreId", component: <FeeCentreDetails />, role: "superAdmin" }
 ];
 
 export const AdminRoutes = [
@@ -250,5 +257,7 @@ export const AdminRoutes = [
   { route: "/hall-tickets", component: <BulkHallTickets /> },
   { route: "/supplementary-hall-tickets", component: <SupplementaryBulkHallTickets /> },
   { route: "/centre-supplementary-exam", component: <SupplementaryExamCentre /> },
+  { route: "/supplementary-mark-entry", component: <SupplementaryMarkEntry /> },
   { route: "/shared-downloads", component: <SharedDownloads /> }
+  ,{ route: "/fee-status", component: <FeeStatus /> }
 ];

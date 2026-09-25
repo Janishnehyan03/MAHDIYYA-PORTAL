@@ -12,6 +12,7 @@ import {
   faFileArchive,
   faGraduationCap,
   faMarker,
+  faMoneyBillWave,
   faPenAlt,
   faSchool,
   faTableList,
@@ -93,6 +94,12 @@ const superAdminDashboardConfig = {
     },
   ],
   "System & Utilities": [
+    {
+      text: "FEE COLLECTION",
+      icon: faMoneyBillWave,
+      link: "/fee-collection",
+      description: "Track centre dues and payments",
+    },
     {
       text: "DOWNLOADS",
       icon: faDownload,
@@ -182,6 +189,12 @@ const adminDashboardConfig = {
   ],
   Utilities: [
     {
+      text: "Fee Status",
+      icon: faMoneyBillWave,
+      link: "/fee-status",
+      description: "View your centre's fee balance",
+    },
+    {
       text: "Uploads",
       icon: faUpload,
       link: "/my-uploads",
@@ -239,42 +252,44 @@ const cardThemes = [
 ];
 
 // --- Reusable Component: Modern DashboardCard ---
-const DashboardCard = ({ item, notificationCount, theme }) => (
+const DashboardCard = ({ item, notificationCount, theme, status }) => (
   <Link
     to={item.link}
-    className={`group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl ${theme.hoverBorder}`}
+    className={`group relative flex min-h-[185px] flex-col justify-between overflow-hidden rounded-3xl border border-slate-200/90 bg-white p-7 shadow-sm transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl ${theme.hoverBorder}`}
   >
     {/* Soft glow that appears on hover */}
     <div
-      className={`pointer-events-none absolute -right-10 -top-10 h-28 w-28 rounded-full opacity-0 blur-2xl transition-opacity duration-300 group-hover:opacity-100 ${theme.glow}`}
+      className={`pointer-events-none absolute -right-12 -top-12 h-36 w-36 rounded-full opacity-0 blur-3xl transition-opacity duration-300 group-hover:opacity-100 ${theme.glow}`}
     />
 
     {/* Notification Badge */}
     {notificationCount > 0 && (
-      <div className="absolute right-3 top-3 z-10 flex h-6 min-w-[1.5rem] items-center justify-center rounded-full bg-red-500 px-1.5 text-xs font-bold text-white ring-2 ring-white animate-pulse">
+      <div className="absolute right-4 top-4 z-10 flex h-7 min-w-[1.75rem] items-center justify-center rounded-full bg-red-500 px-2 text-xs font-bold text-white ring-2 ring-white shadow-sm animate-pulse">
         {notificationCount}
       </div>
     )}
 
     {/* Top section: Icon and Title */}
-    <div className="relative flex items-center gap-4">
+    <div className="relative flex items-center gap-5">
       <div
-        className={`flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br text-white shadow-md transition-transform duration-300 group-hover:scale-110 ${theme.iconGradient}`}
+        className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br text-white shadow-md transition-transform duration-300 group-hover:scale-105 ${theme.iconGradient}`}
       >
-        <FontAwesomeIcon icon={item.icon} className="h-5 w-5" />
+        <FontAwesomeIcon icon={item.icon} className="h-6 w-6" />
       </div>
-      <h3 className="text-base font-semibold leading-tight text-slate-800">
-        {item.text}
-      </h3>
+      <div>
+        <h3 className="text-lg font-bold tracking-tight text-slate-800 transition-colors group-hover:text-indigo-600">
+          {item.text}
+        </h3>
+      </div>
     </div>
 
     {/* Bottom section: Description and Action Arrow */}
-    <div className="relative mt-5 flex items-end justify-between">
-      <p className="pr-4 text-xs leading-relaxed text-slate-500">
-        {item.description || "Click to manage"}
+    <div className="relative mt-6 flex items-end justify-between border-t border-slate-100/90 pt-4">
+      <p className="pr-4 text-xs font-medium leading-relaxed text-slate-500">
+        {status ? `${status.status?.toUpperCase()} · ₹${Number(status.outstanding || 0).toLocaleString("en-IN")} outstanding` : (item.description || "Click to manage")}
       </p>
       <span
-        className={`flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full transition-all duration-300 group-hover:translate-x-0.5 ${theme.arrowBg} ${theme.arrowText}`}
+        className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full shadow-2xs transition-all duration-300 group-hover:translate-x-1 ${theme.arrowBg} ${theme.arrowText}`}
       >
         <FontAwesomeIcon icon={faArrowRight} className="h-3.5 w-3.5" />
       </span>
@@ -284,30 +299,30 @@ const DashboardCard = ({ item, notificationCount, theme }) => (
 
 // --- Skeleton Loader Component ---
 const SkeletonCard = () => (
-  <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm animate-pulse">
-    <div className="flex items-center gap-4">
-      <div className="h-12 w-12 rounded-xl bg-slate-200"></div>
-      <div className="h-4 w-2/3 rounded bg-slate-200"></div>
+  <div className="flex min-h-[185px] flex-col justify-between rounded-3xl border border-slate-200/90 bg-white p-7 shadow-sm animate-pulse">
+    <div className="flex items-center gap-5">
+      <div className="h-14 w-14 shrink-0 rounded-2xl bg-slate-200"></div>
+      <div className="h-5 w-2/3 rounded bg-slate-200"></div>
     </div>
-    <div className="mt-6">
-      <div className="h-3 w-full rounded bg-slate-200"></div>
-      <div className="mt-2 h-3 w-1/2 rounded bg-slate-200"></div>
+    <div className="mt-6 flex items-center justify-between border-t border-slate-100 pt-4">
+      <div className="h-3.5 w-1/2 rounded bg-slate-200"></div>
+      <div className="h-9 w-9 shrink-0 rounded-full bg-slate-200"></div>
     </div>
   </div>
 );
 
 // --- Section Component for Grouping ---
 const DashboardSection = ({ title, theme, children }) => (
-  <section className="mb-12">
+  <section className="w-full !w-full mb-14">
     <div className="mb-6 flex items-center gap-3">
       <span
         className={`h-7 w-1.5 rounded-full bg-gradient-to-b ${theme.bar}`}
       />
-      <h2 className="text-lg font-bold uppercase tracking-wide text-slate-700">
+      <h2 className="text-lg font-bold uppercase tracking-wider text-slate-700">
         {title}
       </h2>
     </div>
-    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+    <div className="grid w-full grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:gap-8">
       {children}
     </div>
   </section>
@@ -318,6 +333,7 @@ function Dashboard() {
   const { authData } = useContext(UserAuthContext);
   const [branchName, setBranchName] = useState("");
   const [admissionCount, setAdmissionCount] = useState(0);
+  const [feeStatus, setFeeStatus] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -328,12 +344,14 @@ function Dashboard() {
       }
       try {
         setIsLoading(true);
-        const [branchRes, admissionsRes] = await Promise.all([
+        const [branchRes, admissionsRes, feeRes] = await Promise.all([
           Axios.get(`/study-centre/${authData.branch._id}`),
           Axios.post(`student?branch=${authData.branch._id}&verified=false`),
+          Axios.get("/fee-collection/my-status"),
         ]);
         setBranchName(branchRes.data?.data?.studyCentreName || "");
         setAdmissionCount(admissionsRes.data.length);
+        setFeeStatus(feeRes.data);
       } catch (error) {
         console.error("Failed to fetch admin data:", error);
         setBranchName("Your Branch");
@@ -381,7 +399,7 @@ function Dashboard() {
         </header>
 
         {/* --- Main Dashboard Sections --- */}
-        <main>
+        <main className="w-full">
           {isLoading ? (
             <DashboardSection title="Loading Dashboard..." theme={cardThemes[0]}>
               {Array.from({ length: 8 }).map((_, i) => (
@@ -405,6 +423,7 @@ function Dashboard() {
                       notificationCount={
                         item.isNotification ? admissionCount : 0
                       }
+                      status={item.text === "Fee Status" ? feeStatus : null}
                     />
                   ))}
                 </DashboardSection>
