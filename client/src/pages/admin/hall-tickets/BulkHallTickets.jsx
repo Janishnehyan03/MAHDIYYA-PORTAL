@@ -33,9 +33,19 @@ const generateHallTicketImage = (ticket, examName, backgroundImage) => {
 
     // --- Draw Header (Exam Name) ---
     const headerY = POS_Y_START - 120; // Slightly lower to center in box
-    ctx.font = `bold 33px ${FONT_PRIMARY}`;
+    const title = examName?.toUpperCase() || "ADMIT CARD";
+    
+    let fontSize = 33;
+    ctx.font = `bold ${fontSize}px ${FONT_PRIMARY}`;
+    const headerMaxWidth = canvas.width - 120; // Allow 60px padding on each side
+    
+    while (ctx.measureText(title).width > headerMaxWidth && fontSize > 16) {
+      fontSize -= 1;
+      ctx.font = `bold ${fontSize}px ${FONT_PRIMARY}`;
+    }
+
     ctx.textAlign = "center";
-    ctx.fillText(examName?.toUpperCase(), CENTER_X, headerY);
+    ctx.fillText(title, CENTER_X, headerY, headerMaxWidth);
 
     // Note: "ADMIT CARD" is already in the background image.
 

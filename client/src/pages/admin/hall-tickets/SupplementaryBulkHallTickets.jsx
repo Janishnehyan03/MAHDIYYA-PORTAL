@@ -32,10 +32,20 @@ const generateSupplementaryHallTicketImage = (ticket, examName, backgroundImage)
 
     // 2. Draw Header (Exam Title)
     const headerY = POS_Y_START - 120;
-    ctx.font = `bold 33px ${FONT_PRIMARY}`;
+    const title = examName?.toUpperCase() || "SUPPLEMENTARY EXAMINATION";
+    
+    let fontSize = 33;
+    ctx.font = `bold ${fontSize}px ${FONT_PRIMARY}`;
+    const headerMaxWidth = canvas.width - 120; // Allow 60px padding on each side
+    
+    while (ctx.measureText(title).width > headerMaxWidth && fontSize > 16) {
+      fontSize -= 1;
+      ctx.font = `bold ${fontSize}px ${FONT_PRIMARY}`;
+    }
+
     ctx.textAlign = "center";
     ctx.fillStyle = COLOR_PRIMARY;
-    ctx.fillText(examName?.toUpperCase() || "SUPPLEMENTARY EXAMINATION", CENTER_X, headerY);
+    ctx.fillText(title, CENTER_X, headerY, headerMaxWidth);
 
     // 3. Draw Student Photo (if available)
     if (ticket.imageUrl) {
