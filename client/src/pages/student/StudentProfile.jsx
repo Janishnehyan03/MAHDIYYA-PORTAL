@@ -408,9 +408,9 @@ function StudentProfile() {
             <div className="relative flex flex-col sm:flex-row items-center gap-6">
               {/* --- Image Upload and Avatar --- */}
               <div className="relative group">
-                {student.imageUrl || previewUrl ? (
+                {student.registerNo || student.imageUrl || previewUrl ? (
                   <img
-                    src={previewUrl || student.imageUrl}
+                    src={previewUrl || (student.registerNo ? `https://res.cloudinary.com/djal8himk/image/upload/fl_preserve_transparency/v1763118885/students/${student.registerNo}.jpg?_s=public-apps` : student.imageUrl)}
                     alt={student.studentName}
                     className="w-24 h-24 object-cover rounded-full border-4 border-white/80 shadow-md"
                   />

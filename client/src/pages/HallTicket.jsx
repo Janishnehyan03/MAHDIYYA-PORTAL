@@ -137,9 +137,9 @@ function HallTicket() {
                       </div>
                     )}
                     <div className={`w-32 h-32 flex items-center justify-center overflow-hidden ${!data?.data?.imageUrl ? "border border-black" : ""}`}>
-                      {data?.data?.imageUrl ? (
+                      {data?.data?.registerNo || data?.data?.imageUrl ? (
                         <img
-                          src={data?.data?.imageUrl}
+                          src={data?.data?.registerNo ? `https://res.cloudinary.com/djal8himk/image/upload/fl_preserve_transparency/v1763118885/students/${data.data.registerNo}.jpg?_s=public-apps` : data?.data?.imageUrl}
                           alt="Student"
                           className="w-full h-full object-cover"
                         />
