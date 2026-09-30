@@ -664,6 +664,13 @@ exports.getSupplementaryHallTicketSessions = catchAsync(async (req, res, next) =
 
 // 15. Get Supplementary Hall Tickets Data for Bulk Download
 exports.getSupplementaryHallTickets = catchAsync(async (req, res, next) => {
+  const Configuration = require("../models/configurationsModel");
+  const configuration = await Configuration.findOne();
+
+  if (configuration && !configuration.supplementaryHallTicketDownload) {
+    return next(new AppError("Supplementary Hall ticket download is currently disabled by Super Admin", 403));
+  }
+
   const { examTemplateId, semester } = req.query;
   const query = {};
 
