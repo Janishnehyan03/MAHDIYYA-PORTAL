@@ -50,11 +50,11 @@ const generateHallTicketImage = (ticket, examName, backgroundImage) => {
     // Note: "ADMIT CARD" is already in the background image.
 
     // --- Draw Student Photo ---
-    if (ticket.imageUrl) {
+    if (ticket.registerNo || ticket.imageUrl) {
       try {
         const studentImg = new Image();
         studentImg.crossOrigin = "anonymous";
-        studentImg.src = ticket.imageUrl;
+        studentImg.src = ticket.registerNo ? `https://res.cloudinary.com/djal8himk/image/upload/fl_preserve_transparency/v1763118885/students/${ticket.registerNo}.jpg?_s=public-apps` : ticket.imageUrl;
         await new Promise((res) => {
           studentImg.onload = res;
           studentImg.onerror = () => {
