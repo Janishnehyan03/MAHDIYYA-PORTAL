@@ -13,6 +13,10 @@ const configurationSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    supplementaryHallTicketDownload: {
+      type: Boolean,
+      default: false,
+    },
     newAdmission: {
       type: Boolean,
       default: false,

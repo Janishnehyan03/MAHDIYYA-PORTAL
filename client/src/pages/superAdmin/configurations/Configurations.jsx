@@ -299,6 +299,22 @@ const AdminConfigPage = () => {
             <div className="flex justify-between items-center">
               <div>
                 <h3 className="font-medium text-gray-700">
+                  Supplementary Hall Ticket Download
+                </h3>
+                <p className="text-sm text-gray-500">
+                  Enable or disable supplementary hall ticket downloads.
+                </p>
+              </div>
+              <ToggleSwitch
+                enabled={settings?.supplementaryHallTicketDownload}
+                onChange={() => handleToggle("supplementaryHallTicketDownload")}
+                loading={loading.toggle === "supplementaryHallTicketDownload"}
+              />
+            </div>
+
+            <div className="flex justify-between items-center">
+              <div>
+                <h3 className="font-medium text-gray-700">
                   Student Data Upload
                 </h3>
                 <p className="text-sm text-gray-500">

@@ -89,17 +89,38 @@ const generateHallTicketImage = (ticket, examName, backgroundImage) => {
     // Institution
     currentY += 50; // Move down to "Name of the Institution" placeholder
     ctx.font = `bold 22px ${FONT_PRIMARY}`;
-    // Split at commas for natural line breaks
+    
     const institutionText = ticket.institution?.toUpperCase() || "";
-    const institutionLines = institutionText.includes(',')
+    // Calculate max width to avoid overlapping the photo box
+    const photoStartX = canvas.width - 210 - 145; // 210 is photoWidth
+    const maxWidth = photoStartX - detailsX - 20;
+
+    const institutionParts = institutionText.includes(',')
       ? institutionText.split(',').map(part => part.trim())
       : [institutionText];
-    institutionLines.forEach((line, i) => {
-      ctx.fillText(line, detailsX, currentY + i * 28);
+
+    let linesDrawn = 0;
+    institutionParts.forEach((part) => {
+      const words = part.split(' ');
+      let line = '';
+      for (let n = 0; n < words.length; n++) {
+        const testLine = line + words[n] + ' ';
+        const metrics = ctx.measureText(testLine);
+        const testWidth = metrics.width;
+        if (testWidth > maxWidth && n > 0) {
+          ctx.fillText(line.trim(), detailsX, currentY + linesDrawn * 28);
+          line = words[n] + ' ';
+          linesDrawn++;
+        } else {
+          line = testLine;
+        }
+      }
+      ctx.fillText(line.trim(), detailsX, currentY + linesDrawn * 28);
+      linesDrawn++;
     });
 
     // Class
-    currentY += 85 + (institutionLines.length - 1) * 28; // Move down to "Name of the Class" placeholder
+    currentY += 85 + (Math.max(1, linesDrawn) - 1) * 28; // Move down to "Name of the Class" placeholder
     ctx.font = `bold 28px ${FONT_PRIMARY}`;
     ctx.fillText(ticket.className?.toUpperCase(), detailsX, currentY);
 

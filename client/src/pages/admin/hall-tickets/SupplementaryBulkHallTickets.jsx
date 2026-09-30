@@ -42,10 +42,8 @@ const generateSupplementaryHallTicketImage = (ticket, examName, backgroundImage)
       try {
         const studentImg = new Image();
         studentImg.crossOrigin = "anonymous";
-        // Handle full URL vs relative file path
-        studentImg.src = ticket.imageUrl.startsWith("http")
-          ? ticket.imageUrl
-          : getUploadsUrl(ticket.imageUrl);
+        // Match behavior with standard hall tickets
+        studentImg.src = ticket.imageUrl;
 
         await new Promise((res) => {
           studentImg.onload = res;
@@ -92,16 +90,38 @@ const generateSupplementaryHallTicketImage = (ticket, examName, backgroundImage)
     // Name of the Institution (Study Centre)
     currentY += 50;
     ctx.font = `bold 22px ${FONT_PRIMARY}`;
+    
     const institutionText = ticket.institution?.toUpperCase() || "";
-    const institutionLines = institutionText.includes(",")
-      ? institutionText.split(",").map((part) => part.trim())
+    // Calculate max width to avoid overlapping the photo box
+    const photoStartX = canvas.width - 210 - 145; // 210 is photoWidth
+    const maxWidth = photoStartX - detailsX - 20;
+
+    const institutionParts = institutionText.includes(',')
+      ? institutionText.split(',').map((part) => part.trim())
       : [institutionText];
-    institutionLines.forEach((line, i) => {
-      ctx.fillText(line, detailsX, currentY + i * 28);
+
+    let linesDrawn = 0;
+    institutionParts.forEach((part) => {
+      const words = part.split(' ');
+      let line = '';
+      for (let n = 0; n < words.length; n++) {
+        const testLine = line + words[n] + ' ';
+        const metrics = ctx.measureText(testLine);
+        const testWidth = metrics.width;
+        if (testWidth > maxWidth && n > 0) {
+          ctx.fillText(line.trim(), detailsX, currentY + linesDrawn * 28);
+          line = words[n] + ' ';
+          linesDrawn++;
+        } else {
+          line = testLine;
+        }
+      }
+      ctx.fillText(line.trim(), detailsX, currentY + linesDrawn * 28);
+      linesDrawn++;
     });
 
     // Class / Semester
-    currentY += 85 + (institutionLines.length - 1) * 28;
+    currentY += 85 + (Math.max(1, linesDrawn) - 1) * 28;
     ctx.font = `bold 28px ${FONT_PRIMARY}`;
     ctx.fillText(ticket.className?.toUpperCase() || "", detailsX, currentY);
 

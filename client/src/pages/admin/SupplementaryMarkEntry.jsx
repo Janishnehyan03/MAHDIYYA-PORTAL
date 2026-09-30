@@ -95,23 +95,23 @@ function SupplementaryMarkEntry() {
     );
   };
 
-  const handleAutoSaveMarks = async (appId) => {
-    const app = applications.find((a) => a._id === appId);
-    if (!app) return;
-
+  const handleSaveAllMarks = async () => {
+    if (applications.length === 0) return;
+    
     try {
-      setSaving((prev) => ({ ...prev, [appId]: true }));
-      await Axios.patch(`/supplementary-exam/application/${appId}/marks`, {
-        subjectMarks: app.subjectMarks || [],
-      });
-      toast.success(`Marks saved successfully for ${app.registerNo}`);
+      setSaving({ all: true });
+      const promises = applications.map(app => 
+        Axios.patch(`/supplementary-exam/application/${app._id}/marks`, {
+          subjectMarks: app.subjectMarks || [],
+        })
+      );
+      await Promise.all(promises);
+      toast.success("All marks saved successfully!");
     } catch (error) {
       console.error("Save marks error:", error);
-      toast.error(
-        error.response?.data?.message || "Failed to save marks"
-      );
+      toast.error("Failed to save some marks.");
     } finally {
-      setSaving((prev) => ({ ...prev, [appId]: false }));
+      setSaving({ all: false });
     }
   };
 
@@ -213,8 +213,16 @@ function SupplementaryMarkEntry() {
                 </span>
               </h3>
             </div>
-            {/* Filter / Search input */}
-            <div className="flex items-center gap-2">
+            {/* Filter / Search input & Save Button */}
+            <div className="flex flex-col sm:flex-row items-center gap-3">
+              <button 
+                onClick={handleSaveAllMarks}
+                disabled={saving.all || applications.length === 0}
+                className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold py-2 px-4 rounded-lg flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {saving.all && <FontAwesomeIcon icon={faSpinner} spin />}
+                {saving.all ? "Saving..." : "Save All Marks"}
+              </button>
               <div className="relative">
                 <input
                   type="text"
@@ -269,7 +277,7 @@ function SupplementaryMarkEntry() {
                         <td className="px-6 py-4 font-medium text-blue-700">{app.semester}</td>
                         {Array.from(new Set(filteredApplications.flatMap((item) => item.subjects || []))).map((sub) => (
                           <td key={sub} className="px-6 py-4 text-center">
-                            {app.subjects?.includes(sub) ? <input type="text" inputMode="numeric" maxLength={3} value={smMap[sub] ?? ""} onChange={(e) => handleMarkChange(app._id, sub, e.target.value.replace(/\D/g, "").slice(0, 3))} onBlur={() => handleAutoSaveMarks(app._id)} placeholder="0" className="w-20 border border-gray-300 rounded p-1 text-sm text-center focus:ring-blue-500 focus:border-blue-500" /> : <span className="text-gray-300">—</span>}
+                            {app.subjects?.includes(sub) ? <input type="text" inputMode="numeric" maxLength={3} value={smMap[sub] ?? ""} onChange={(e) => handleMarkChange(app._id, sub, e.target.value.replace(/\D/g, "").slice(0, 3))} placeholder="0" className="w-20 border border-gray-300 rounded p-1 text-sm text-center focus:ring-blue-500 focus:border-blue-500" /> : <span className="text-gray-300">—</span>}
                           </td>
                         ))}
                       </tr>
