@@ -5,7 +5,6 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faBuilding,
   faCheck,
-  faCircleCheck,
   faCircleExclamation,
   faCopy,
   faEye,
@@ -18,7 +17,6 @@ import {
   faShieldHalved,
   faSpinner,
   faTriangleExclamation,
-  faUser,
 } from "@fortawesome/free-solid-svg-icons";
 import { UserAuthContext } from "../context/userContext";
 
@@ -28,15 +26,11 @@ export default function Settings() {
 
   const [activeTab, setActiveTab] = useState(isSuperAdmin ? "centres" : "password");
 
-  // Own password change form state
+  // Own password change form state (single password field)
   const [passwordForm, setPasswordForm] = useState({
-    currentPassword: "",
     newPassword: "",
-    confirmPassword: "",
   });
-  const [showCurrentPass, setShowCurrentPass] = useState(false);
   const [showNewPass, setShowNewPass] = useState(false);
-  const [showConfirmPass, setShowConfirmPass] = useState(false);
   const [passwordLoading, setPasswordLoading] = useState(false);
 
   // Study Centres credentials (Super Admin view)
@@ -96,23 +90,15 @@ export default function Settings() {
       return;
     }
 
-    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
-      toast.error("New password and confirm password do not match");
-      return;
-    }
-
     setPasswordLoading(true);
     try {
       await Axios.patch("/auth/password", {
-        currentPassword: passwordForm.currentPassword,
         password: passwordForm.newPassword,
       });
 
       toast.success("Password updated successfully!");
       setPasswordForm({
-        currentPassword: "",
         newPassword: "",
-        confirmPassword: "",
       });
     } catch (err) {
       toast.error(err.response?.data?.message || "Failed to update password");
@@ -554,33 +540,7 @@ export default function Settings() {
               )}
 
               <form onSubmit={handlePasswordChange} className="space-y-5">
-                {/* Current Password */}
-                <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-600">
-                    Current Password <span className="text-rose-500">*</span>
-                  </label>
-                  <div className="relative mt-2">
-                    <input
-                      type={showCurrentPass ? "text" : "password"}
-                      required
-                      value={passwordForm.currentPassword}
-                      onChange={(e) =>
-                        setPasswordForm({ ...passwordForm, currentPassword: e.target.value })
-                      }
-                      placeholder={!isSuperAdmin ? "Enter current password (default: 1986)" : "Enter current password"}
-                      className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-800 outline-none transition placeholder:text-slate-300 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowCurrentPass(!showCurrentPass)}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
-                    >
-                      <FontAwesomeIcon icon={showCurrentPass ? faEyeSlash : faEye} />
-                    </button>
-                  </div>
-                </div>
-
-                {/* New Password */}
+                {/* Single Password Field */}
                 <div>
                   <label className="block text-xs font-bold uppercase tracking-wider text-slate-600">
                     New Password <span className="text-rose-500">*</span>
@@ -591,43 +551,16 @@ export default function Settings() {
                       required
                       minLength={4}
                       value={passwordForm.newPassword}
-                      onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
-                      placeholder="Choose a new password (min. 4 characters)"
-                      className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-800 outline-none transition placeholder:text-slate-300 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100"
+                      onChange={(e) => setPasswordForm({ newPassword: e.target.value })}
+                      placeholder="Enter new password (min. 4 characters)"
+                      className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3.5 text-sm font-semibold text-slate-800 outline-none transition placeholder:text-slate-300 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100"
                     />
                     <button
                       type="button"
                       onClick={() => setShowNewPass(!showNewPass)}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1"
                     >
                       <FontAwesomeIcon icon={showNewPass ? faEyeSlash : faEye} />
-                    </button>
-                  </div>
-                </div>
-
-                {/* Confirm New Password */}
-                <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-600">
-                    Confirm New Password <span className="text-rose-500">*</span>
-                  </label>
-                  <div className="relative mt-2">
-                    <input
-                      type={showConfirmPass ? "text" : "password"}
-                      required
-                      minLength={4}
-                      value={passwordForm.confirmPassword}
-                      onChange={(e) =>
-                        setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })
-                      }
-                      placeholder="Re-enter your new password"
-                      className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-800 outline-none transition placeholder:text-slate-300 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowConfirmPass(!showConfirmPass)}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
-                    >
-                      <FontAwesomeIcon icon={showConfirmPass ? faEyeSlash : faEye} />
                     </button>
                   </div>
                 </div>

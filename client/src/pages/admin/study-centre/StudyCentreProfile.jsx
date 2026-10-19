@@ -7,7 +7,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useCallback, useContext, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import Axios from "../../../Axios";
 import { DISTRICT } from "../../../Consts";
@@ -417,10 +417,7 @@ function StudyCentreProfile() {
                 <h2 className="text-lg font-medium text-gray-900">
                   Admin Credentials
                 </h2>
-                <p className="text-sm text-yellow-600 bg-yellow-50 p-3 rounded-md mt-2">
-                  Warning: Changing these will affect how you log in.
-                </p>
-                <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-6 items-end">
                   <FormField
                     id="username"
                     label="Admin Username"
@@ -430,15 +427,15 @@ function StudyCentreProfile() {
                     error={errors.username}
                     required
                   />
-                  <FormField
-                    id="password"
-                    label="Admin Password"
-                    name="password"
-                    value={inputData.password}
-                    onChange={onChange}
-                    placeholder="Enter new password or leave blank"
-                    error={errors.password}
-                  />
+                  <div className="rounded-xl border border-indigo-100 bg-indigo-50/70 p-4 text-xs text-indigo-900">
+                    <p className="font-bold text-indigo-900">Password Management</p>
+                    <p className="mt-1 text-indigo-700">
+                      Login password for this institution is managed securely in{" "}
+                      <Link to="/settings" className="font-bold text-indigo-800 underline hover:text-indigo-950">
+                        Settings
+                      </Link>.
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>

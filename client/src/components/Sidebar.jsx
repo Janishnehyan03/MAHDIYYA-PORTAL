@@ -14,6 +14,7 @@ import {
   faMoneyBillWave,
   faGaugeHigh,
   faGraduationCap,
+  faKey,
   faMarker,
   faPenAlt,
   faSchool,
@@ -113,6 +114,7 @@ function Sidebar() {
     { name: "Notifications", route: "/create-notification", icon: faBell },
     { name: "Messages", route: "/create-messages", icon: faEnvelope },
     { name: "Configurations", route: "/configurations", icon: faCog },
+    { name: "Settings", route: "/settings", icon: faKey },
     { name: "Recycle Bin", route: "/trash", icon: faTrash },
   ];
 
@@ -132,6 +134,7 @@ function Sidebar() {
     { name: "Shared Downloads", route: "/shared-downloads", icon: faDownload },
     { name: "My Messages", route: "/my-messages", icon: faEnvelope },
     { name: "Centre Profile", route: "/study-centre-profile/", icon: faUser },
+    { name: "Settings", route: "/settings", icon: faCog },
   ];
 
   const navItems =

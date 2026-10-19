@@ -347,6 +347,32 @@ function AllStudyCentres() {
                             </span>
                           )}
                         </td>
+                        <td className="px-5 py-3.5">
+                          <div className="flex items-center gap-2">
+                            <span className="font-mono text-slate-400 select-none tracking-wider text-xs">
+                              ••••••••
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setRevealModal({
+                                  isOpen: true,
+                                  centre,
+                                  superAdminPassword: "",
+                                  revealedPassword: null,
+                                  loading: false,
+                                  error: "",
+                                  copied: false,
+                                })
+                              }
+                              title="Verify Super Admin password to reveal"
+                              className="inline-flex items-center gap-1 rounded-lg border border-indigo-200 bg-indigo-50 px-2 py-1 text-xs font-bold text-indigo-700 transition hover:bg-indigo-100"
+                            >
+                              <FontAwesomeIcon icon={faEye} className="h-3 w-3" />
+                              Reveal
+                            </button>
+                          </div>
+                        </td>
                         <td className="px-5 py-3.5 text-right">
                           <Link
                             to={`/edit-branch/${centre._id}`}
@@ -381,6 +407,121 @@ function AllStudyCentres() {
                   )}
                 </tbody>
               </table>
+            </div>
+          </div>
+        )}
+
+        {/* Security Reveal Modal */}
+        {revealModal.isOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/50 p-4 backdrop-blur-sm">
+            <div className="w-full max-w-md overflow-hidden rounded-3xl border border-white/80 bg-white p-6 shadow-2xl backdrop-blur-xl">
+              <div className="mb-5 flex items-start justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600">
+                    <FontAwesomeIcon icon={revealModal.revealedPassword ? faLockOpen : faShieldHalved} size="lg" />
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-wider text-indigo-600">Security Gate</p>
+                    <h3 className="text-lg font-black text-slate-900">
+                      {revealModal.revealedPassword ? "Institution Credentials" : "Super Admin Verification"}
+                    </h3>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setRevealModal({ ...revealModal, isOpen: false })}
+                  className="rounded-xl px-2.5 py-1 text-lg text-slate-400 hover:bg-slate-100"
+                >
+                  ×
+                </button>
+              </div>
+
+              <div className="mb-4 rounded-2xl bg-slate-50 p-3.5 text-xs text-slate-600">
+                <p className="font-bold text-slate-800">{revealModal.centre?.studyCentreName}</p>
+                <p className="mt-0.5 text-slate-500">
+                  Code: <span className="font-mono font-semibold">{revealModal.centre?.studyCentreCode}</span>
+                </p>
+              </div>
+
+              {revealModal.error && (
+                <div className="mb-4 flex items-center gap-2 rounded-xl bg-rose-50 p-3 text-xs font-semibold text-rose-700">
+                  <FontAwesomeIcon icon={faCircleCheck} className="hidden" />
+                  <span>{revealModal.error}</span>
+                </div>
+              )}
+
+              {!revealModal.revealedPassword ? (
+                <form onSubmit={handleRevealPassword}>
+                  <p className="mb-3 text-xs text-slate-500">
+                    Enter your <strong>Super Admin password</strong> to authorize and reveal this institution's password.
+                  </p>
+
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-500">
+                    Super Admin Password
+                    <input
+                      type="password"
+                      autoFocus
+                      required
+                      value={revealModal.superAdminPassword}
+                      onChange={(e) =>
+                        setRevealModal({ ...revealModal, superAdminPassword: e.target.value, error: "" })
+                      }
+                      placeholder="Enter your master password"
+                      className="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold outline-none focus:border-indigo-400 focus:ring-4 focus:ring-indigo-100"
+                    />
+                  </label>
+
+                  <div className="mt-6 flex justify-end gap-2.5">
+                    <button
+                      type="button"
+                      onClick={() => setRevealModal({ ...revealModal, isOpen: false })}
+                      className="rounded-xl px-4 py-2.5 text-xs font-bold text-slate-500 hover:bg-slate-100"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={revealModal.loading}
+                      className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-2.5 text-xs font-bold text-white shadow-md shadow-indigo-600/25 transition hover:bg-indigo-700 disabled:opacity-60"
+                    >
+                      {revealModal.loading ? <FontAwesomeIcon icon={faSpinner} spin /> : <FontAwesomeIcon icon={faKey} />}
+                      Authorize &amp; Reveal
+                    </button>
+                  </div>
+                </form>
+              ) : (
+                <div className="space-y-4">
+                  <div className="rounded-2xl border border-emerald-200 bg-emerald-50/70 p-4 text-center">
+                    <p className="text-[11px] font-bold uppercase tracking-wider text-emerald-800">
+                      Active Login Password
+                    </p>
+                    <p className="mt-2 select-all font-mono text-2xl font-black text-emerald-700">
+                      {revealModal.revealedPassword}
+                    </p>
+                    <p className="mt-1 text-[11px] text-emerald-600">
+                      Active credentials for portal sign in
+                    </p>
+                  </div>
+
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={handleCopyPassword}
+                      className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 py-3 text-xs font-bold text-white shadow-md shadow-emerald-600/25 transition hover:bg-emerald-700"
+                    >
+                      <FontAwesomeIcon icon={revealModal.copied ? faCheck : faCopy} />
+                      {revealModal.copied ? "Copied to Clipboard!" : "Copy Password"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setRevealModal({ ...revealModal, isOpen: false })}
+                      className="rounded-xl border border-slate-200 px-4 py-3 text-xs font-bold text-slate-700 hover:bg-slate-50"
+                    >
+                      Done
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         )}

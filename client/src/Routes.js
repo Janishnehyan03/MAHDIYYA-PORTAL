@@ -29,6 +29,7 @@ import SharedDownloads from "./pages/admin/SharedDownloads";
 import FeeStatus from "./pages/admin/FeeStatus";
 import FeeCollection from "./pages/superAdmin/FeeCollection";
 import FeeCentreDetails from "./pages/superAdmin/FeeCentreDetails";
+import Settings from "./pages/Settings";
 
 import SupplementaryMarkEntry from "./pages/admin/SupplementaryMarkEntry";
 
@@ -167,7 +168,8 @@ export const SuperAdminRoutes = [
     role: "superAdmin",
   },
   { route: "/fee-collection", component: <FeeCollection />, role: "superAdmin" }
-  ,{ route: "/fee-collection/centre/:centreId", component: <FeeCentreDetails />, role: "superAdmin" }
+  ,{ route: "/fee-collection/centre/:centreId", component: <FeeCentreDetails />, role: "superAdmin" },
+  { route: "/settings", component: <Settings />, role: "superAdmin" }
 ];
 
 export const AdminRoutes = [
@@ -259,5 +261,6 @@ export const AdminRoutes = [
   { route: "/centre-supplementary-exam", component: <SupplementaryExamCentre /> },
   { route: "/supplementary-mark-entry", component: <SupplementaryMarkEntry /> },
   { route: "/shared-downloads", component: <SharedDownloads /> }
-  ,{ route: "/fee-status", component: <FeeStatus /> }
+  ,{ route: "/fee-status", component: <FeeStatus /> },
+  { route: "/settings", component: <Settings /> }
 ];

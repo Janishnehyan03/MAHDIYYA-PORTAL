@@ -49,21 +49,36 @@ router.get("/centre/:centreId", async (req, res, next) => {
 
 router.post("/rates", async (req, res, next) => {
   try {
-    const { academicYear, affiliationFeeM1M2, affiliationFeeDegree, perStudentFee, affiliationFee } = req.body;
-    const m1m2 = affiliationFeeM1M2 !== undefined && affiliationFeeM1M2 !== "" ? Number(affiliationFeeM1M2) : (affiliationFee !== undefined ? Number(affiliationFee) : 1000);
-    const degree = affiliationFeeDegree !== undefined && affiliationFeeDegree !== "" ? Number(affiliationFeeDegree) : 1500;
-    const perStudent = Number(perStudentFee);
+    const {
+      academicYear,
+      affiliationFeeM1M2,
+      affiliationFeeDegree,
+      courseFeeM1M2,
+      courseFeeM3M5,
+      examFeeM1M2,
+      examFeeM3M5,
+    } = req.body;
 
-    if (!academicYear || isNaN(m1m2) || isNaN(degree) || isNaN(perStudent)) {
+    const affM1M2 = Number(affiliationFeeM1M2 !== undefined && affiliationFeeM1M2 !== "" ? affiliationFeeM1M2 : 1000);
+    const affDegree = Number(affiliationFeeDegree !== undefined && affiliationFeeDegree !== "" ? affiliationFeeDegree : 1500);
+    const cM1M2 = Number(courseFeeM1M2 !== undefined && courseFeeM1M2 !== "" ? courseFeeM1M2 : 600);
+    const cM3M5 = Number(courseFeeM3M5 !== undefined && courseFeeM3M5 !== "" ? courseFeeM3M5 : 700);
+    const eM1M2 = Number(examFeeM1M2 !== undefined && examFeeM1M2 !== "" ? examFeeM1M2 : 150);
+    const eM3M5 = Number(examFeeM3M5 !== undefined && examFeeM3M5 !== "" ? examFeeM3M5 : 200);
+
+    if (!academicYear || isNaN(affM1M2) || isNaN(affDegree) || isNaN(cM1M2) || isNaN(cM3M5) || isNaN(eM1M2) || isNaN(eM3M5)) {
       return res.status(400).json({ message: "Academic year and valid fee amounts are required" });
     }
 
     const rate = await FeeRate.create({
       academicYear,
-      affiliationFeeM1M2: m1m2,
-      affiliationFeeDegree: degree,
-      affiliationFee: m1m2,
-      perStudentFee: perStudent,
+      affiliationFeeM1M2: affM1M2,
+      affiliationFeeDegree: affDegree,
+      affiliationFee: affM1M2,
+      courseFeeM1M2: cM1M2,
+      courseFeeM3M5: cM3M5,
+      examFeeM1M2: eM1M2,
+      examFeeM3M5: eM3M5,
       createdBy: req.user._id,
     });
     res.status(201).json(rate);
@@ -76,43 +91,74 @@ router.post("/calculate", async (req, res, next) => {
     const rate = await FeeRate.findOne({ academicYear }).sort({ effectiveFrom: -1 });
     if (!rate) return res.status(404).json({ message: "No fee rate configured for this academic year" });
 
-    // Identify all classes categorized as DEGREE
-    const degreeClasses = await Class.find({ courseLevel: "DEGREE" }).select("_id");
-    const degreeClassIds = degreeClasses.map((c) => c._id);
+    // Identify M1 & M2 vs M3 to M5 classes
+    const m1m2Classes = await Class.find({
+      $or: [{ courseLevel: "M1_M2" }, { classOrder: { $lte: 2 } }],
+    }).select("_id");
+    const m1m2ClassIds = m1m2Classes.map((c) => c._id);
+
+    const m3m5Classes = await Class.find({
+      $or: [{ courseLevel: "DEGREE" }, { classOrder: { $gte: 3 } }],
+    }).select("_id");
+    const m3m5ClassIds = m3m5Classes.map((c) => c._id);
 
     const centres = await Branch.find({ isActive: { $ne: false } });
     const AcademicYear = require("../models/academicYearModel");
     const academicYearRecord = await AcademicYear.findOne({ year: academicYear });
     const records = [];
 
-    const m1m2Rate = rate.affiliationFeeM1M2 !== undefined ? rate.affiliationFeeM1M2 : (rate.affiliationFee || 1000);
-    const degreeRate = rate.affiliationFeeDegree !== undefined ? rate.affiliationFeeDegree : 1500;
+    const affM1M2 = rate.affiliationFeeM1M2 !== undefined ? rate.affiliationFeeM1M2 : (rate.affiliationFee || 1000);
+    const affDegree = rate.affiliationFeeDegree !== undefined ? rate.affiliationFeeDegree : 1500;
+    const cM1M2Rate = rate.courseFeeM1M2 !== undefined ? rate.courseFeeM1M2 : 600;
+    const cM3M5Rate = rate.courseFeeM3M5 !== undefined ? rate.courseFeeM3M5 : 700;
+    const eM1M2Rate = rate.examFeeM1M2 !== undefined ? rate.examFeeM1M2 : 150;
+    const eM3M5Rate = rate.examFeeM3M5 !== undefined ? rate.examFeeM3M5 : 200;
 
     for (const centre of centres) {
-      const studentFilter = { branch: centre._id, droppedOut: { $ne: true }, deleted: { $ne: true } };
-      if (academicYearRecord) studentFilter.academicYear = academicYearRecord._id;
-      const studentCount = await Student.countDocuments(studentFilter);
+      const studentFilter = {
+        branch: centre._id,
+        completed: { $ne: true },
+        droppedOut: { $ne: true },
+        deleted: { $ne: true },
+      };
 
-      let hasDegreeStudents = false;
-      if (degreeClassIds.length > 0) {
-        const degreeStudentCount = await Student.countDocuments({
-          ...studentFilter,
-          class: { $in: degreeClassIds },
-        });
-        hasDegreeStudents = degreeStudentCount > 0;
-      }
+      // Count students in M1 & M2
+      const m1m2StudentCount = await Student.countDocuments({
+        ...studentFilter,
+        class: { $in: m1m2ClassIds },
+      });
+
+      // Count students in M3 to M5
+      const m3m5StudentCount = await Student.countDocuments({
+        ...studentFilter,
+        class: { $in: m3m5ClassIds },
+      });
+
+      const totalStudents = m1m2StudentCount + m3m5StudentCount;
+      const hasDegreeStudents = m3m5StudentCount > 0;
 
       const affiliationType = hasDegreeStudents ? "DEGREE" : "M1_M2";
-      const affiliationFee = hasDegreeStudents ? degreeRate : m1m2Rate;
-      const totalDue = affiliationFee + studentCount * rate.perStudentFee;
+      const affiliationFee = hasDegreeStudents ? affDegree : affM1M2;
+
+      const courseFeeTotal = (m1m2StudentCount * cM1M2Rate) + (m3m5StudentCount * cM3M5Rate);
+      const examFeeTotal = (m1m2StudentCount * eM1M2Rate) + (m3m5StudentCount * eM3M5Rate);
+
+      const totalDue = affiliationFee + courseFeeTotal + examFeeTotal;
 
       const existing = await FeeCollection.findOne({ studyCentre: centre._id, academicYear });
       if (existing) {
         const paid = existing.payments.reduce((sum, p) => sum + p.amount, 0);
         existing.affiliationFee = affiliationFee;
         existing.affiliationType = affiliationType;
-        existing.perStudentFee = rate.perStudentFee;
-        existing.studentCount = studentCount;
+        existing.m1m2StudentCount = m1m2StudentCount;
+        existing.m3m5StudentCount = m3m5StudentCount;
+        existing.studentCount = totalStudents;
+        existing.courseFeeM1M2 = cM1M2Rate;
+        existing.courseFeeM3M5 = cM3M5Rate;
+        existing.courseFeeTotal = courseFeeTotal;
+        existing.examFeeM1M2 = eM1M2Rate;
+        existing.examFeeM3M5 = eM3M5Rate;
+        existing.examFeeTotal = examFeeTotal;
         existing.totalDue = totalDue;
         existing.status = paid >= totalDue ? "paid" : (paid > 0 ? "partial" : "pending");
         existing.calculatedAt = new Date();
@@ -124,8 +170,15 @@ router.post("/calculate", async (req, res, next) => {
           academicYear,
           affiliationFee,
           affiliationType,
-          perStudentFee: rate.perStudentFee,
-          studentCount,
+          m1m2StudentCount,
+          m3m5StudentCount,
+          studentCount: totalStudents,
+          courseFeeM1M2: cM1M2Rate,
+          courseFeeM3M5: cM3M5Rate,
+          courseFeeTotal,
+          examFeeM1M2: eM1M2Rate,
+          examFeeM3M5: eM3M5Rate,
+          examFeeTotal,
           totalDue,
         }));
       }

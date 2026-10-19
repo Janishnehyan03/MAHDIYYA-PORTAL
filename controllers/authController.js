@@ -129,11 +129,8 @@ exports.updatePassword = catchAsync(async (req, res, next) => {
     return next(new AppError("User not found", 404));
   }
 
-  // If a regular user/admin is updating their own password, current password is required
-  if (!isSuperAdmin || isSelf) {
-    if (!req.body.currentPassword) {
-      return next(new AppError("Please provide your current password", 400));
-    }
+  // If current password is provided, verify it
+  if (req.body.currentPassword) {
     let isMatch = await bcrypt.compare(req.body.currentPassword, user.password);
     // Fallback: If legacy default password '1986' was entered and matches decrypted or default
     if (!isMatch) {
