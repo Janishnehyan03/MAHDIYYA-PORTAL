@@ -36,6 +36,10 @@ const configurationSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    supplementaryMarkSubmission: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,

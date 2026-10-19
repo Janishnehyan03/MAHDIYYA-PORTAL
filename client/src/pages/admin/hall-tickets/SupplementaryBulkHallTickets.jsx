@@ -3,6 +3,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import axios from "axios";
 import { jsPDF } from "jspdf";
 import React, { useCallback, useEffect, useState } from "react";
+import moment from "moment";
 import { toast } from "react-toastify";
 import Axios, { getUploadsUrl } from "../../../Axios";
 
@@ -176,7 +177,13 @@ const generateSupplementaryHallTicketImage = (ticket, examName, backgroundImage)
 
       // Date
       ctx.textAlign = "center";
-      ctx.fillText(subject.date || "-", tableStartX + colWidth * 0.5, rowY + 35);
+      const formattedDate =
+        subject.date && subject.date !== "-"
+          ? moment(subject.date).isValid()
+            ? moment(subject.date).format("DD-MM-YYYY")
+            : subject.date
+          : "-";
+      ctx.fillText(formattedDate, tableStartX + colWidth * 0.5, rowY + 35);
 
       // Subject Name
       ctx.textAlign = "left";

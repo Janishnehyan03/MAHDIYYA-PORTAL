@@ -5,7 +5,11 @@ const router = require("express").Router();
 router.post(
   "/",
   catchAsync(async (req, res, next) => {
-    let data = await Class.create(req.body);
+    let data = await Class.create({
+      className: req.body.className,
+      classOrder: req.body.classOrder,
+      courseLevel: req.body.courseLevel || "M1_M2",
+    });
     res.status(200).json(data);
   })
 );
@@ -19,10 +23,15 @@ router.get(
 router.patch(
   "/:id",
   catchAsync(async (req, res, next) => {
-    let data = await Class.findByIdAndUpdate(req.params.id, {
-      className: req.body.className,
-      classOrder: req.body.classOrder,
-    });
+    let data = await Class.findByIdAndUpdate(
+      req.params.id,
+      {
+        className: req.body.className,
+        classOrder: req.body.classOrder,
+        courseLevel: req.body.courseLevel,
+      },
+      { new: true }
+    );
     res.status(200).json(data);
   })
 );

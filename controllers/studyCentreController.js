@@ -16,9 +16,15 @@ cloudinary.config({
 exports.createBranch = async (req, res, next) => {
   try {
     let data = await StudyCentre.create(req.body);
-    let user = await Auth.create({ ...req.body, branch: data._id });
+    const password = req.body.password || "1986";
+    let user = await Auth.create({
+      ...req.body,
+      password,
+      branch: data._id,
+      role: "admin",
+    });
     data.admin = user._id;
-    data.save();
+    await data.save();
     res.status(200).json(data);
   } catch (error) {
     next(error);
@@ -80,7 +86,32 @@ exports.editBranch = async (req, res, next) => {
     studyCentreId = req.user.branch;
   }
   try {
-    let data = await StudyCentre.findByIdAndUpdate(studyCentreId, req.body);
+    let data = await StudyCentre.findByIdAndUpdate(studyCentreId, req.body, { new: true });
+    // Synchronize credentials with Auth
+    if (req.body.password && req.body.password.trim() !== "") {
+      const { encryptPassword } = require("../utils/cryptoHelper");
+      let authUser = await Auth.findOne({ branch: studyCentreId, role: "admin" }).select("+password +encryptedPassword");
+      if (!authUser && data?.admin) {
+        authUser = await Auth.findById(data.admin).select("+password +encryptedPassword");
+      }
+      if (!authUser) {
+        authUser = new Auth({
+          username: req.body.username || data.studyCentreCode,
+          branch: studyCentreId,
+          role: "admin",
+        });
+      }
+      if (req.body.username) authUser.username = req.body.username;
+      authUser.password = req.body.password;
+      authUser.encryptedPassword = encryptPassword(req.body.password);
+      await authUser.save();
+    } else if (req.body.username) {
+      let authUser = await Auth.findOne({ branch: studyCentreId, role: "admin" });
+      if (authUser) {
+        authUser.username = req.body.username;
+        await authUser.save();
+      }
+    }
     res.status(200).json(data);
   } catch (error) {
     next(error);

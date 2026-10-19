@@ -6,8 +6,8 @@ import MyMessages from "./pages/admin/MyMessages";
 import MyUploads from "./pages/admin/MyUploads";
 import AdmissionManagement from "./pages/admin/admission/AdmissionManagement";
 import Admissions from "./pages/admin/admission/Admissions";
-import BulkHallTickets from "./pages/admin/hall-tickets/BulkHallTickets";
-import SupplementaryBulkHallTickets from "./pages/admin/hall-tickets/SupplementaryBulkHallTickets";
+import HallTicketsSection from "./pages/admin/hall-tickets/HallTicketsSection";
+
 import PreviousExamManagement from "./pages/admin/previous-exam/PreviousExamManagement";
 import PreviousExamTable from "./pages/admin/previous-exam/PreviousExamTable";
 import MarkEntry from "./pages/admin/results/MarkEntry";
@@ -29,6 +29,7 @@ import SharedDownloads from "./pages/admin/SharedDownloads";
 import FeeStatus from "./pages/admin/FeeStatus";
 import FeeCollection from "./pages/superAdmin/FeeCollection";
 import FeeCentreDetails from "./pages/superAdmin/FeeCentreDetails";
+import Settings from "./pages/Settings";
 
 import SupplementaryMarkEntry from "./pages/admin/SupplementaryMarkEntry";
 
@@ -167,7 +168,8 @@ export const SuperAdminRoutes = [
     role: "superAdmin",
   },
   { route: "/fee-collection", component: <FeeCollection />, role: "superAdmin" }
-  ,{ route: "/fee-collection/centre/:centreId", component: <FeeCentreDetails />, role: "superAdmin" }
+  ,{ route: "/fee-collection/centre/:centreId", component: <FeeCentreDetails />, role: "superAdmin" },
+  { route: "/settings", component: <Settings />, role: "superAdmin" }
 ];
 
 export const AdminRoutes = [
@@ -254,10 +256,11 @@ export const AdminRoutes = [
   { route: "/add-cce-mark/", component: <CceMark.AddCceMark /> },
   { route: "/add-result", component: <Result.AddResult /> },
   { route: "/previous-results/admin", component: <PreviousExamTable /> },
-  { route: "/hall-tickets", component: <BulkHallTickets /> },
-  { route: "/supplementary-hall-tickets", component: <SupplementaryBulkHallTickets /> },
+  { route: "/hall-tickets", component: <HallTicketsSection /> },
+  { route: "/supplementary-hall-tickets", component: <HallTicketsSection defaultTab="supplementary" /> },
   { route: "/centre-supplementary-exam", component: <SupplementaryExamCentre /> },
   { route: "/supplementary-mark-entry", component: <SupplementaryMarkEntry /> },
   { route: "/shared-downloads", component: <SharedDownloads /> }
-  ,{ route: "/fee-status", component: <FeeStatus /> }
+  ,{ route: "/fee-status", component: <FeeStatus /> },
+  { route: "/settings", component: <Settings /> }
 ];

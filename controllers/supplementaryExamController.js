@@ -308,6 +308,15 @@ exports.deleteApplication = catchAsync(async (req, res, next) => {
 
 // 11.5 Update marks for a supplementary application
 exports.updateMarks = catchAsync(async (req, res, next) => {
+  const Configuration = require("../models/configurationsModel");
+  const configuration = await Configuration.findOne();
+
+  if (req.user && req.user.role === "admin" && configuration && !configuration.supplementaryMarkSubmission) {
+    return next(
+      new AppError("Supplementary Mark Entry is currently disabled by Super Admin.", 403)
+    );
+  }
+
   const { subjectMarks } = req.body;
 
   const application = await SupplementaryApplication.findById(req.params.id).populate("examTemplate");
@@ -381,6 +390,15 @@ exports.downloadMarksTemplate = catchAsync(async (req, res, next) => {
 
 // 11.7 Import supplementary marks from the template format
 exports.importMarks = catchAsync(async (req, res, next) => {
+  const Configuration = require("../models/configurationsModel");
+  const configuration = await Configuration.findOne();
+
+  if (req.user && req.user.role === "admin" && configuration && !configuration.supplementaryMarkSubmission) {
+    return next(
+      new AppError("Supplementary Mark Entry is currently disabled by Super Admin.", 403)
+    );
+  }
+
   if (!req.file) return next(new AppError("Please upload an Excel file", 400));
   const template = await SupplementaryExamTemplate.findById(req.params.templateId);
   if (!template) return next(new AppError("Exam template not found", 404));
@@ -691,7 +709,7 @@ exports.getSupplementaryHallTickets = catchAsync(async (req, res, next) => {
   }
 
   const applications = await SupplementaryApplication.find(query)
-    .populate("examTemplate", "title status")
+    .populate("examTemplate")
     .populate("branch", "studyCentreName studyCentreCode")
     .sort({ registerNo: 1 });
 
@@ -732,13 +750,29 @@ exports.getSupplementaryHallTickets = catchAsync(async (req, res, next) => {
     const photo = studentPhotoMap[regNoUpper] || null;
 
     const subjectsList = Array.isArray(app.subjects) ? app.subjects : [];
+
+    // Map schedules from template for this semester
+    const template = app.examTemplate;
+    const semDoc = template?.semesters?.find(
+      (s) => (s.semesterName || "").trim().toUpperCase() === (app.semester || "").trim().toUpperCase()
+    );
+    const scheduleMap = {};
+    if (semDoc && Array.isArray(semDoc.schedules)) {
+      semDoc.schedules.forEach((sch) => {
+        if (sch.subjectName) {
+          scheduleMap[sch.subjectName.trim().toUpperCase()] = sch;
+        }
+      });
+    }
+
     const formattedSubjects = subjectsList.map((subj) => {
       const sName = (subj || "").trim();
+      const sched = scheduleMap[sName.toUpperCase()];
       return {
         subjectName: sName,
         subjectCode: subjectCodeMap[sName.toUpperCase()] || "-",
-        date: "-",
-        time: "-",
+        date: sched?.date || "-",
+        time: sched?.time || "-",
       };
     });
 

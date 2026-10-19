@@ -14,6 +14,7 @@ import {
   faMoneyBillWave,
   faGaugeHigh,
   faGraduationCap,
+  faKey,
   faMarker,
   faPenAlt,
   faSchool,
@@ -113,6 +114,7 @@ function Sidebar() {
     { name: "Notifications", route: "/create-notification", icon: faBell },
     { name: "Messages", route: "/create-messages", icon: faEnvelope },
     { name: "Configurations", route: "/configurations", icon: faCog },
+    { name: "Settings", route: "/settings", icon: faKey },
     { name: "Recycle Bin", route: "/trash", icon: faTrash },
   ];
 
@@ -124,7 +126,6 @@ function Sidebar() {
     { name: "New Admissions", route: "/new-admissions", icon: faBook },
     { name: "Mark Entry", route: "/mark-entry", icon: faPenAlt },
     { name: "Hall Tickets", route: "/hall-tickets", icon: faFileArchive },
-    { name: "Supplementary Hall Tickets", route: "/supplementary-hall-tickets", icon: faFileArchive },
     { name: "Exam Results", route: "/result-view", icon: faCheckDouble },
     { name: "Bulk Exam Results", route: "/bulk-result-view", icon: faTableList },
     { name: "Previous Results", route: "/previous-results/admin", icon: faCheckDouble },
@@ -133,6 +134,7 @@ function Sidebar() {
     { name: "Shared Downloads", route: "/shared-downloads", icon: faDownload },
     { name: "My Messages", route: "/my-messages", icon: faEnvelope },
     { name: "Centre Profile", route: "/study-centre-profile/", icon: faUser },
+    { name: "Settings", route: "/settings", icon: faCog },
   ];
 
   const navItems =

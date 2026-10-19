@@ -171,6 +171,29 @@ function MarkEntry() {
                 )}
               </div>
             </div>
+
+            {/* Supplementary Assessment Section */}
+            <div>
+              <h2 className="text-xl font-semibold text-gray-800 border-b pb-2 mb-4">
+                Supplementary Assessment
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <ActionCard
+                  to="/centre-supplementary-exam"
+                  icon={faFileLines}
+                  title="View Supplementary Exams"
+                  description="Review student supplementary applications and results."
+                />
+                {configuration?.supplementaryMarkSubmission && (
+                  <ActionCard
+                    to="/supplementary-mark-entry"
+                    icon={faPlus}
+                    title="Add Supplementary Marks"
+                    description="Enter scores for registered supplementary exam candidates."
+                  />
+                )}
+              </div>
+            </div>
           </div>
         )}
       </div>

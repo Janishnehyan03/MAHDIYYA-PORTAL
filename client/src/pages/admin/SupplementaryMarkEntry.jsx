@@ -1,19 +1,22 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { Link } from "react-router-dom";
 import Axios from "../../Axios";
+import { UserAuthContext } from "../../context/userContext";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faSearch,
-  faExclamationTriangle,
   faSpinner,
   faArrowLeft,
   faGraduationCap,
   faFileExcel,
   faDownload,
+  faLock,
 } from "@fortawesome/free-solid-svg-icons";
 import { toast } from "react-toastify";
 
 function SupplementaryMarkEntry() {
+  const { authData } = useContext(UserAuthContext);
+  const [configuration, setConfiguration] = useState(null);
   const [templates, setTemplates] = useState([]);
   const [selectedTemplateId, setSelectedTemplateId] = useState("");
   const [selectedTemplate, setSelectedTemplate] = useState(null);
@@ -24,9 +27,21 @@ function SupplementaryMarkEntry() {
   const [saving, setSaving] = useState({}); // track saving state per application
   const [importing, setImporting] = useState(false);
 
+  const isGateClosed = authData?.role === "admin" && configuration && !configuration.supplementaryMarkSubmission;
+
   useEffect(() => {
     fetchTemplates();
+    fetchConfiguration();
   }, []);
+
+  const fetchConfiguration = async () => {
+    try {
+      const { data } = await Axios.get("/configurations");
+      setConfiguration(data);
+    } catch (err) {
+      console.error("Failed to load configurations:", err);
+    }
+  };
 
   useEffect(() => {
     if (selectedTemplateId) {
@@ -171,6 +186,16 @@ function SupplementaryMarkEntry() {
           </div>
         </div>
 
+        {isGateClosed && (
+          <div className="mb-6 bg-amber-50 border-l-4 border-amber-500 p-4 rounded-lg flex items-center gap-3 text-amber-800">
+            <FontAwesomeIcon icon={faLock} className="text-amber-500 text-lg" />
+            <div>
+              <p className="font-semibold text-sm">Supplementary Mark Submission is currently CLOSED by Super Admin.</p>
+              <p className="text-xs text-amber-700">You can view registered candidates and existing marks, but editing and importing are disabled.</p>
+            </div>
+          </div>
+        )}
+
         {/* Exam Session Selection Card */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-3">
@@ -194,9 +219,9 @@ function SupplementaryMarkEntry() {
             <button onClick={handleDownloadTemplate} disabled={!selectedTemplateId} className="inline-flex items-center justify-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-sm font-bold text-emerald-700 hover:bg-emerald-100 disabled:opacity-50">
               <FontAwesomeIcon icon={faDownload} /> Download demo Excel
             </button>
-            <label className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-bold text-white hover:bg-blue-700">
+            <label className={`inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-bold text-white transition ${isGateClosed ? "bg-gray-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700 cursor-pointer"}`}>
               <FontAwesomeIcon icon={faFileExcel} /> {importing ? "Importing marks..." : "Import filled Excel"}
-              <input type="file" accept=".xlsx,.xls" className="hidden" onChange={handleImport} disabled={importing || !selectedTemplateId} />
+              <input type="file" accept=".xlsx,.xls" className="hidden" onChange={handleImport} disabled={importing || !selectedTemplateId || isGateClosed} />
             </label>
           </div>
           <p className="mt-3 text-xs text-gray-500">Download the Excel file, enter marks under each subject header, and upload it back. Marks must be between 0 and 100.</p>
@@ -217,7 +242,7 @@ function SupplementaryMarkEntry() {
             <div className="flex flex-col sm:flex-row items-center gap-3">
               <button 
                 onClick={handleSaveAllMarks}
-                disabled={saving.all || applications.length === 0}
+                disabled={saving.all || applications.length === 0 || isGateClosed}
                 className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold py-2 px-4 rounded-lg flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {saving.all && <FontAwesomeIcon icon={faSpinner} spin />}
@@ -277,7 +302,7 @@ function SupplementaryMarkEntry() {
                         <td className="px-6 py-4 font-medium text-blue-700">{app.semester}</td>
                         {Array.from(new Set(filteredApplications.flatMap((item) => item.subjects || []))).map((sub) => (
                           <td key={sub} className="px-6 py-4 text-center">
-                            {app.subjects?.includes(sub) ? <input type="text" inputMode="numeric" maxLength={3} value={smMap[sub] ?? ""} onChange={(e) => handleMarkChange(app._id, sub, e.target.value.replace(/\D/g, "").slice(0, 3))} placeholder="0" className="w-20 border border-gray-300 rounded p-1 text-sm text-center focus:ring-blue-500 focus:border-blue-500" /> : <span className="text-gray-300">—</span>}
+                            {app.subjects?.includes(sub) ? <input type="text" inputMode="numeric" maxLength={3} value={smMap[sub] ?? ""} disabled={isGateClosed} onChange={(e) => handleMarkChange(app._id, sub, e.target.value.replace(/\D/g, "").slice(0, 3))} placeholder="0" className="w-20 border border-gray-300 rounded p-1 text-sm text-center focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed" /> : <span className="text-gray-300">—</span>}
                           </td>
                         ))}
                       </tr>
