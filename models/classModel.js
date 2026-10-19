@@ -11,6 +11,11 @@ const classSchema = new mongoose.Schema({
     required: [true, "Class Order is required field"],
     unique: true,
   },
+  courseLevel: {
+    type: String,
+    enum: ["M1_M2", "DEGREE"],
+    default: "M1_M2",
+  },
   deleted: { type: Boolean, default: false },
 });
 

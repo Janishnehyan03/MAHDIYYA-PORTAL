@@ -84,6 +84,7 @@ function ClassManagment() {
                 <tr>
                   <th scope="col" className="px-6 py-3 font-semibold">#</th>
                   <th scope="col" className="px-6 py-3 font-semibold">Class Name</th>
+                  <th scope="col" className="px-6 py-3 font-semibold">Category</th>
                   <th scope="col" className="px-6 py-3 font-semibold">Order</th>
                   <th scope="col" className="px-6 py-3 font-semibold text-center">Actions</th>
                 </tr>
@@ -94,6 +95,17 @@ function ClassManagment() {
                     <tr key={classItem._id} className="hover:bg-gray-50 transition-colors">
                       <td className="px-6 py-4 font-medium text-gray-500">{index + 1}</td>
                       <td className="px-6 py-4 font-semibold text-gray-800">{classItem.className}</td>
+                      <td className="px-6 py-4">
+                        <span
+                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold ${
+                            classItem.courseLevel === "DEGREE"
+                              ? "bg-purple-100 text-purple-800 border border-purple-200"
+                              : "bg-blue-100 text-blue-800 border border-blue-200"
+                          }`}
+                        >
+                          {classItem.courseLevel === "DEGREE" ? "Degree" : "M1 & M2"}
+                        </span>
+                      </td>
                       <td className="px-6 py-4 text-gray-800">
                         {typeof classItem.classOrder !== "undefined" ? classItem.classOrder : "-"}
                       </td>
@@ -110,7 +122,7 @@ function ClassManagment() {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan="4" className="text-center py-12 px-6 text-gray-500">
+                    <td colSpan="5" className="text-center py-12 px-6 text-gray-500">
                       No classes found. Click "Add New Class" to get started.
                     </td>
                   </tr>
@@ -137,11 +149,13 @@ function ClassManagment() {
 function ClassModal({ isOpen, onClose, onSubmit, isEditing, initialData }) {
   const [className, setClassName] = useState("");
   const [classOrder, setClassOrder] = useState("");
+  const [courseLevel, setCourseLevel] = useState("M1_M2");
 
   useEffect(() => {
     // Pre-fill form when editing, otherwise clear it
     if (isEditing && initialData) {
       setClassName(initialData.className || "");
+      setCourseLevel(initialData.courseLevel || "M1_M2");
       setClassOrder(
         typeof initialData.classOrder !== "undefined" && initialData.classOrder !== null
           ? initialData.classOrder
@@ -149,6 +163,7 @@ function ClassModal({ isOpen, onClose, onSubmit, isEditing, initialData }) {
       );
     } else {
       setClassName("");
+      setCourseLevel("M1_M2");
       setClassOrder("");
     }
   }, [isEditing, initialData, isOpen]); // Rerun when modal opens
@@ -159,7 +174,7 @@ function ClassModal({ isOpen, onClose, onSubmit, isEditing, initialData }) {
       // Parse classOrder to number, fallback to 0 if empty or invalid
       const parsedOrder =
         classOrder === "" || isNaN(Number(classOrder)) ? 0 : Number(classOrder);
-      onSubmit({ className, classOrder: parsedOrder });
+      onSubmit({ className, classOrder: parsedOrder, courseLevel });
     }
   };
 
@@ -197,6 +212,23 @@ function ClassModal({ isOpen, onClose, onSubmit, isEditing, initialData }) {
                         placeholder="e.g., Grade 10 - Science"
                         required
                       />
+                    </div>
+                    <div className="mt-4">
+                      <label htmlFor="courseLevel" className="block text-sm font-medium text-gray-700">
+                        Course Level / Category
+                      </label>
+                      <select
+                        id="courseLevel"
+                        value={courseLevel}
+                        onChange={(e) => setCourseLevel(e.target.value)}
+                        className="mt-1 block w-full rounded-md border border-gray-300 bg-white shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-3"
+                      >
+                        <option value="M1_M2">M1 &amp; M2 (Affiliation fee: ₹1,000)</option>
+                        <option value="DEGREE">Degree Class (Affiliation fee: ₹1,500)</option>
+                      </select>
+                      <p className="mt-1 text-xs text-gray-500">
+                        Institutions with active students in any Degree class will be assessed the Degree affiliation fee.
+                      </p>
                     </div>
                     <div className="mt-4">
                       <label htmlFor="classOrder" className="block text-sm font-medium text-gray-700">

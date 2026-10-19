@@ -12,6 +12,7 @@ const feeCollectionSchema = new mongoose.Schema({
   studyCentre: { type: mongoose.Types.ObjectId, ref: "Branch", required: true },
   academicYear: { type: String, required: true },
   affiliationFee: { type: Number, required: true, min: 0 },
+  affiliationType: { type: String, enum: ["M1_M2", "DEGREE"], default: "M1_M2" },
   perStudentFee: { type: Number, required: true, min: 0 },
   studentCount: { type: Number, required: true, min: 0 },
   totalDue: { type: Number, required: true, min: 0 },

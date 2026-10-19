@@ -6,8 +6,8 @@ import MyMessages from "./pages/admin/MyMessages";
 import MyUploads from "./pages/admin/MyUploads";
 import AdmissionManagement from "./pages/admin/admission/AdmissionManagement";
 import Admissions from "./pages/admin/admission/Admissions";
-import BulkHallTickets from "./pages/admin/hall-tickets/BulkHallTickets";
-import SupplementaryBulkHallTickets from "./pages/admin/hall-tickets/SupplementaryBulkHallTickets";
+import HallTicketsSection from "./pages/admin/hall-tickets/HallTicketsSection";
+
 import PreviousExamManagement from "./pages/admin/previous-exam/PreviousExamManagement";
 import PreviousExamTable from "./pages/admin/previous-exam/PreviousExamTable";
 import MarkEntry from "./pages/admin/results/MarkEntry";
@@ -254,8 +254,8 @@ export const AdminRoutes = [
   { route: "/add-cce-mark/", component: <CceMark.AddCceMark /> },
   { route: "/add-result", component: <Result.AddResult /> },
   { route: "/previous-results/admin", component: <PreviousExamTable /> },
-  { route: "/hall-tickets", component: <BulkHallTickets /> },
-  { route: "/supplementary-hall-tickets", component: <SupplementaryBulkHallTickets /> },
+  { route: "/hall-tickets", component: <HallTicketsSection /> },
+  { route: "/supplementary-hall-tickets", component: <HallTicketsSection defaultTab="supplementary" /> },
   { route: "/centre-supplementary-exam", component: <SupplementaryExamCentre /> },
   { route: "/supplementary-mark-entry", component: <SupplementaryMarkEntry /> },
   { route: "/shared-downloads", component: <SharedDownloads /> }

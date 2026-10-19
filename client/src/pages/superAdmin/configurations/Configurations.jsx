@@ -283,6 +283,22 @@ const AdminConfigPage = () => {
             <div className="flex justify-between items-center">
               <div>
                 <h3 className="font-medium text-gray-700">
+                  Supplementary Mark Submission
+                </h3>
+                <p className="text-sm text-gray-500">
+                  Allow or disallow supplementary exam mark entries.
+                </p>
+              </div>
+              <ToggleSwitch
+                enabled={settings?.supplementaryMarkSubmission}
+                onChange={() => handleToggle("supplementaryMarkSubmission")}
+                loading={loading.toggle === "supplementaryMarkSubmission"}
+              />
+            </div>
+
+            <div className="flex justify-between items-center">
+              <div>
+                <h3 className="font-medium text-gray-700">
                   Hall Ticket Download
                 </h3>
                 <p className="text-sm text-gray-500">

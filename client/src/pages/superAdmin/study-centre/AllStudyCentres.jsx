@@ -1,14 +1,21 @@
 import {
   faBuilding,
+  faCheck,
   faCircleCheck,
   faCircleXmark,
+  faCopy,
   faEdit,
+  faEye,
+  faKey,
   faLayerGroup,
+  faLockOpen,
   faMagnifyingGlass,
   faPlus,
+  faShieldHalved,
   faSort,
   faSortDown,
   faSortUp,
+  faSpinner,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React, { useEffect, useMemo, useState } from "react";
@@ -26,6 +33,17 @@ function AllStudyCentres() {
     direction: "ascending",
   });
   const [isActiveFilter, setIsActiveFilter] = useState("all"); // 'all', 'active', 'inactive'
+
+  // Security Reveal Modal
+  const [revealModal, setRevealModal] = useState({
+    isOpen: false,
+    centre: null,
+    superAdminPassword: "",
+    revealedPassword: null,
+    loading: false,
+    error: "",
+    copied: false,
+  });
 
   const navigation = useNavigate();
 
@@ -105,11 +123,48 @@ function AllStudyCentres() {
     return sortConfig.direction === "ascending" ? faSortUp : faSortDown;
   };
 
+  const handleRevealPassword = async (e) => {
+    e.preventDefault();
+    if (!revealModal.superAdminPassword) {
+      setRevealModal((prev) => ({ ...prev, error: "Please enter your Super Admin password" }));
+      return;
+    }
+    setRevealModal((prev) => ({ ...prev, loading: true, error: "" }));
+    try {
+      const { data } = await Axios.post("/auth/reveal-study-centre-password", {
+        centreId: revealModal.centre._id,
+        superAdminPassword: revealModal.superAdminPassword,
+      });
+      setRevealModal((prev) => ({
+        ...prev,
+        revealedPassword: data.password,
+        loading: false,
+        error: "",
+      }));
+    } catch (err) {
+      setRevealModal((prev) => ({
+        ...prev,
+        loading: false,
+        error: err.response?.data?.message || "Incorrect Super Admin password. Access denied.",
+      }));
+    }
+  };
+
+  const handleCopyPassword = () => {
+    if (!revealModal.revealedPassword) return;
+    navigator.clipboard.writeText(revealModal.revealedPassword);
+    setRevealModal((prev) => ({ ...prev, copied: true }));
+    setTimeout(() => {
+      setRevealModal((prev) => ({ ...prev, copied: false }));
+    }, 2000);
+  };
+
   const tableHeaders = [
     { key: "studyCentreName", label: "Study Centre" },
     { key: "studyCentreCode", label: "Code" },
     { key: "phone", label: "Phone", responsive: "lg" },
     { key: "isActive", label: "Status" },
+    { key: "password", label: "Password" },
   ];
 
   const stats = [

@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import Axios from "../../Axios";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faDownload,
   faPlus,
   faSpinner,
   faTrash,
@@ -14,6 +13,9 @@ import {
   faBookOpen,
   faGraduationCap,
   faRefresh,
+  faSearch,
+  faCalendarAlt,
+  faFilter,
 } from "@fortawesome/free-solid-svg-icons";
 import { toast } from "react-toastify";
 
@@ -26,12 +28,18 @@ function SupplementaryExam() {
   const [loading, setLoading] = useState(false);
   const [exportLoading, setExportLoading] = useState(false);
 
+  // Result tab filters
+  const [resultCollegeFilter, setResultCollegeFilter] = useState("all");
+  const [resultSemesterFilter, setResultSemesterFilter] = useState("all");
+  const [resultStatusFilter, setResultStatusFilter] = useState("all"); // 'all' | 'Pass' | 'Fail' | 'Pending'
+  const [resultSearchQuery, setResultSearchQuery] = useState("");
+
   // Modal / Form state for Template Creation & Editing
   const [showModal, setShowModal] = useState(false);
   const [editingTemplateId, setEditingTemplateId] = useState(null);
   const [examTitle, setExamTitle] = useState("");
   const [semesters, setSemesters] = useState([
-    { semesterName: "", subjectsText: "" },
+    { semesterName: "", subjectsText: "", schedules: [] },
   ]);
 
   useEffect(() => {
@@ -73,12 +81,13 @@ function SupplementaryExam() {
         template.semesters.map((s) => ({
           semesterName: s.semesterName,
           subjectsText: Array.isArray(s.subjects) ? s.subjects.join(", ") : "",
+          schedules: Array.isArray(s.schedules) ? s.schedules : [],
         }))
       );
     } else {
       setEditingTemplateId(null);
       setExamTitle("");
-      setSemesters([{ semesterName: "", subjectsText: "" }]);
+      setSemesters([{ semesterName: "", subjectsText: "", schedules: [] }]);
     }
     setShowModal(true);
   };
@@ -87,11 +96,11 @@ function SupplementaryExam() {
     setShowModal(false);
     setEditingTemplateId(null);
     setExamTitle("");
-    setSemesters([{ semesterName: "", subjectsText: "" }]);
+    setSemesters([{ semesterName: "", subjectsText: "", schedules: [] }]);
   };
 
   const handleAddSemesterRow = () => {
-    setSemesters([...semesters, { semesterName: "", subjectsText: "" }]);
+    setSemesters([...semesters, { semesterName: "", subjectsText: "", schedules: [] }]);
   };
 
   const handleRemoveSemesterRow = (index) => {
@@ -110,6 +119,29 @@ function SupplementaryExam() {
     setSemesters(updated);
   };
 
+  const handleScheduleChange = (semIdx, subjectName, field, value) => {
+    const updated = [...semesters];
+    const curSem = updated[semIdx];
+    const curSchedules = curSem.schedules ? [...curSem.schedules] : [];
+    const existingIdx = curSchedules.findIndex(
+      (s) => s.subjectName?.trim().toUpperCase() === subjectName.trim().toUpperCase()
+    );
+    if (existingIdx !== -1) {
+      curSchedules[existingIdx] = {
+        ...curSchedules[existingIdx],
+        [field]: value,
+      };
+    } else {
+      curSchedules.push({
+        subjectName,
+        date: field === "date" ? value : "",
+        time: field === "time" ? value : "",
+      });
+    }
+    curSem.schedules = curSchedules;
+    setSemesters(updated);
+  };
+
   const handleSaveTemplate = async (e) => {
     e.preventDefault();
 
@@ -119,13 +151,27 @@ function SupplementaryExam() {
     }
 
     const formattedSemesters = semesters
-      .map((s) => ({
-        semesterName: s.semesterName.trim(),
-        subjects: s.subjectsText
+      .map((s) => {
+        const subjects = s.subjectsText
           .split(",")
           .map((sub) => sub.trim())
-          .filter(Boolean),
-      }))
+          .filter(Boolean);
+        const schedules = subjects.map((sub) => {
+          const found = (s.schedules || []).find(
+            (sch) => sch.subjectName?.trim().toUpperCase() === sub.toUpperCase()
+          );
+          return {
+            subjectName: sub,
+            date: found?.date || "",
+            time: found?.time || "",
+          };
+        });
+        return {
+          semesterName: s.semesterName.trim(),
+          subjects,
+          schedules,
+        };
+      })
       .filter((s) => s.semesterName !== "");
 
     if (formattedSemesters.length === 0) {
@@ -245,6 +291,30 @@ function SupplementaryExam() {
     { id: app.branch._id, name: app.branch.studyCentreName || app.studyCentreName, code: app.branch.studyCentreCode || app.studyCentreCode },
   ])).values()];
   const visibleApplications = applications.filter((app) => selectedCollegeFilter === "all" || app.branch?._id === selectedCollegeFilter);
+
+  const semestersList = [
+    ...new Set(applications.map((app) => app.semester).filter(Boolean)),
+  ];
+
+  const visibleResults = applications.filter((app) => {
+    if (resultCollegeFilter !== "all" && app.branch?._id !== resultCollegeFilter) {
+      return false;
+    }
+    if (resultSemesterFilter !== "all" && app.semester !== resultSemesterFilter) {
+      return false;
+    }
+    if (resultSearchQuery.trim()) {
+      const q = resultSearchQuery.toLowerCase().trim();
+      const matchReg = (app.registerNo || "").toLowerCase().includes(q);
+      const matchName = (app.studentName || "").toLowerCase().includes(q);
+      if (!matchReg && !matchName) return false;
+    }
+    if (resultStatusFilter !== "all") {
+      const res = getResultDetails(app);
+      if (res.status !== resultStatusFilter) return false;
+    }
+    return true;
+  });
 
   const getResultDetails = (application) => {
     const marks = Array.isArray(application.subjectMarks)
@@ -551,63 +621,219 @@ function SupplementaryExam() {
 
         {/* TAB 3: SUPPLEMENTARY RESULTS */}
         {activeTab === "results" && (
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-            <div className="p-6 border-b border-gray-200 bg-gray-50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-              <div>
-                <h2 className="text-lg font-bold text-gray-900">Supplementary Exam Results</h2>
-                <p className="text-sm text-gray-500 mt-1">View marks entered for submitted supplementary applications.</p>
+          <div className="space-y-6">
+            {/* Filter Toolbar Card */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-5 border-b pb-4">
+                <div>
+                  <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                    <FontAwesomeIcon icon={faFilter} className="text-blue-600 text-sm" />
+                    Supplementary Exam Results
+                  </h2>
+                  <p className="text-sm text-gray-500 mt-0.5">Filter, search, and view marks entered for submitted supplementary applications.</p>
+                </div>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <button
+                    onClick={fetchApplications}
+                    disabled={loading}
+                    className="flex items-center gap-2 px-4 py-2 border border-blue-200 text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-lg text-sm font-semibold disabled:opacity-50 transition"
+                  >
+                    <FontAwesomeIcon icon={faRefresh} spin={loading} />
+                    Refresh Results
+                  </button>
+                  <button
+                    onClick={handleExportResults}
+                    disabled={exportLoading || applications.length === 0}
+                    className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-semibold shadow-sm disabled:opacity-50 transition"
+                  >
+                    {exportLoading ? <FontAwesomeIcon icon={faSpinner} spin /> : <FontAwesomeIcon icon={faFileExcel} />}
+                    Export Results Excel
+                  </button>
+                </div>
               </div>
-              <button
-                onClick={fetchApplications}
-                disabled={loading}
-                className="flex items-center gap-2 px-4 py-2.5 border border-blue-200 text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-lg font-medium disabled:opacity-50 transition"
-              >
-                <FontAwesomeIcon icon={faRefresh} spin={loading} />
-                Refresh Results
-              </button>
+
+              {/* Filters Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5">
+                <div>
+                  <label className="block text-xs font-bold text-gray-600 mb-1 uppercase tracking-wide">
+                    EXAM SESSION
+                  </label>
+                  <select
+                    value={selectedTemplateFilter}
+                    onChange={(e) => setSelectedTemplateFilter(e.target.value)}
+                    className="w-full border-gray-300 rounded-lg shadow-xs p-2 text-sm border font-medium text-gray-800 focus:ring-blue-500 focus:border-blue-500"
+                  >
+                    <option value="all">All Exam Sessions</option>
+                    {templates.map((t) => (
+                      <option key={t._id} value={t._id}>
+                        {t.title} ({t.status.toUpperCase()})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-gray-600 mb-1 uppercase tracking-wide">
+                    STUDY CENTRE
+                  </label>
+                  <select
+                    value={resultCollegeFilter}
+                    onChange={(e) => setResultCollegeFilter(e.target.value)}
+                    className="w-full border-gray-300 rounded-lg shadow-xs p-2 text-sm border font-medium text-gray-800 focus:ring-blue-500 focus:border-blue-500"
+                  >
+                    <option value="all">All Study Centres</option>
+                    {colleges.map((college) => (
+                      <option key={college.id} value={college.id}>
+                        {college.name || college.code || college.id}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-gray-600 mb-1 uppercase tracking-wide">
+                    SEMESTER
+                  </label>
+                  <select
+                    value={resultSemesterFilter}
+                    onChange={(e) => setResultSemesterFilter(e.target.value)}
+                    className="w-full border-gray-300 rounded-lg shadow-xs p-2 text-sm border font-medium text-gray-800 focus:ring-blue-500 focus:border-blue-500"
+                  >
+                    <option value="all">All Semesters</option>
+                    {semestersList.map((sem) => (
+                      <option key={sem} value={sem}>
+                        {sem}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-gray-600 mb-1 uppercase tracking-wide">
+                    RESULT STATUS
+                  </label>
+                  <select
+                    value={resultStatusFilter}
+                    onChange={(e) => setResultStatusFilter(e.target.value)}
+                    className="w-full border-gray-300 rounded-lg shadow-xs p-2 text-sm border font-medium text-gray-800 focus:ring-blue-500 focus:border-blue-500"
+                  >
+                    <option value="all">All Statuses</option>
+                    <option value="Pass">Pass Only</option>
+                    <option value="Fail">Fail Only</option>
+                    <option value="Pending">Pending / Incomplete</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-gray-600 mb-1 uppercase tracking-wide">
+                    SEARCH STUDENT
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      placeholder="Reg No or Name..."
+                      value={resultSearchQuery}
+                      onChange={(e) => setResultSearchQuery(e.target.value)}
+                      className="w-full border border-gray-300 rounded-lg pl-8 pr-3 py-2 text-sm focus:ring-blue-500 focus:border-blue-500"
+                    />
+                    <FontAwesomeIcon
+                      icon={faSearch}
+                      className="absolute left-2.5 top-3 text-gray-400 text-xs"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Statistics Chips */}
+              <div className="mt-4 pt-3 border-t border-gray-100 flex flex-wrap gap-2 text-xs font-semibold">
+                <span className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full border border-gray-200">
+                  Total Results: <strong className="text-gray-900">{visibleResults.length}</strong>
+                </span>
+                <span className="bg-emerald-50 text-emerald-700 px-3 py-1 rounded-full border border-emerald-200">
+                  Passed: <strong>{visibleResults.filter((app) => getResultDetails(app).status === "Pass").length}</strong>
+                </span>
+                <span className="bg-rose-50 text-rose-700 px-3 py-1 rounded-full border border-rose-200">
+                  Failed: <strong>{visibleResults.filter((app) => getResultDetails(app).status === "Fail").length}</strong>
+                </span>
+                <span className="bg-amber-50 text-amber-700 px-3 py-1 rounded-full border border-amber-200">
+                  Pending Marks: <strong>{visibleResults.filter((app) => getResultDetails(app).status === "Pending").length}</strong>
+                </span>
+              </div>
             </div>
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm">
-                <thead className="bg-gray-100 text-gray-600 text-xs uppercase font-semibold border-b">
-                  <tr>
-                    <th className="px-6 py-3">Sl No</th>
-                    <th className="px-6 py-3">Reg No</th>
-                    <th className="px-6 py-3">Student Name</th>
-                    <th className="px-6 py-3">Exam / Semester</th>
-                    <th className="px-6 py-3">Marks</th>
-                    <th className="px-6 py-3">Result</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200">
-                  {visibleApplications.length > 0 ? visibleApplications.map((app, idx) => {
-                    const result = getResultDetails(app);
-                    return (
-                      <tr key={app._id} className="hover:bg-gray-50">
-                        <td className="px-6 py-4 text-gray-500">{idx + 1}</td>
-                        <td className="px-6 py-4 font-bold text-gray-900">{app.registerNo}</td>
-                        <td className="px-6 py-4 font-medium text-gray-800">{app.studentName}</td>
-                        <td className="px-6 py-4">
-                          <div className="font-medium text-blue-700">{app.examTemplate?.title || "-"}</div>
-                          <div className="text-xs text-gray-500">{app.semester}</div>
-                        </td>
-                        <td className="px-6 py-4">
-                          <div className="flex flex-wrap gap-1.5 min-w-48">
-                            {(app.subjects || []).map((subject) => {
-                              const mark = result.markMap.get(subject.trim().toUpperCase());
-                              return <span key={subject} className="bg-gray-50 text-gray-700 border border-gray-200 text-xs px-2 py-1 rounded font-semibold">{subject}: {mark === "" || mark === undefined ? "—" : mark}</span>;
-                            })}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4">
-                          <span className={`inline-flex px-2.5 py-1 rounded-full text-xs font-bold ${result.status === "Pass" ? "bg-green-100 text-green-700" : result.status === "Fail" ? "bg-red-100 text-red-700" : "bg-amber-100 text-amber-700"}`}>{result.status}</span>
+
+            {/* Results Table Card */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-sm">
+                  <thead className="bg-gray-100 text-gray-600 text-xs uppercase font-semibold border-b">
+                    <tr>
+                      <th className="px-6 py-3">Sl No</th>
+                      <th className="px-6 py-3">Reg No</th>
+                      <th className="px-6 py-3">Student Name</th>
+                      <th className="px-6 py-3">Study Centre</th>
+                      <th className="px-6 py-3">Exam / Semester</th>
+                      <th className="px-6 py-3">Marks</th>
+                      <th className="px-6 py-3">Result</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200">
+                    {visibleResults.length > 0 ? (
+                      visibleResults.map((app, idx) => {
+                        const result = getResultDetails(app);
+                        return (
+                          <tr key={app._id} className="hover:bg-gray-50">
+                            <td className="px-6 py-4 text-gray-500">{idx + 1}</td>
+                            <td className="px-6 py-4 font-bold text-gray-900">{app.registerNo}</td>
+                            <td className="px-6 py-4 font-medium text-gray-800">{app.studentName}</td>
+                            <td className="px-6 py-4 text-gray-600 text-xs">
+                              <div className="font-semibold">{app.studyCentreName || app.branch?.studyCentreName || "-"}</div>
+                              <div className="text-gray-400">{app.studyCentreCode || app.branch?.studyCentreCode || ""}</div>
+                            </td>
+                            <td className="px-6 py-4">
+                              <div className="font-medium text-blue-700">{app.examTemplate?.title || "-"}</div>
+                              <div className="text-xs text-gray-500 font-medium">{app.semester}</div>
+                            </td>
+                            <td className="px-6 py-4">
+                              <div className="flex flex-wrap gap-1.5 min-w-48">
+                                {(app.subjects || []).map((subject) => {
+                                  const mark = result.markMap.get(subject.trim().toUpperCase());
+                                  return (
+                                    <span
+                                      key={subject}
+                                      className="bg-gray-50 text-gray-700 border border-gray-200 text-xs px-2 py-1 rounded font-semibold"
+                                    >
+                                      {subject}: {mark === "" || mark === undefined ? "—" : mark}
+                                    </span>
+                                  );
+                                })}
+                              </div>
+                            </td>
+                            <td className="px-6 py-4">
+                              <span
+                                className={`inline-flex px-2.5 py-1 rounded-full text-xs font-bold ${
+                                  result.status === "Pass"
+                                    ? "bg-emerald-100 text-emerald-700"
+                                    : result.status === "Fail"
+                                    ? "bg-rose-100 text-rose-700"
+                                    : "bg-amber-100 text-amber-700"
+                                }`}
+                              >
+                                {result.status}
+                              </span>
+                            </td>
+                          </tr>
+                        );
+                      })
+                    ) : (
+                      <tr>
+                        <td colSpan="7" className="px-6 py-12 text-center text-gray-500">
+                          No supplementary results found matching your filters.
                         </td>
                       </tr>
-                    );
-                  }) : (
-                    <tr><td colSpan="6" className="px-6 py-12 text-center text-gray-500">No supplementary results found.</td></tr>
-                  )}
-                </tbody>
-              </table>
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         )}
@@ -696,6 +922,45 @@ function SupplementaryExam() {
                             Enter all subject names separated by commas.
                           </span>
                         </div>
+
+                        {sem.subjectsText.split(",").map((s) => s.trim()).filter(Boolean).length > 0 && (
+                          <div className="mt-3 bg-white rounded-lg p-3 border border-gray-200">
+                            <div className="text-xs font-bold text-gray-700 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                              <FontAwesomeIcon icon={faCalendarAlt} className="text-blue-600" />
+                              Exam Timetable Schedule (Date & Time for Hall Tickets)
+                            </div>
+                            <div className="space-y-2">
+                              {sem.subjectsText.split(",").map((s) => s.trim()).filter(Boolean).map((subName) => {
+                                const curSchedule = (sem.schedules || []).find(
+                                  (sch) => sch.subjectName?.trim().toUpperCase() === subName.toUpperCase()
+                                );
+                                return (
+                                  <div key={subName} className="flex flex-col sm:flex-row sm:items-center gap-2 p-2 bg-gray-50 rounded border border-gray-100">
+                                    <span className="w-full sm:w-1/3 text-xs font-bold text-gray-800 truncate" title={subName}>
+                                      {subName}
+                                    </span>
+                                    <div className="flex-1 flex gap-2">
+                                      <input
+                                        type="date"
+                                        value={curSchedule?.date || ""}
+                                        onChange={(e) => handleScheduleChange(idx, subName, "date", e.target.value)}
+                                        className="w-1/2 text-xs border border-gray-300 rounded p-1.5 focus:ring-blue-500 focus:border-blue-500"
+                                        title="Exam Date"
+                                      />
+                                      <input
+                                        type="text"
+                                        placeholder="Time (e.g. 10:00 AM - 12:30 PM)"
+                                        value={curSchedule?.time || ""}
+                                        onChange={(e) => handleScheduleChange(idx, subName, "time", e.target.value)}
+                                        className="w-1/2 text-xs border border-gray-300 rounded p-1.5 focus:ring-blue-500 focus:border-blue-500"
+                                      />
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>

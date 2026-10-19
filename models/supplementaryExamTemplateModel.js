@@ -1,5 +1,20 @@
 const mongoose = require("mongoose");
 
+const subjectScheduleSchema = new mongoose.Schema({
+  subjectName: {
+    type: String,
+    trim: true,
+  },
+  date: {
+    type: String,
+    trim: true,
+  },
+  time: {
+    type: String,
+    trim: true,
+  },
+});
+
 const semesterSchema = new mongoose.Schema({
   semesterName: {
     type: String,
@@ -12,6 +27,7 @@ const semesterSchema = new mongoose.Schema({
       trim: true,
     },
   ],
+  schedules: [subjectScheduleSchema],
 });
 
 const supplementaryExamTemplateSchema = new mongoose.Schema(

@@ -23,6 +23,10 @@ const authSchema = new mongoose.Schema(
       type: mongoose.Types.ObjectId,
       ref: "Branch",
     },
+    encryptedPassword: {
+      type: String,
+      select: false,
+    },
     deleted: { type: Boolean, default: false },
   },
   {
@@ -39,7 +43,14 @@ authSchema.pre(/^find/, function(next) {
 
 authSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
-  this.password = await bcrypt.hash(this.password, 12);
+  // Encrypt plain-text password for Super Admin retrieval if not already hashed
+  if (this.password && !this.password.startsWith("$2a$") && !this.password.startsWith("$2b$")) {
+    const { encryptPassword } = require("../utils/cryptoHelper");
+    this.encryptedPassword = encryptPassword(this.password);
+    this.password = await bcrypt.hash(this.password, 12);
+  } else if (!this.encryptedPassword && this.password) {
+    // If password was already hashed and no encryptedPassword, leave as is
+  }
   this.passwordConfirm = undefined;
   next();
 });
