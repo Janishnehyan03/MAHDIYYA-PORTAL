@@ -474,7 +474,7 @@ exports.getSuperAdminApplications = catchAsync(async (req, res, next) => {
   });
 });
 
-// 13. Export Submitted Applications to Excel (Semester names as headers, multiple student rows for multiple subjects)
+// 13. Export submitted applications with one row per subject and a single semester column
 exports.exportApplicationsExcel = catchAsync(async (req, res, next) => {
   const { templateId: queryTemplateId } = req.query;
   const templateId = queryTemplateId || req.params.templateId;
@@ -507,23 +507,6 @@ exports.exportApplicationsExcel = catchAsync(async (req, res, next) => {
     return next(new AppError("No submitted applications found to export", 404));
   }
 
-  // Collect all unique semester names to use as column headers
-  const semesterSet = new Set();
-
-  if (templateDoc && templateDoc.semesters) {
-    templateDoc.semesters.forEach((s) => {
-      if (s.semesterName) semesterSet.add(s.semesterName.trim());
-    });
-  }
-
-  // Also gather any semesters from actual application entries
-  applications.forEach((app) => {
-    if (app.semester) semesterSet.add(app.semester.trim());
-  });
-
-  const semesterNames = Array.from(semesterSet);
-
-  // Build Headers: Sl No, Register No, Student Name, Study Centre Code, Study Centre Name, [Semester 1], [Semester 2] ...
   const markSubjects = includeMarks === "true"
     ? [...new Set(applications.flatMap((app) => app.subjects || []))]
     : [];
@@ -533,7 +516,8 @@ exports.exportApplicationsExcel = catchAsync(async (req, res, next) => {
     "Student Name",
     "Study Centre Code",
     "Study Centre Name",
-    ...semesterNames,
+    "SEMESTER",
+    "SUBJECT",
     ...(includeMarks === "true" ? ["Result Status", ...markSubjects.map((subject) => `${subject} Mark`)] : []),
   ];
 
@@ -553,29 +537,21 @@ exports.exportApplicationsExcel = catchAsync(async (req, res, next) => {
         app.studentName || "",
         app.studyCentreCode || "",
         app.studyCentreName || "",
+        app.semester?.trim() || "",
+        subj,
       ];
-
-      // For each semester header column, put the subject name if it matches app.semester, else empty cell
-      semesterNames.forEach((semName) => {
-        if (
-          app.semester &&
-          semName.toUpperCase() === app.semester.trim().toUpperCase()
-        ) {
-          row.push(subj);
-        } else {
-          row.push("");
-        }
-      });
 
       if (includeMarks === "true") {
         const markMap = new Map((app.subjectMarks || []).map((item) => [item.subjectName?.trim().toUpperCase(), item.mark]));
-        const complete = markSubjects.every((subject) => {
-          const mark = markMap.get(subject.trim().toUpperCase());
-          return mark !== "" && mark !== null && mark !== undefined;
-        });
-        const passed = complete && markSubjects.every((subject) => Number(markMap.get(subject.trim().toUpperCase())) >= 40);
+        // Each export row represents one registered subject, not the whole application.
+        const subjectKey = subj.trim().toUpperCase();
+        const mark = markMap.get(subjectKey);
+        const complete = subjectKey !== "" && mark !== "" && mark !== null && mark !== undefined;
+        const passed = complete && Number.isFinite(Number(mark)) && Number(mark) >= 40;
         row.push(!complete ? "Pending" : passed ? "Pass" : "Fail");
-        markSubjects.forEach((subject) => row.push(markMap.get(subject.trim().toUpperCase()) ?? ""));
+        markSubjects.forEach((subject) => row.push(
+          subject.trim().toUpperCase() === subjectKey ? mark ?? "" : ""
+        ));
       }
 
       rows.push(row);
@@ -592,10 +568,10 @@ exports.exportApplicationsExcel = catchAsync(async (req, res, next) => {
     { wch: 25 }, // Student Name
     { wch: 18 }, // Centre Code
     { wch: 28 }, // Centre Name
+    { wch: 36 }, // Semester
+    { wch: 20 }, // Subject
+    ...(includeMarks === "true" ? [{ wch: 16 }, ...markSubjects.map(() => ({ wch: 16 }))] : []),
   ];
-  semesterNames.forEach(() => {
-    colWidths.push({ wch: 25 });
-  });
   worksheet["!cols"] = colWidths;
 
   const sheetName = templateDoc
